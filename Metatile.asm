@@ -75,14 +75,13 @@ DrawMetatile:
 	and		$3
 	ld		h,a
 	
-	
 	ld		de,_SCRN0
 	add		hl,de
 	ld		d,h
 	ld		e,l
 	; get tile data pointer
 	ld		hl,Engine_TilesetPointer
-	ld		a,[hl]
+	ld		a,[hl+]
 	ld		h,[hl]
 	ld		l,a
 	ld		c,b
@@ -150,26 +149,3 @@ DrawMetatile:
 	pop		af
 	ret
 
-; Metatile format:
-; 16x16, 2 bytes per tile
-; - First byte of tile for tile ID
-; - Second byte of tile for attributes
-	
-MetatileTable:
-	db	$ff,%00000000,$ff,%00000111
-	db	$ff,%00000111,$ff,%00000000
-
-	db	$00,%00000001,$02,%00000001
-	db	$01,%00000001,$03,%00000001
-	
-	db	$04,%00000010,$06,%00000010
-	db	$05,%00000010,$07,%00000010
-	
-	db	$08,%00000011,$0A,%00000011
-	db	$09,%00000011,$0B,%00000011
-	
-	db	$0C,%00000110,$0E,%00000110
-	db	$0D,%00000110,$0F,%00000110
-	
-	db	$ff,%00000001,$ff,%00000010
-	db	$ff,%00000011,$ff,%00000110

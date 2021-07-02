@@ -248,7 +248,104 @@ EmuText:
 	db	"                    "
 	db	"                    "
 	
-SkipGBCScreen::
+; ========================================================================
+
+SkipGBCScreen:
+; ================================
+
+GM_DebugMenu:
+	; TODO
+	jp		GM_Level
+
+Debug_MainMenuText:
+	db	"                    "
+	db	"   - REBOUND GB -   "
+	db	"     DEBUG MENU     "
+	db	"                    "
+	db	"   START GAME       "
+	db	"   LEVEL SELECT     "
+	db	"   SOUND TEST       "
+	db	"   GFX TEST         "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+
+Debug_LevelSelectMenuText:
+	db	"                    "
+	db	"  - LEVEL SELECT -  "
+	db	"                    "
+	db	"   PLAIN PLAINS     "
+	db	"    1  2  3  4  5   "
+	db	"   PYRAMID POWER    "
+	db	"    1  2  3  4  5   "
+	db	"   GREAT GROTTO     "
+	db	"    1  2  3  4  5   "
+	db	"   FORLORN FOREST   "
+	db	"    1  2  3  4  5   "
+	db	"   TRAP TEMPLE      "
+	db	"    1  2  3  4  5   "
+	db	"   BONUS ROUND      "
+	db	"   BACK             "
+	db	"                    "
+	db	"                    "
+	db	"                    "
+	
+
+; ================================
+
+GM_SplashScreens:
+	; TODO
+	
+; ================================
+
+GM_TitleAndMenus:
+	; TODO
+
+; ================================
+
+GM_Level:
+	; TODO - fall through for now
+
+GM_DebugParallax::
+	call	DoubleSpeed
+	
+	ld		b,(Pal_TestMap_End-Pal_TestMap) / 8
+	xor		a
+	ld		hl,Pal_TestMap
+.loop
+	push	af
+	push	bc
+	call	LoadPal
+	pop		bc
+	pop		af
+	inc		a
+	dec		b
+	jr		nz,.loop
+
+	ldfar	hl,ParallaxTiles
+	ld		de,Engine_ParallaxBuffer
+	ld		b,0
+	call	_CopyRAMSmall
+	
+	ld		a,low(ParallaxTileset)
+	ld		[Engine_TilesetPointer],a
+	ld		a,high(ParallaxTileset)
+	ld		[Engine_TilesetPointer+1],a
+
+	CopyTileset	TestMapTiles,0,(TestMapTiles_End-TestMapTiles)/16
+	ld		hl,ParallaxMap
+	call	LoadMap
+	
+	ld		a,$80
+	ld		[Engine_ParallaxDest],a
 	
 	ld		a,%10010001
 	ldh		[rLCDC],a
@@ -257,8 +354,74 @@ SkipGBCScreen::
 	ei
 	
 MainLoop::
+	ld		bc,0
+	ld		a,[sys_btnHold]
+	ld		hl,rSCY
+	bit		btnUp,a
+	call	nz,.scrollUp
+	bit		btnDown,a
+	call	nz,.scrollDown
+	ld		hl,rSCX
+	bit		btnLeft,a
+	call	nz,.scrollLeft
+	bit		btnRight,a
+	call	nz,.scrollRight
+	jr		.doparallax
+	
+.scrollUp
+	dec		[hl]
+	dec		[hl]
+	ld		c,1
+	ret
+.scrollDown
+	inc		[hl]
+	inc		[hl]
+	ld		c,-1
+	ret
+.scrollLeft
+	dec		[hl]
+	dec		[hl]
+	ld		b,1
+	ret
+.scrollRight
+	inc		[hl]
+	inc		[hl]
+	ld		b,-1
+	
+.doparallax
+	ld		a,b
+;	push	bc
+	call	Parallax_ShiftHorizontal
+;	pop		bc
+	ld		a,c
+	call	Parallax_ShiftVertical
+
 	halt		
 	jr		MainLoop
+	
+; Metatile format:
+; 16x16, 2 bytes per tile
+; - First byte of tile for tile ID
+; - Second byte of tile for attributes
+	
+ParallaxTileset:
+	db	$00,%00000000,$01,%00000000	
+	db	$02,%00000000,$03,%00000000
+	
+	db	$04,%00000000,$05,%00000000
+	db	$06,%00000000,$07,%00000000
+
+	db	$08,%00000000,$09,%00000000
+	db	$0a,%00000000,$0b,%00000000
+	
+	db	$0c,%00000000,$0d,%00000000
+	db	$0e,%00000000,$0f,%00000000
+
+	db	$10,%00000001,$12,%00000001
+	db	$11,%00000001,$13,%00000001
+	
+	db	$14,%00000001,$15,%00000001
+	db	$02,%00000001,$03,%00000001
 
 ; ==================
 ; Interrupt handlers
@@ -277,6 +440,22 @@ DoVBlank::
 	push	de
 	push	hl
 	call	Pal_DoFade
+	
+	; setup HDMA
+	xor		a
+	ldh		[rVBK],a
+	ld		a,high(Engine_ParallaxBuffer)
+	ldh		[rHDMA1],a	; HDMA source high
+	ld		a,low(Engine_ParallaxBuffer)
+	ldh		[rHDMA2],a	; HDMA source low
+	ld		a,[Engine_ParallaxDest]
+	ldh		[rHDMA3],a	; HDMA dest high
+	xor		a
+	ldh		[rHDMA4],a	; HDMA dest low
+	ld		a,%00001111
+	ldh		[rHDMA5],a	; HDMA length + type (length 256, hblank wait)
+	
+	
 	pop	hl
 	pop	de
 	pop	bc
@@ -492,6 +671,15 @@ _OAM_DMA_End:
 ; =============
 ; Misc routines
 ; =============
+
+; INPUT: b = bank
+_Bankswitch:
+	ldh		a,[sys_CurrentBank]
+	ldh		[sys_LastBank],a
+	ld		a,b
+	ldh		[sys_CurrentBank],a
+	ld		[rROMB0],a
+	ret
 	
 ; Fill RAM with a value.
 ; INPUT:  a = value
@@ -572,9 +760,9 @@ angle=0.0
 angle=angle+256.0
 	endr
 CosTable:
-angle=mul(67.5,256.0)
+angle=0.0
 	rept	256
-	db	mul(127.0,sin(angle)+1.0)>>16
+	db	mul(127.0,cos(angle)+1.0)>>16
 angle=angle+256.0
 	endr
 
@@ -588,7 +776,8 @@ Font::				incbin	"GFX/Font.bin.wle"
 ; Misc routines
 ; =============
 
-include	"Metatile.asm"	
+include	"Metatile.asm"
+include	"Parallax.asm"
 
 ; ========
 ; SFX data
@@ -611,6 +800,62 @@ Pal_EmuScreen:
 	RGB	 0, 0, 0
 	RGB  0, 0, 0
 	RGB	31,31,31
+	
+Pal_TestMap:
+	RGB	 0, 0, 0
+	RGB	 3, 3, 3
+	RGB	 7, 7, 7
+	RGB	15,15,15
+	
+	RGB	 0, 0, 0
+	RGB	 0,15,31
+	RGB	15,31,31
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+	
+	RGB	 0, 0, 0
+	RGB	31, 0, 0
+	RGB	31,31, 0
+	RGB	31,31,31
+Pal_TestMap_End:
+
+
+TestMapTiles:
+ParallaxTiles:
+	incbin	"GFX/ParallaxTiles.bin"
+ParallaxTiles_End:
+
+section "GFX bank 2",romx
+
+	incbin	"GFX/TestTiles.2bpp"
+TestMapTiles_End:
+
+ParallaxMap:
+	incbin	"GFX/ParallaxMap.bin.wle"
 
 ; ==========
 ; Level data
