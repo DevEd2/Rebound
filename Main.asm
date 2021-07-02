@@ -71,7 +71,7 @@ NintendoLogo:	; DO NOT MODIFY OR ROM WILL NOT BOOT!!!
 	db	$ce,$ed,$66,$66,$cc,$0d,$00,$0b,$03,$73,$00,$83,$00,$0c,$00,$0d
 	db	$00,$08,$11,$1f,$88,$89,$00,$0e,$dc,$cc,$6e,$e6,$dd,$dd,$d9,$99
 	db	$bb,$bb,$67,$63,$6e,$0e,$ec,$cc,$dd,$dc,$99,$9f,$bb,$b9,$33,$3e
-ROMTitle:		romTitle	"REBOUND"	; ROM title (15 bytes)
+ROMTitle:		dbp	"REBOUND",15,0				; ROM title (15 bytes)
 GBCSupport:		db	$C0							; GBC support (0 = DMG only, $80 = DMG/GBC, $C0 = GBC only)
 NewLicenseCode:	db	"DV"						; new license code (2 bytes)
 SGBSupport:		db	0							; SGB support
@@ -273,9 +273,10 @@ Debug_MainMenuText:
 	db	"                    "
 	db	"                    "
 	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	"                    "
+	db	" "
+	dbp	strupr(__DATE__),19," "
+	db	" "
+	dbp	strupr(__TIME__),19," "
 	db	"                    "
 
 Debug_LevelSelectMenuText:
@@ -443,7 +444,7 @@ DoVBlank::
 	rst	$30	; do OAM DMA
 	push	de
 	push	hl
-	call	Pal_DoFade
+;	call	Pal_DoFade
 	
 	; setup HDMA
 	xor		a

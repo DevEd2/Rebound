@@ -248,7 +248,7 @@ doshiftup:		macro
 		inc		e
 	endr
 	endm
-	
+
 doshiftdown:	macro
 	rept	14
 		ld		a,[hl-]
@@ -257,20 +257,22 @@ doshiftdown:	macro
 	endr
 	endm
 
+
 Parallax_ShiftVertical:
-	ret
-	
 	and		a
 	ret		z
-	ld		b,b
 	bit		7,a
 	jp		nz,Parallax_ShiftDown
 
 Parallax_ShiftUp:
-	lb		bc,4,0
+.loop
+	push	bc
+	lb		bc,2,0
 	ld		h,high(Engine_ParallaxBuffer)
 	ld		d,h
-.loop
+.loop2
+	; rows 0 and 2
+	push	bc
 	ld		l,low(Engine_ParallaxBuffer)
 	ld		a,c
 	add		a	; x2
@@ -281,13 +283,13 @@ Parallax_ShiftUp:
 	add		a	; x64
 	add		l
 	ld		l,a
-	ld		e,l
+	ld		e,a
 	ld		a,[hl+]
 	ld		[Engine_ParallaxTemp1],a
 	ld		a,[hl+]
 	ld		[Engine_ParallaxTemp2],a
 	doshiftup
-	ld		l,low(Engine_ParallaxBuffer) + $20
+	ld		l,low(Engine_ParallaxBuffer + $20)
 	ld		a,c
 	add		a	; x2
 	add		a	; x4
@@ -297,50 +299,258 @@ Parallax_ShiftUp:
 	add		a	; x64
 	add		l
 	ld		l,a
-	ld		e,l
-	ld		a,[hl+]
-	ld		[Engine_ParallaxTemp3],a
-	ld		a,[hl+]
-	ld		[Engine_ParallaxTemp4],a
-	doshiftup
-
-	ld		l,low(Engine_ParallaxBuffer) + $10
-	ld		a,c
-	add		a	; x2
-	add		a	; x4
-	add		a	; x8
-	add		a	; x16
-	add		a	; x32
-	add		a	; x64
-	add		l
-	ld		l,a
-	ld		e,l
-	ld		a,[hl+]
-	ld		[Engine_ParallaxTemp1],a
-	ld		a,[hl+]
-	ld		[Engine_ParallaxTemp2],a
-	doshiftup
-	ld		l,low(Engine_ParallaxBuffer) + $30
-	ld		a,c
-	add		a	; x2
-	add		a	; x4
-	add		a	; x8
-	add		a	; x16
-	add		a	; x32
-	add		a	; x64
-	add		l
-	ld		l,a
-	ld		e,l
+	ld		e,a
 	ld		a,[hl+]
 	ld		[Engine_ParallaxTemp3],a
 	ld		a,[hl+]
 	ld		[Engine_ParallaxTemp4],a
 	doshiftup
 	
+	ld		l,low(Engine_ParallaxBuffer + $0e)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp3]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp4]
+	ld		[hl],a
+	ld		l,low(Engine_ParallaxBuffer + $2e)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp1]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp2]
+	ld		[hl],a
+	
+	; rows 1 and 3
+	ld		l,low(Engine_ParallaxBuffer + $10)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl+]
+	ld		[Engine_ParallaxTemp1],a
+	ld		a,[hl+]
+	ld		[Engine_ParallaxTemp2],a
+	doshiftup
+	ld		l,low(Engine_ParallaxBuffer + $30)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl+]
+	ld		[Engine_ParallaxTemp3],a
+	ld		a,[hl+]
+	ld		[Engine_ParallaxTemp4],a
+	doshiftup
+	
+	ld		l,low(Engine_ParallaxBuffer + $1e)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp3]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp4]
+	ld		[hl],a
+	ld		l,low(Engine_ParallaxBuffer + $3e)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp1]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp2]
+	ld		[hl],a
+	
+	pop		bc
 	inc		c
 	dec		b
+	jp		nz,.loop2
+	
+	pop		bc
+	dec		c
 	jp		nz,.loop
 	ret
 	
 Parallax_ShiftDown:
+	cpl
+	inc		a
+	ld		c,a
+.loop
+	push	bc
+	lb		bc,2,0
+	ld		h,high(Engine_ParallaxBuffer)
+	ld		d,h
+.loop2
+	; rows 0 and 2
+	push	bc
+	ld		l,low(Engine_ParallaxBuffer + $0f)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp2],a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp1],a
+	doshiftdown
+	ld		hl,Engine_ParallaxBuffer + $2f ; H is trashed after row 0 is processed so we need to refresh it
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp4],a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp3],a
+	doshiftdown
+	
+	ld		l,low(Engine_ParallaxBuffer + $00)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp3]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp4]
+	ld		[hl],a
+	ld		l,low(Engine_ParallaxBuffer + $20)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp1]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp2]
+	ld		[hl],a
+	
+	; rows 1 and 3
+	ld		l,low(Engine_ParallaxBuffer + $1f)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp2],a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp1],a
+	doshiftdown
+	ld		l,low(Engine_ParallaxBuffer + $3f)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		e,a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp4],a
+	ld		a,[hl-]
+	ld		[Engine_ParallaxTemp3],a
+	doshiftdown
+	
+	ld		l,low(Engine_ParallaxBuffer + $10)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp3]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp4]
+	ld		[hl],a
+	ld		l,low(Engine_ParallaxBuffer + $30)
+	ld		a,c
+	add		a	; x2
+	add		a	; x4
+	add		a	; x8
+	add		a	; x16
+	add		a	; x32
+	add		a	; x64
+	add		l
+	ld		l,a
+	ld		a,[Engine_ParallaxTemp1]
+	ld		[hl+],a
+	ld		a,[Engine_ParallaxTemp2]
+	ld		[hl],a
+	
+	pop		bc
+	inc		c
+	dec		b
+	jp		nz,.loop2
+	
+	pop		bc
+	dec		c
+	jp		nz,.loop
 	ret

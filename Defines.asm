@@ -52,7 +52,7 @@ CopyTileset:			macro
 	ld		hl,\1			; address of tiles to copy
 	ld		de,$8000+\2		; address to copy to
 	call	_CopyTileset
-	endm
+endm
 	
 ; Same as CopyTileset, but waits for VRAM accessibility.
 CopyTilesetSafe:		macro
@@ -60,7 +60,7 @@ CopyTilesetSafe:		macro
 	ld		hl,\1			; address of tiles to copy
 	ld		de,$8000+\2		; address to copy to
 	call	_CopyTilesetSafe
-	endm
+endm
 	
 ; Copy a 1BPP tileset to a specified VRAM address.
 ; USAGE: CopyTileset1BPP [tileset],[VRAM address],[number of tiles to copy]
@@ -69,7 +69,7 @@ CopyTileset1BPP:		macro
 	ld		hl,\1			; address of tiles to copy
 	ld		de,$8000+\2		; address to copy to
 	call	_CopyTileset1BPP
-	endm
+endm
 
 ; Same as CopyTileset1BPP, but waits for VRAM accessibility.
 CopyTileset1BPPSafe:	macro
@@ -77,69 +77,67 @@ CopyTileset1BPPSafe:	macro
 	ld		hl,\1			; address of tiles to copy
 	ld		de,$8000+\2		; address to copy to
 	call	_CopyTileset1BPPSafe
-	endm
+endm
 
 ; Loads a DMG palette.
 ; USAGE: SetPal <rBGP/rOBP0/rOBP1>,(color 1),(color 2),(color 3),(color 4)
 SetDMGPal:				macro
 	ld		a,(\2 + (\3 << 2) + (\4 << 4) + (\5 << 6))
 	ldh		[\1],a
-	endm
+endm
 	
 ; Defines a Game Boy Color RGB palette.
 ; USAGE: RGB	<red>,<green>,<blue>
 RGB:					macro
 	dw		\1+(\2<<5)+(\3<<10)
-	endm
-	
-; Define ROM title.
-romTitle:				macro
-.str\@
-	db		\1
-.str\@_end
-	rept 15-(.str\@_end-.str\@)
-		db		0
-	endr
-	endm
-endc
+endm
 
 ; Wait for VRAM accessibility.
 WaitForVRAM:			macro
 	ldh		a,[rSTAT]
 	and		2
 	jr		nz,@-4
-	endm
+endm
 	
 string:					macro
 	db		\1,0
-	endm
+endm
 	
 ldfar:					macro
 	ld		b,bank(\2)
 	call	_Bankswitch
 	ld		\1,\2
-	endm
+endm
 	
 farcall:				macro
 	ld		b,bank(\1)
 	call	Bankswitch
 	call	\1
-	endm
+endm
 	
 resbank:				macro
 	ldh		a,[sys_LastBank]
 	ld		b,a
 	ld		[rROMB0],a
-	endm
+endm
 	
 djnz:					macro
 	dec		b
 	jr		nz,\1
-	endm
+endm
 	
 lb:						macro
 	ld		\1,\2<<8 | \3
-	endm
+endm
+	
+dbp:					macro
+.str\@
+	db		\1
+.str\@_end
+	rept	\2-(.str\@_end-.str\@)
+		db	\3
+	endr
+endm
 	
 ; === Project-specific macros ===
 
@@ -176,3 +174,5 @@ tempSP:				dw
 sys_CurrentBank:	db
 sys_LastBank:		db
 sys_TempCounter:	db
+
+endc
