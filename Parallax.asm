@@ -1,5 +1,3 @@
-; TODO TODO TODO FIX MYSTERIOUS STACK OVERFLOW IN PARALLAX_SHIFTRIGHT
-
 section "Parallax RAM",wram0,align[8]
 Engine_ParallaxBuffer:	ds	256
 Engine_ParallaxDest:		db
@@ -128,7 +126,6 @@ Parallax_ShiftLeft::
 	ret
 	
 Parallax_ShiftRight::
-	ld		b,b
 	cpl
 	inc		a
 	ld		b,a

@@ -288,7 +288,7 @@ Debug_LevelSelectMenuText:
 	db	"    1  2  3  4  5   "
 	db	"   GREAT GROTTO     "
 	db	"    1  2  3  4  5   "
-	db	"   FORLORN FOREST   "
+	db	"   FORGOTTEN FOREST "
 	db	"    1  2  3  4  5   "
 	db	"   TRAP TEMPLE      "
 	db	"    1  2  3  4  5   "
@@ -347,6 +347,10 @@ GM_DebugParallax::
 	ld		a,$80
 	ld		[Engine_ParallaxDest],a
 	
+	xor		a
+	ld		[Engine_TempSCX],a
+	ld		[Engine_TempSCY],a
+	
 	ld		a,%10010001
 	ldh		[rLCDC],a
 	ld		a,IEF_VBLANK
@@ -356,16 +360,16 @@ GM_DebugParallax::
 MainLoop::
 	ld		bc,0
 	ld		a,[sys_btnHold]
-	ld		hl,rSCY
+	ld		hl,Engine_TempSCY
 	bit		btnUp,a
 	call	nz,.scrollUp
 	bit		btnDown,a
 	call	nz,.scrollDown
-	ld		hl,rSCX
+	ld		hl,Engine_TempSCX
 	bit		btnLeft,a
 	call	nz,.scrollLeft
 	bit		btnRight,a
-	call	nz,.scrollRight
+	jr		nz,.scrollRight
 	jr		.doparallax
 	
 .scrollUp
@@ -390,9 +394,9 @@ MainLoop::
 	
 .doparallax
 	ld		a,b
-;	push	bc
+	push	bc
 	call	Parallax_ShiftHorizontal
-;	pop		bc
+	pop		bc
 	ld		a,c
 	call	Parallax_ShiftVertical
 
@@ -455,6 +459,10 @@ DoVBlank::
 	ld		a,%00001111
 	ldh		[rHDMA5],a	; HDMA length + type (length 256, hblank wait)
 	
+	ld		a,[Engine_TempSCX]
+	ldh		[rSCX],a
+	ld		a,[Engine_TempSCY]
+	ldh		[rSCY],a
 	
 	pop	hl
 	pop	de

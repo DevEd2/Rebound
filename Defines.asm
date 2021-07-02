@@ -162,6 +162,9 @@ sys_LCDCFlag:		db
 sys_EmuCheck:		db
 ; project-specific
 
+Engine_TempSCX:		db
+Engine_TempSCY:		db
+
 section "Zeropage",hram
 
 OAM_DMA:			ds	16
