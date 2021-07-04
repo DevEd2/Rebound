@@ -261,7 +261,7 @@ SkipGBCScreen:
 	ld		[sys_TimerFlag],a
 	ld		[sys_LCDCFlag],a
 	; clear OAM buffer
-	ld		hl,SpriteBuffer
+	ld		hl,OAMBuffer
 	ld		b,40*4
 	xor		a
 	call	_FillRAMSmall
@@ -374,13 +374,21 @@ GM_Level:
 	ld		[Engine_ParallaxDest],a
 	
 	xor		a
-	ld		[Engine_TempSCX],a
-	ld		[Engine_TempSCY],a
+	ld		[Engine_CameraX],a
+	ld		[Engine_CameraY],a
 	
-	ld		a,%10010001
+	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
 	ldh		[rLCDC],a
 	ld		a,IEF_VBLANK
 	ldh		[rIE],a
+	
+	
+	ld		a,8
+	ld		[Player_AnimTimer],a
+
+	ld		a,8
+	ld		[Player_XPos],a
+	ld		[Player_YPos],a
 	
 	ei
 	
@@ -389,45 +397,73 @@ MainLoop::
 
 	ld		bc,0
 	ld		a,[sys_btnHold]
-	ld		hl,Engine_TempSCY
+	ld		hl,Player_YPos
 	bit		btnUp,a
-	call	nz,.scrollUp
+	call	nz,.moveUp
 	bit		btnDown,a
-	call	nz,.scrollDown
-	ld		hl,Engine_TempSCX
+	call	nz,.moveDown
+	ld		hl,Player_XPos
 	bit		btnLeft,a
-	call	nz,.scrollLeft
+	call	nz,.moveLeft
 	bit		btnRight,a
-	jr		nz,.scrollRight
-	jr		.doparallax
+	jr		nz,.moveRight
+	jr		.docamera
 	
-.scrollUp
+.moveUp
 	dec		[hl]
-	dec		[hl]
-	ld		c,1
 	ret
-.scrollDown
+.moveDown
 	inc		[hl]
-	inc		[hl]
-	ld		c,-1
 	ret
-.scrollLeft
+.moveLeft
 	dec		[hl]
-	dec		[hl]
-	ld		b,1
 	ret
-.scrollRight
+.moveRight
 	inc		[hl]
-	inc		[hl]
-	ld		b,-1
 	
-.doparallax
-	ld		a,b
-	push	bc
-	call	Parallax_ShiftHorizontal
-	pop		bc
-	ld		a,c
-	call	Parallax_ShiftVertical
+.docamera
+
+	ld		a,[Engine_CameraX]
+	ld		d,a
+	ld		a,[Engine_CameraY]
+	ld		e,a
+
+	ld		a,[Player_XPos]
+.checkleft
+	sub		SCRN_X / 2
+	jr		nc,.checkright
+	xor		a
+	jr		.setcamx
+.checkright
+	cp		256 - SCRN_X
+	jr		c,.setcamx
+	ld		a,256 - SCRN_X
+.setcamx
+	ld		[Engine_CameraX],a
+
+	ld		a,[Player_YPos]
+.checkup
+	sub		SCRN_Y / 2
+	jr		nc,.checkdown
+	xor		a
+	jr		.setcamy
+.checkdown
+	cp		256 - SCRN_Y
+	jr		c,.setcamy
+	ld		a,256 - SCRN_Y
+.setcamy
+	ld		[Engine_CameraY],a
+	
+	ld		a,[Player_AnimTimer]
+	dec		a
+	jr		nz,.skip
+	ld		a,[Player_CurrentFrame]
+	inc		a
+	ld		[Player_CurrentFrame],a
+	ld		a,8
+.skip
+	ld		[Player_AnimTimer],a
+
 
 	call	ProcessPlayer
 	call	DrawPlayer
@@ -491,9 +527,9 @@ DoVBlank::
 	ld		a,%00001111
 	ldh		[rHDMA5],a	; HDMA length + type (length 256, hblank wait)
 	
-	ld		a,[Engine_TempSCX]
+	ld		a,[Engine_CameraX]
 	ldh		[rSCX],a
-	ld		a,[Engine_TempSCY]
+	ld		a,[Engine_CameraY]
 	ldh		[rSCY],a
 	
 	pop	hl
@@ -699,7 +735,7 @@ CopyDMARoutine::
 	ret
 	
 _OAM_DMA::
-	ld	a,high(SpriteBuffer)
+	ld	a,high(OAMBuffer)
 	ldh	[rDMA],a
 	ld	a,$28
 .wait

@@ -150,7 +150,7 @@ endm
 
 section	"Variables",wram0,align[8]
 
-SpriteBuffer:		ds	40*4	; 40 sprites, 4 bytes each
+OAMBuffer:			ds	40*4	; 40 sprites, 4 bytes each
 
 sys_GBType:			db	; 0 = DMG, 1 = GBC, 2 = GBA
 sys_ResetTimer:		db
@@ -163,8 +163,8 @@ sys_LCDCFlag:		db
 sys_EmuCheck:		db
 ; project-specific
 
-Engine_TempSCX:		db
-Engine_TempSCY:		db
+Engine_CameraX:		db
+Engine_CameraY:		db
 
 section "Zeropage",hram
 

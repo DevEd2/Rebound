@@ -83,5 +83,60 @@ ProcessPlayer:
 	ret
 	
 DrawPlayer:
-	; TODO
+	; load correct frame in player VRAM area
+	ld		a,[Player_CurrentFrame]
+	add		a
+	add		a
+	ld		l,a
+	ld		h,0
+	add		hl,hl	; x2
+	add		hl,hl	; x4
+	add		hl,hl	; x8
+	add		hl,hl	; x16
+	ldfar	de,PlayerTiles
+	add		hl,de
+	ld		b,$40
+	ld		de,$8000
+	ld		a,1
+	ldh		[rVBK],a
+.loadtiles
+	ldh		a,[rSTAT]
+	and		2
+	jr		nz,.loadtiles
+	ld		a,[hl+]
+	ld		[de],a
+	inc		e
+	dec		b
+	jr		nz,.loadtiles
+	xor		a
+	ldh		[rVBK],a
+
+	ld		hl,OAMBuffer
+	ld		a,[Engine_CameraY]
+	ld		e,a
+	ld		a,[Player_YPos]
+	sub		e
+	add		8
+	ld		b,a
+	ld		[hl+],a
+	ld		a,[Engine_CameraX]
+	ld		e,a
+	ld		a,[Player_XPos]
+	sub		e
+	ld		c,a
+	ld		[hl+],a
+	xor		a
+	ld		[hl+],a
+	ld		a,%00001000
+	ld		[hl+],a
+	ld		a,b
+	ld		[hl+],a
+	ld		a,c
+	add		8
+	ld		[hl+],a
+	ld		a,2
+	ld		[hl+],a
+	ld		a,%00001000
+	ld		[hl],a
+	
 	ret
