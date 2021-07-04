@@ -108,7 +108,7 @@ ProgramStart::
 	dec	b
 	jr	nz,.loop
 	call	CopyDMARoutine
-	call	$ff80	; clear OAM
+;	call	$ff80	; clear OAM
 	
 	; wait for VBlank
 	ld	hl,rLY
@@ -251,6 +251,32 @@ EmuText:
 ; ========================================================================
 
 SkipGBCScreen:
+	; clear vars
+	xor		a
+	ld		[sys_ResetTimer],a
+	ld		[sys_CurrentFrame],a
+	ld		[sys_btnPress],a
+	ld		[sys_btnHold],a
+	ld		[sys_VBlankFlag],a
+	ld		[sys_TimerFlag],a
+	ld		[sys_LCDCFlag],a
+	; clear OAM buffer
+	ld		hl,SpriteBuffer
+	ld		b,40*4
+	xor		a
+	call	_FillRAMSmall
+	
+	; clear GHX's RAM
+	ld		hl,$de00
+	ld		b,0
+	xor		a
+	call	_FillRAMSmall
+
+	; start playing music
+	ld		a,1
+	farcall	GHX_Play
+	; fall through
+	
 ; ================================
 
 GM_DebugMenu:
@@ -313,14 +339,13 @@ GM_TitleAndMenus:
 ; ================================
 
 GM_Level:
-	; TODO - fall through for now
-
-GM_DebugParallax::
 	call	DoubleSpeed
 	
+	call	InitPlayer
+
+	ldfar	hl,Pal_TestMap
 	ld		b,(Pal_TestMap_End-Pal_TestMap) / 8
 	xor		a
-	ld		hl,Pal_TestMap
 .loop
 	push	af
 	push	bc
@@ -356,9 +381,12 @@ GM_DebugParallax::
 	ldh		[rLCDC],a
 	ld		a,IEF_VBLANK
 	ldh		[rIE],a
+	
 	ei
 	
 MainLoop::
+	farcall	GHX_Update
+
 	ld		bc,0
 	ld		a,[sys_btnHold]
 	ld		hl,Engine_TempSCY
@@ -401,7 +429,10 @@ MainLoop::
 	ld		a,c
 	call	Parallax_ShiftVertical
 
-	halt		
+	call	ProcessPlayer
+	call	DrawPlayer
+
+	halt
 	jr		MainLoop
 	
 ; Metatile format:
@@ -683,11 +714,13 @@ _OAM_DMA_End:
 
 ; INPUT: b = bank
 _Bankswitch:
+	push	af
 	ldh		a,[sys_CurrentBank]
 	ldh		[sys_LastBank],a
 	ld		a,b
 	ldh		[sys_CurrentBank],a
 	ld		[rROMB0],a
+	pop		af
 	ret
 	
 ; Fill RAM with a value.
@@ -787,6 +820,7 @@ Font::				incbin	"GFX/Font.bin.wle"
 
 include	"Metatile.asm"
 include	"Parallax.asm"
+include	"Player.asm"
 
 ; ========
 ; SFX data
@@ -852,13 +886,17 @@ Pal_TestMap:
 	RGB	31,31,31
 Pal_TestMap_End:
 
+Pal_Player:
+	RGB	31, 0,31
+	RGB	 0, 0, 0
+	RGB	 0,15,31
+	RGB	31,31,31
+Pal_Player_End:
 
 TestMapTiles:
 ParallaxTiles:
-	incbin	"GFX/ParallaxTiles.bin"
+	incbin	"GFX/ParallaxTiles.2bpp"
 ParallaxTiles_End:
-
-section "GFX bank 2",romx
 
 	incbin	"GFX/TestTiles.2bpp"
 TestMapTiles_End:
@@ -866,8 +904,25 @@ TestMapTiles_End:
 ParallaxMap:
 	incbin	"GFX/ParallaxMap.bin.wle"
 
+section "Player tiles",romx,align[8]
+PlayerTiles:
+	incbin	"GFX/PlayerTiles.2bpp"
+
 ; ==========
 ; Level data
 ; ==========
 
 include "Levels/TestMap.inc"
+
+; ==========
+; Sound data
+; ==========
+
+section "GHX sound driver + data",romx
+GHX_Play:	incbin	"Music.bin",$0,3	; $4000
+GHX_Update:	incbin	"Music.bin",$3,3	; $4003
+GHX_Unk1:	incbin	"Music.bin",$6,3	; $4006
+GHX_Unk2:	incbin	"Music.bin",$9,3	; $4009
+GHX_Init:	incbin	"Music.bin",$c,3	; $400c
+GHX_Unk3:	incbin	"Music.bin",$f,3	; $400f
+GHX_Data:	incbin	"Music.bin",$12

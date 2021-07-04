@@ -102,22 +102,25 @@ endm
 string:					macro
 	db		\1,0
 endm
-	
+
+; Loads appropriate ROM bank for a block of data and loads its pointer into a given register.
+; Trashes B.
 ldfar:					macro
 	ld		b,bank(\2)
 	call	_Bankswitch
 	ld		\1,\2
 endm
 	
+; Loads appropriate ROM bank for a routine and executes it.
+; Trashes B.
 farcall:				macro
 	ld		b,bank(\1)
-	call	Bankswitch
+	call	_Bankswitch
 	call	\1
 endm
 	
 resbank:				macro
 	ldh		a,[sys_LastBank]
-	ld		b,a
 	ld		[rROMB0],a
 endm
 	

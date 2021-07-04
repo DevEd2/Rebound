@@ -402,7 +402,7 @@ _DoneFade:
 	ld	[sys_FadeState],a
 	ret
 
-; INPUT:     a = palette number to load into (bit 7 for object palette)
+; INPUT:     a = palette number to load into (bit 3 for object palette)
 ;           hl = palette pointer
 ; DESTROYS:  a, b, de, hl
 LoadPal:
