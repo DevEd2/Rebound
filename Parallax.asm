@@ -9,6 +9,7 @@ Engine_ParallaxTemp4:		db
 section "Parallax routines",rom0
 ; INPUT: a = amount to shift by
 Parallax_ShiftHorizontal::
+	push	de
 	and		a
 	ret		z
 	bit		7,a
@@ -123,6 +124,7 @@ Parallax_ShiftLeft::
 	pop		bc
 	dec		b
 	jp		nz,.loop0
+	pop		de
 	ret
 	
 Parallax_ShiftRight::
@@ -235,6 +237,7 @@ Parallax_ShiftRight::
 	pop		bc
 	dec		b
 	jp		nz,.loop0
+	pop		de
 	ret
 
 ; ===============
@@ -259,6 +262,7 @@ doshiftdown:	macro
 
 
 Parallax_ShiftVertical:
+	push	de
 	and		a
 	ret		z
 	bit		7,a
@@ -272,7 +276,6 @@ Parallax_ShiftUp:
 	ld		d,h
 .loop2
 	; rows 0 and 2
-	push	bc
 	ld		l,low(Engine_ParallaxBuffer)
 	ld		a,c
 	add		a	; x2
@@ -398,7 +401,6 @@ Parallax_ShiftUp:
 	ld		a,[Engine_ParallaxTemp2]
 	ld		[hl],a
 	
-	pop		bc
 	inc		c
 	dec		b
 	jp		nz,.loop2
@@ -406,6 +408,7 @@ Parallax_ShiftUp:
 	pop		bc
 	dec		c
 	jp		nz,.loop
+	pop		de
 	ret
 	
 Parallax_ShiftDown:
@@ -419,7 +422,6 @@ Parallax_ShiftDown:
 	ld		d,h
 .loop2
 	; rows 0 and 2
-	push	bc
 	ld		l,low(Engine_ParallaxBuffer + $0f)
 	ld		a,c
 	add		a	; x2
@@ -545,7 +547,6 @@ Parallax_ShiftDown:
 	ld		a,[Engine_ParallaxTemp2]
 	ld		[hl],a
 	
-	pop		bc
 	inc		c
 	dec		b
 	jp		nz,.loop2
@@ -553,4 +554,5 @@ Parallax_ShiftDown:
 	pop		bc
 	dec		c
 	jp		nz,.loop
+	pop		de
 	ret

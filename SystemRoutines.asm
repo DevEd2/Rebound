@@ -106,18 +106,14 @@ DrawBin:
 	jr	.chkloop
 	
 ; ================================================================
-; Load a screen
+; Call HL
 ; ================================================================
 
-LoadScreen:
-	ld	de,_SCRN0
-	ld	bc,_SCRN1-_SCRN0
-.loop
-	ld	a,[hl+]
-	ld	[de],a
-	inc	de
-	dec	bc
-	ld	a,b
-	or	c
-	jr	nz,.loop
-	ret
+_CallHL:
+	ld		a,h
+	bit		7,a
+	jr		z,.skip
+	ld		b,b
+	jp		@
+.skip
+	jp		hl

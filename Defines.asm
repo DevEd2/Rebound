@@ -141,6 +141,22 @@ dbp:					macro
 		db	\3
 	endr
 endm
+
+dbw:					macro
+	db		\1
+	dw		\2
+endm
+
+debugmsg:				macro
+	ld		d,d
+	jr		.\@
+	dw		$6464
+	dw		0
+	db		\1,0
+	dw		0
+	dw		0
+.\@
+endm
 	
 ; === Project-specific macros ===
 
@@ -165,6 +181,7 @@ sys_EmuCheck:		db
 
 Engine_CameraX:		db
 Engine_CameraY:		db
+Engine_CameraOdd:	db
 
 section "Zeropage",hram
 

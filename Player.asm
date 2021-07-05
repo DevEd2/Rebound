@@ -9,12 +9,13 @@ Player_ScreenID:		db	; which subscreen the player is currently on
 Player_XPos:			db	; current X position
 Player_YPos:			db	; current Y position
 Player_SubpixelXY:		db	; upper nybble = X subpixel, lower nybble = Y subpixel
-Player_CurrentAnim:		db	; current animation
-Player_AnimTimer:		db	; time until next animation frame is displayed
+Player_AnimPointer:		dw	; pointer to current animation sequence
+Player_AnimTimer:		db	; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame:	db	; current animation frame being displayed
-Player_Flags:			db
 
 PlayerRAM_End:
+
+Player_MoveSpeed		equ	2
 
 ; ========================
 ; Player animation defines
@@ -71,6 +72,11 @@ InitPlayer:
 	ld		b,PlayerRAM_End-PlayerRAM
 	xor		a
 	call	_FillRAMSmall
+	; initialize animation pointer
+	ld		a,low(Anim_Player_Idle)
+	ld		[Player_AnimPointer],a
+	ld		a,high(Anim_Player_Idle)
+	ld		[Player_AnimPointer+1],a
 	; load player palette
 	ldfar	hl,Pal_Player
 	ld		a,8
@@ -80,6 +86,8 @@ InitPlayer:
 	
 ProcessPlayer:
 	; TODO
+	
+	call	AnimatePlayer
 	ret
 	
 DrawPlayer:
@@ -140,3 +148,192 @@ DrawPlayer:
 	ld		[hl],a
 	
 	ret
+
+; ===================
+; Animation constants
+; ===================
+
+C_SetAnim	equ	$80
+
+; ================
+; Animation macros
+; ================
+
+NUM_ANIMS	set	0	; no touchy!
+
+defanim:		macro
+AnimID_\1		equ	NUM_ANIMS
+NUM_ANIMS		set	NUM_ANIMS+1
+Anim_\1:
+	endm
+
+; ==================
+; Animation routines
+; ==================
+
+Player_SetAnimation:
+	ld		a,l
+	ld		[Player_AnimPointer],a
+	ld		a,h
+	ld		[Player_AnimPointer+1],a
+	ld		a,1
+	ld		[Player_AnimTimer],a
+	ret
+
+AnimatePlayer:
+	ld		a,[Player_AnimTimer]
+	cp		-1
+	ret		z	; return if current frame time = -1
+	dec		a
+	ld		[Player_AnimTimer],a
+	ret		nz	; return if anim timer > 0
+
+	; get anim pointer
+	ld		a,[Player_AnimPointer]
+	ld		l,a
+	ld		a,[Player_AnimPointer+1]
+	ld		h,a
+	
+	; get frame / command number
+.getEntry
+	ld		a,[hl+]
+	bit		7,a
+	jr		nz,.cmdProc
+	ld		[Player_CurrentFrame],a
+	ld		a,[hl+]
+	ld		[Player_AnimTimer],a
+.doneEntry
+	ld		a,l
+	ld		[Player_AnimPointer],a
+	ld		a,h
+	ld		[Player_AnimPointer+1],a
+	ret
+	
+.cmdProc
+	push	hl
+	ld		hl,.cmdProcTable
+	add		a
+	add		l
+	ld		l,a
+	jr		nc,.nocarry
+	inc		h
+.nocarry
+	ld		a,[hl+]
+	ld		h,[hl]
+	ld		l,a
+	jp		hl
+	
+.cmdProcTable:
+	dw		.setAnim
+	
+.setAnim
+	pop		hl
+	ld		a,[hl+]
+	ld		h,[hl]
+	ld		l,a
+	jr		.getEntry
+
+; ==============
+; Animation data
+; ==============
+
+; Animation format:
+; XX YY
+; XX = Frame ID / command (if bit 7 set)
+; YY = Wait time / command parameter
+
+	defanim	Player_Left2
+	db		F_Player_Left2,-1
+	
+	defanim	Player_Left1
+	db		F_Player_Left1,-1
+
+	defanim	Player_Idle
+	db		F_Player_Idle,-1
+
+	defanim	Player_Right1
+	db		F_Player_Right1,-1
+	
+	defanim	Player_Right2
+	db		F_Player_Right2,-1
+	
+	defanim	Player_Left2Blink
+	db		F_Player_Left2_Blink1,1
+	db		F_Player_Left2_Blink2,1
+	db		F_Player_Left2_Blink3,1
+	db		F_Player_Left2_Blink4,4
+	db		F_Player_Left2_Blink3,1
+	db		F_Player_Left2_Blink2,1
+	db		F_Player_Left2_Blink1,1
+	dbw		C_SetAnim,Anim_Player_Left2
+	
+	defanim	Player_Left1Blink
+	db		F_Player_Left1_Blink1,1
+	db		F_Player_Left1_Blink2,1
+	db		F_Player_Left1_Blink3,1
+	db		F_Player_Left1_Blink4,4
+	db		F_Player_Left1_Blink3,1
+	db		F_Player_Left1_Blink2,1
+	db		F_Player_Left1_Blink1,1
+	dbw		C_SetAnim,Anim_Player_Left1
+	
+	defanim	Player_IdleBlink
+	db		F_Player_Idle_Blink1,1
+	db		F_Player_Idle_Blink2,1
+	db		F_Player_Idle_Blink3,1
+	db		F_Player_Idle_Blink4,4
+	db		F_Player_Idle_Blink3,1
+	db		F_Player_Idle_Blink2,1
+	db		F_Player_Idle_Blink1,1
+	dbw		C_SetAnim,Anim_Player_Idle
+	
+	defanim	Player_Right1Blink
+	db		F_Player_Right1_Blink1,1
+	db		F_Player_Right1_Blink2,1
+	db		F_Player_Right1_Blink3,1
+	db		F_Player_Right1_Blink4,4
+	db		F_Player_Right1_Blink3,1
+	db		F_Player_Right1_Blink2,1
+	db		F_Player_Right1_Blink1,1
+	dbw		C_SetAnim,Anim_Player_Right1
+	
+	defanim	Player_Right2Blink
+	db		F_Player_Right2_Blink1,1
+	db		F_Player_Right2_Blink2,1
+	db		F_Player_Right2_Blink3,1
+	db		F_Player_Right2_Blink4,4
+	db		F_Player_Right2_Blink3,1
+	db		F_Player_Right2_Blink2,1
+	db		F_Player_Right2_Blink1,1
+	dbw		C_SetAnim,Anim_Player_Right2
+	
+	defanim	Player_Hurt
+	db		F_Player_Hurt1,6
+	db		F_Player_Hurt2,6
+	dbw		C_SetAnim,Anim_Player_Hurt
+	
+	defanim	Player_SMH
+	db		F_Player_Left1,2
+	db		F_Player_Left2,2
+	db		F_Player_Left1,2
+	db		F_Player_Idle,2
+	db		F_Player_Right1,2
+	db		F_Player_Right2,2
+	db		F_Player_Right1,2
+	db		F_Player_Idle,2
+	db		F_Player_Left1,2
+	db		F_Player_Left2,2
+	db		F_Player_Left1,2
+	db		F_Player_Idle,2
+	db		F_Player_Right1,2
+	db		F_Player_Right2,2
+	db		F_Player_Right1,2
+	db		F_Player_Idle,2
+	db		F_Player_Left1,2
+	db		F_Player_Left2,2
+	db		F_Player_Left1,2
+	db		F_Player_Idle,2
+	db		F_Player_Right1,2
+	db		F_Player_Right2,2
+	db		F_Player_Right1,2
+	dbw		C_SetAnim,Anim_Player_Idle

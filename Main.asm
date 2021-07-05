@@ -12,7 +12,7 @@ include "Defines.asm"
 ; Reset vectors
 ; =============
 section "Reset $00",rom0[$00]
-ResetGame::		jp	EntryPoint
+CallHL::		jp	_CallHL
 	
 section	"Reset $08",rom0[$08]
 FillRAM::		jp	_FillRAM
@@ -90,7 +90,7 @@ ROMChecksum:	dw								; ROM checksum (2 bytes) (handled by post-linking tool)
 
 ProgramStart::
 	di
-	ld	sp,$e000
+	ld		sp,$e000
 	push	bc
 	push	af
 	
@@ -273,7 +273,7 @@ SkipGBCScreen:
 	call	_FillRAMSmall
 
 	; start playing music
-	ld		a,1
+	ld		a,9
 	farcall	GHX_Play
 	; fall through
 	
@@ -373,9 +373,11 @@ GM_Level:
 	ld		a,$80
 	ld		[Engine_ParallaxDest],a
 	
+	; initialize camera
 	xor		a
 	ld		[Engine_CameraX],a
 	ld		[Engine_CameraY],a
+	ld		[Engine_CameraOdd],a
 	
 	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
 	ldh		[rLCDC],a
@@ -383,7 +385,7 @@ GM_Level:
 	ldh		[rIE],a
 	
 	
-	ld		a,8
+	ld		a,-1
 	ld		[Player_AnimTimer],a
 
 	ld		a,8
@@ -406,9 +408,27 @@ MainLoop::
 	bit		btnLeft,a
 	call	nz,.moveLeft
 	bit		btnRight,a
-	jr		nz,.moveRight
-	jr		.docamera
+	call	nz,.moveRight
 	
+	ld		a,[sys_btnPress]
+	bit		btnA,a
+	jr		z,.hurttest
+	ld		hl,Anim_Player_IdleBlink
+	call	Player_SetAnimation
+	jr		.docamera
+.hurttest
+	bit		btnB,a
+	jr		z,.smhtest
+	ld		hl,Anim_Player_Hurt
+	call	Player_SetAnimation
+	jr		.docamera
+.smhtest
+	bit		btnStart,a
+	jr		z,.docamera
+	ld		hl,Anim_Player_SMH
+	call	Player_SetAnimation
+	jr		.docamera
+		
 .moveUp
 	dec		[hl]
 	ret
@@ -420,9 +440,9 @@ MainLoop::
 	ret
 .moveRight
 	inc		[hl]
+	ret
 	
 .docamera
-
 	ld		a,[Engine_CameraX]
 	ld		d,a
 	ld		a,[Engine_CameraY]
@@ -454,22 +474,35 @@ MainLoop::
 .setcamy
 	ld		[Engine_CameraY],a
 	
-	ld		a,[Player_AnimTimer]
-	dec		a
-	jr		nz,.skip
-	ld		a,[Player_CurrentFrame]
+	; do parallax
+	
+	ld		a,[Engine_CameraOdd]
+	xor		1
+	ld		[Engine_CameraOdd],a
+	jr		nz,.skipXY
+	ld		a,[Engine_CameraX]
+	sub		d
+	jr		z,.skipX
+	cpl
 	inc		a
-	ld		[Player_CurrentFrame],a
-	ld		a,8
-.skip
-	ld		[Player_AnimTimer],a
-
+	ld		b,1
+	call	Parallax_ShiftHorizontal
+.skipX
+	ld		a,[Engine_CameraY]
+	sub		e
+	jr		z,.skipY
+	cpl
+	inc		a
+	ld		c,1
+	call	Parallax_ShiftVertical
+.skipY
+.skipXY
 
 	call	ProcessPlayer
 	call	DrawPlayer
 
 	halt
-	jr		MainLoop
+	jp		MainLoop
 	
 ; Metatile format:
 ; 16x16, 2 bytes per tile
