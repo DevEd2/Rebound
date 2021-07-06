@@ -77,18 +77,69 @@ InitPlayer:
 	ld		[Player_AnimPointer],a
 	ld		a,high(Anim_Player_Idle)
 	ld		[Player_AnimPointer+1],a
+	; initialize animation timer
+	ld		a,-1
+	ld		[Player_AnimTimer],a
 	; load player palette
 	ldfar	hl,Pal_Player
 	ld		a,8
-	call	LoadPal	
+	call	LoadPal
 	; TODO
 	ret
-	
+
+; ========
+
 ProcessPlayer:
 	; TODO
+	ld		a,[sys_btnHold]
+	ld		hl,Player_YPos
+	bit		btnUp,a
+	call	nz,.moveUp
+	bit		btnDown,a
+	call	nz,.moveDown
+	ld		hl,Player_XPos
+	bit		btnLeft,a
+	call	nz,.moveLeft
+	bit		btnRight,a
+	call	nz,.moveRight
 	
+	ld		a,[sys_btnPress]
+	bit		btnA,a
+	jr		z,.hurttest
+	ld		hl,Anim_Player_IdleBlink
+	call	Player_SetAnimation
+	jr		.done
+.hurttest
+	bit		btnB,a
+	jr		z,.smhtest
+	ld		hl,Anim_Player_Hurt
+	call	Player_SetAnimation
+	jr		.done
+.smhtest
+	bit		btnStart,a
+	jr		z,.done
+	ld		hl,Anim_Player_SMH
+	call	Player_SetAnimation
+	jr		.done
+		
+.moveUp
+	dec		[hl]
+	ret
+.moveDown
+	inc		[hl]
+	ret
+.moveLeft
+	dec		[hl]
+	ret
+.moveRight
+	inc		[hl]
+	ret
+	
+.done
 	call	AnimatePlayer
 	ret
+	
+; ========
 	
 DrawPlayer:
 	; load correct frame in player VRAM area
@@ -240,7 +291,7 @@ AnimatePlayer:
 ; Animation format:
 ; XX YY
 ; XX = Frame ID / command (if bit 7 set)
-; YY = Wait time / command parameter
+; YY = Wait time (one byte) / command parameter (can be more than one byte)
 
 	defanim	Player_Left2
 	db		F_Player_Left2,-1

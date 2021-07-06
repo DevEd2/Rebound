@@ -41,16 +41,16 @@ section	"VBlank IRQ",rom0[$40]
 IRQ_VBlank::	jp	DoVBlank
 
 section	"STAT IRQ",rom0[$48]
-IRQ_Stat::	jp	DoStat
+IRQ_Stat::		jp	DoStat
 
 section	"Timer IRQ",rom0[$50]
-IRQ_Timer::	jp	DoTimer
+IRQ_Timer::		jp	DoTimer
 
 section	"Serial IRQ",rom0[$58]
-IRQ_Serial::	reti	; not needed
+IRQ_Serial::	jp	DoSerial
 
 section	"Joypad IRQ",rom0[$60]
-IRQ_Joypad::	reti	; not needed
+IRQ_Joypad::	jp	DoJoypad
 
 ; ===============
 ; System routines
@@ -95,20 +95,20 @@ ProgramStart::
 	push	af
 	
 ; init memory
-;	ld	hl,$c000	; start of WRAM
-;	ld	bc,$1ffa	; don't clear stack
-;	xor	a
-;	rst	$08
+;	ld		hl,$c000	; start of WRAM
+;	ld		bc,$1ffa	; don't clear stack
+;	xor		a
+;	rst		FillRAM
 		
-	ld	bc,$7f80
-	xor	a
+	ld		bc,$7f80
+	xor		a
 .loop
-	ld	[c],a
-	inc	c
-	dec	b
-	jr	nz,.loop
+	ld		[c],a
+	inc		c
+	dec		b
+	jr		nz,.loop
 	call	CopyDMARoutine
-;	call	$ff80	; clear OAM
+;	rst		DoOAMDMA
 	
 	; wait for VBlank
 	ld	hl,rLY
@@ -120,89 +120,90 @@ ProgramStart::
 	ldh	[rLCDC],a	; disable LCD
 	
 	; clear VRAM
-	ldh	[rVBK],a
-	ld	hl,$8000
-	ld	bc,$2000
-	rst	$08	; fill RAM
-	ld	a,1
-	ldh	[rVBK],a
-	xor	a
-	ld	hl,$8000
-	ld	bc,$2000
-	rst	$08	; fill RAM
-	xor	a
-	ldh	[rVBK],a
+	ldh		[rVBK],a
+	ld		hl,$8000
+	ld		bc,$2000
+	rst		FillRAM
+	
+	ld		a,1
+	ldh		[rVBK],a
+	xor		a
+	ld		hl,$8000
+	ld		bc,$2000
+	rst		FillRAM
+	xor		a
+	ldh		[rVBK],a
 	
 	
 ; check GB type
 ; sets sys_GBType to 0 if DMG/SGB/GBP/GBL/SGB2, 1 if GBC, 2 if GBA/GBA SP/GB Player
-	pop	af
-	pop	bc
-	cp	$11
-	jp	nz,GBCOnlyScreen
+	pop		af
+	pop		bc
+	cp		$11
+	jp		nz,GBCOnlyScreen
 .gbc
-	and	1		; a = 1
-	add	b		; b = 1 if on GBA
-	ld	[sys_GBType],a
+	and		1		; a = 1
+	add		b		; b = 1 if on GBA
+	ld		[sys_GBType],a
 	; spoof check!
-	ld	hl,$8000
-	ld	a,$56
-	ld	[hl],a
-	ld	b,a
-	ld	a,1
-	ldh	[rVBK],a	; rVBK is not supported on DMG
-	ld	a,b
-	cp	[hl]
-	jr	z,GBCOnlyScreen
-	xor	a
-	ld	[rVBK],a
+	ld		hl,$8000
+	ld		a,$56
+	ld		[hl],a
+	ld		b,a
+	ld		a,1
+	ldh		[rVBK],a	; rVBK is not supported on DMG
+	ld		a,b
+	cp		[hl]
+	jr		z,GBCOnlyScreen
+	xor		a
+	ld		[rVBK],a
 	; emu check!
 	; layer 1: echo RAM
-	ld	a,$56
-	ld	[sys_EmuCheck],a
-	ld	b,a
-	ld	a,[sys_EmuCheck+$2000]	; read from echo RAM
-	cp	b
-	jp	z,SkipGBCScreen
+	ld		a,$56
+	ld		[sys_EmuCheck],a
+	ld		b,a
+	ld		a,[sys_EmuCheck+$2000]	; read from echo RAM
+	cp		b
+	jp		z,SkipGBCScreen
 EmuScreen:
 	; since we're on an emulator we don't need to wait for VBlank before disabling the LCD	
-	xor	a
-	ldh	[rLCDC],a	; disable LCD
-	ld	a,bank(Pal_EmuScreen)
-	ld	[rROMB0],a
-	ld	hl,Pal_EmuScreen
-	xor	a
+	xor		a
+	ldh		[rLCDC],a	; disable LCD
+	ld		a,bank(Pal_EmuScreen)
+	ld		[rROMB0],a
+	ld		hl,Pal_EmuScreen
+	xor		a
 	call	LoadPal
-	ld	hl,Font
-	ld	de,$8000
+	ld		hl,Font
+	ld		de,$8000
 	call	DecodeWLE
-	ld	hl,EmuText
+	ld		hl,EmuText
 	call	LoadTilemapText
-	ld	a,%10010001
-	ldh	[rLCDC],a
-	ld	a,IEF_VBLANK
-	ldh	[rIE],a
+	ld		a,%10010001
+	ldh		[rLCDC],a
+	ld		a,IEF_VBLANK
+	ldh		[rIE],a
 	ei
 EmuLoop:
 	halt
-	jr	EmuLoop
+	jr		EmuLoop
 GBCOnlyScreen:
-	xor	a
-	ld	[sys_GBType],a
+	xor		a
+	ld		[sys_GBType],a
 	
 	; GBC only screen
 	SetDMGPal	rBGP,0,3,3,0
-	ld	hl,Font
-	ld	de,$8000
+	ld		hl,Font
+	ld		de,$8000
 	call	DecodeWLE
-	ld	hl,GBCOnlyText
+	ld		hl,GBCOnlyText
 	call	LoadTilemapText
 	
-	ld	a,%10010001
-	ldh	[rLCDC],a
+	ld		a,%10010001
+	ldh		[rLCDC],a
 	
-	ld	a,IEF_VBLANK
-	ldh	[rIE],a
+	ld		a,IEF_VBLANK
+	ldh		[rIE],a
 	ei
 	
 GBCOnlyLoop:
@@ -271,238 +272,31 @@ SkipGBCScreen:
 	ld		b,0
 	xor		a
 	call	_FillRAMSmall
-
-	; start playing music
-	ld		a,9
-	farcall	GHX_Play
+	
+	call	DoubleSpeed
+	
+	jp		GM_Level
 	; fall through
 	
 ; ================================
 
-GM_DebugMenu:
-	; TODO
-	jp		GM_Level
-
-Debug_MainMenuText:
-	db	"                    "
-	db	"   - REBOUND GB -   "
-	db	"     DEBUG MENU     "
-	db	"                    "
-	db	"   START GAME       "
-	db	"   LEVEL SELECT     "
-	db	"   SOUND TEST       "
-	db	"   GFX TEST         "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	db	" "
-	dbp	strupr(__DATE__),19," "
-	db	" "
-	dbp	strupr(__TIME__),19," "
-	db	"                    "
-
-Debug_LevelSelectMenuText:
-	db	"                    "
-	db	"  - LEVEL SELECT -  "
-	db	"                    "
-	db	"   PLAIN PLAINS     "
-	db	"    1  2  3  4  5   "
-	db	"   PYRAMID POWER    "
-	db	"    1  2  3  4  5   "
-	db	"   GREAT GROTTO     "
-	db	"    1  2  3  4  5   "
-	db	"   FORGOTTEN FOREST "
-	db	"    1  2  3  4  5   "
-	db	"   TRAP TEMPLE      "
-	db	"    1  2  3  4  5   "
-	db	"   BONUS ROUND      "
-	db	"   BACK             "
-	db	"                    "
-	db	"                    "
-	db	"                    "
-	
+include	"Engine/DebugMenu.asm"
 
 ; ================================
 
 GM_SplashScreens:
 	; TODO
+	ret
 	
 ; ================================
 
 GM_TitleAndMenus:
 	; TODO
+	ret
 
 ; ================================
 
-GM_Level:
-	call	DoubleSpeed
-	
-	call	InitPlayer
-
-	ldfar	hl,Pal_TestMap
-	ld		b,(Pal_TestMap_End-Pal_TestMap) / 8
-	xor		a
-.loop
-	push	af
-	push	bc
-	call	LoadPal
-	pop		bc
-	pop		af
-	inc		a
-	dec		b
-	jr		nz,.loop
-
-	ldfar	hl,ParallaxTiles
-	ld		de,Engine_ParallaxBuffer
-	ld		b,0
-	call	_CopyRAMSmall
-	
-	ld		a,low(ParallaxTileset)
-	ld		[Engine_TilesetPointer],a
-	ld		a,high(ParallaxTileset)
-	ld		[Engine_TilesetPointer+1],a
-
-	CopyTileset	TestMapTiles,0,(TestMapTiles_End-TestMapTiles)/16
-	ld		hl,ParallaxMap
-	call	LoadMap
-	
-	ld		a,$80
-	ld		[Engine_ParallaxDest],a
-	
-	; initialize camera
-	xor		a
-	ld		[Engine_CameraX],a
-	ld		[Engine_CameraY],a
-	ld		[Engine_CameraOdd],a
-	
-	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
-	ldh		[rLCDC],a
-	ld		a,IEF_VBLANK
-	ldh		[rIE],a
-	
-	
-	ld		a,-1
-	ld		[Player_AnimTimer],a
-
-	ld		a,8
-	ld		[Player_XPos],a
-	ld		[Player_YPos],a
-	
-	ei
-	
-MainLoop::
-	farcall	GHX_Update
-
-	ld		bc,0
-	ld		a,[sys_btnHold]
-	ld		hl,Player_YPos
-	bit		btnUp,a
-	call	nz,.moveUp
-	bit		btnDown,a
-	call	nz,.moveDown
-	ld		hl,Player_XPos
-	bit		btnLeft,a
-	call	nz,.moveLeft
-	bit		btnRight,a
-	call	nz,.moveRight
-	
-	ld		a,[sys_btnPress]
-	bit		btnA,a
-	jr		z,.hurttest
-	ld		hl,Anim_Player_IdleBlink
-	call	Player_SetAnimation
-	jr		.docamera
-.hurttest
-	bit		btnB,a
-	jr		z,.smhtest
-	ld		hl,Anim_Player_Hurt
-	call	Player_SetAnimation
-	jr		.docamera
-.smhtest
-	bit		btnStart,a
-	jr		z,.docamera
-	ld		hl,Anim_Player_SMH
-	call	Player_SetAnimation
-	jr		.docamera
-		
-.moveUp
-	dec		[hl]
-	ret
-.moveDown
-	inc		[hl]
-	ret
-.moveLeft
-	dec		[hl]
-	ret
-.moveRight
-	inc		[hl]
-	ret
-	
-.docamera
-	ld		a,[Engine_CameraX]
-	ld		d,a
-	ld		a,[Engine_CameraY]
-	ld		e,a
-
-	ld		a,[Player_XPos]
-.checkleft
-	sub		SCRN_X / 2
-	jr		nc,.checkright
-	xor		a
-	jr		.setcamx
-.checkright
-	cp		256 - SCRN_X
-	jr		c,.setcamx
-	ld		a,256 - SCRN_X
-.setcamx
-	ld		[Engine_CameraX],a
-
-	ld		a,[Player_YPos]
-.checkup
-	sub		SCRN_Y / 2
-	jr		nc,.checkdown
-	xor		a
-	jr		.setcamy
-.checkdown
-	cp		256 - SCRN_Y
-	jr		c,.setcamy
-	ld		a,256 - SCRN_Y
-.setcamy
-	ld		[Engine_CameraY],a
-	
-	; do parallax
-	
-	ld		a,[Engine_CameraOdd]
-	xor		1
-	ld		[Engine_CameraOdd],a
-	jr		nz,.skipXY
-	ld		a,[Engine_CameraX]
-	sub		d
-	jr		z,.skipX
-	cpl
-	inc		a
-	ld		b,1
-	call	Parallax_ShiftHorizontal
-.skipX
-	ld		a,[Engine_CameraY]
-	sub		e
-	jr		z,.skipY
-	cpl
-	inc		a
-	ld		c,1
-	call	Parallax_ShiftVertical
-.skipY
-.skipXY
-
-	call	ProcessPlayer
-	call	DrawPlayer
-
-	halt
-	jp		MainLoop
+include	"Engine/Level.asm"
 	
 ; Metatile format:
 ; 16x16, 2 bytes per tile
@@ -535,18 +329,18 @@ ParallaxTileset:
 DoVBlank::
 	push	af
 	push	bc
+	push	de
+	push	hl
+	ld	a,1
+	ld	[sys_VBlankFlag],a		; set VBlank flag
+	
 	ld	a,[sys_CurrentFrame]
 	inc	a
 	ld	[sys_CurrentFrame],a	; increment current frame
 	call	CheckInput
-	ld	a,1
-	ld	[sys_VBlankFlag],a		; set VBlank flag
-	rst	$30	; do OAM DMA
-	push	de
-	push	hl
-;	call	Pal_DoFade
+	rst		DoOAMDMA
 	
-	; setup HDMA
+	; setup HDMA for parallax GFX transfer
 	xor		a
 	ldh		[rVBK],a
 	ld		a,high(Engine_ParallaxBuffer)
@@ -565,57 +359,75 @@ DoVBlank::
 	ld		a,[Engine_CameraY]
 	ldh		[rSCY],a
 	
-	pop	hl
-	pop	de
-	pop	bc
-	
+;	call	Pal_DoFade
+
 	; A+B+Start+Select restart sequence
-	ld	a,[sys_btnHold]
-	cp	_A+_B+_Start+_Select	; is A+B+Start+Select pressed
-	jr	nz,.noreset				; if not, skip
-	ld	a,[sys_ResetTimer]		; get reset timer
-	inc	a
-	ld	[sys_ResetTimer],a		; store reset timer
-	cp	60						; has 1 second passed?
-	jr	nz,.continue			; if not, skip
-	ld	a,[sys_GBType]			; get current GB model
-	dec	a						; GBC?
-	jr	z,.gbc					; if yes, jump
-	dec	a						; GBA?
-	jr	z,.gba					; if yes, jump
-.dmg							; default case: assume DMG
-	xor	a						; a = 0, b = whatever
-	jr	.dorestart
-.gbc							; a = $11, b = 0
-	ld	a,$11
-	ld	b,0
-	jr	.dorestart
-.gba							; a = $11, b = 1
-	ld	a,$11
-	ld	b,1
+	ld		a,[sys_btnHold]
+	cp		_A+_B+_Start+_Select	; is A+B+Start+Select pressed
+	jr		nz,.noreset				; if not, skip
+	ld		a,[sys_ResetTimer]		; get reset timer
+	inc		a
+	ld		[sys_ResetTimer],a		; store reset timer
+	cp		60						; has 1 second passed?
+	jr		nz,.continue			; if not, skip
+	ld		a,[sys_GBType]			; get current GB model
+	dec		a						; GBC?
+	jr		z,.gbc					; if yes, jump
+	dec		a						; GBA?
+	jr		z,.gba					; if yes, jump
+.dmg								; default case: assume DMG
+	xor		a						; a = 0, b = whatever
+	jr		.dorestart
+.gbc								; a = $11, b = 0
+	ld		a,$11
+	ld		b,0
+	jr		.dorestart
+.gba								; a = $11, b = 1
+	ld		a,$11
+	ld		b,1
 	; fall through to .dorestart
 .dorestart
-	jp	ProgramStart			; restart game
-.noreset						; if A+B+Start+Select aren't held...
-	xor	a
-	ld	[sys_ResetTimer],a		; reset timer
-.continue						; done
+	jp		ProgramStart			; restart game
+.noreset							; if A+B+Start+Select aren't held...
+	xor		a
+	ld		[sys_ResetTimer],a		; reset timer
+.continue							; done
 	
-	pop	af
+	; update music
+	farcall	GHX_Update
+	
+	pop		hl
+	pop		de
+	pop		bc
+	pop		af
 	reti
 	
 DoStat::
 	push	af
-	ld	a,1
-	ld	[sys_LCDCFlag],a
-	pop	af
+	ld		a,1
+	ld		[sys_LCDCFlag],a
+	pop		af
 	reti
 	
 DoTimer::
 	push	af
-	ld	a,1
-	ld	[sys_TimerFlag],a
-	pop	af
+	ld		a,1
+	ld		[sys_TimerFlag],a
+	pop		af
+	reti
+	
+DoSerial::
+	push	af
+	ld		a,1
+	ld		[sys_SerialFlag],a
+	pop		af
+	reti
+	
+DoJoypad::
+	push	af
+	ld		a,1
+	ld		[sys_JoypadFlag],a
+	pop		af
 	reti
 	
 ; =======================
@@ -624,50 +436,82 @@ DoTimer::
 
 _WaitVBlank::
 	push	af
-	ldh	a,[rIE]
-	bit	0,a
-	jr	z,.done
+	ldh		a,[rIE]
+	bit		0,a
+	jr		z,.done
 .wait
 	halt
-	ld	a,[sys_VBlankFlag]
-	and	a
-	jr	z,.wait
-	xor	a
-	ld	[sys_VBlankFlag],a
+	ld		a,[sys_VBlankFlag]
+	and		a
+	jr		z,.wait
+	xor		a
+	ld		[sys_VBlankFlag],a
 .done
-	pop	af
-	ret
-
-_WaitTimer::
-	push	af
-	ldh	a,[rIE]
-	bit	2,a
-	jr	z,.done
-.wait
-	halt
-	ld	a,[sys_TimerFlag]
-	and	a
-	jr	z,.wait
-	xor	a
-	ld	[sys_VBlankFlag],a
-.done
-	pop	af
+	pop		af
 	ret
 
 _WaitLCDC::
 	push	af
-	ldh	a,[rIE]
-	bit	1,a
-	jr	z,.done
+	ldh		a,[rIE]
+	bit		1,a
+	jr		z,.done
 .wait
 	halt
-	ld	a,[sys_LCDCFlag]
-	and	a
-	jr	z,.wait
-	xor	a
-	ld	[sys_LCDCFlag],a
+	ld		a,[sys_LCDCFlag]
+	and		a
+	jr		z,.wait
+	xor		a
+	ld		[sys_LCDCFlag],a
 .done
-	pop	af
+	pop		af
+	ret
+	
+_WaitTimer::
+	push	af
+	ldh		a,[rIE]
+	bit		2,a
+	jr		z,.done
+.wait
+	halt
+	ld		a,[sys_TimerFlag]
+	and		a
+	jr		z,.wait
+	xor		a
+	ld		[sys_VBlankFlag],a
+.done
+	pop		af
+	ret
+
+_WaitSerial::
+	push	af
+	ldh		a,[rIE]
+	bit		3,a
+	jr		z,.done
+.wait
+	halt
+	ld		a,[sys_SerialFlag]
+	and		a
+	jr		z,.wait
+	xor		a
+	ld		[sys_SerialFlag],a
+.done
+	pop		af
+	ret
+	
+_WaitJoypad:
+	push	af
+	ldh		a,[rIE]
+	bit		4,a
+	jr		z,.done
+.wait
+	halt
+	ld		a,[sys_JoypadFlag]
+	and		a
+	jr		z,.wait
+	xor		a
+	ld		[sys_JoypadFlag],a
+.done
+	pop		af
 	ret
 	
 ; =================
@@ -757,7 +601,7 @@ LoadTilemapText:
 ; ============
 
 CopyDMARoutine::
-	ld	bc,$80 + ((_OAM_DMA_End-_OAM_DMA) << 8)
+	ld	bc,low(OAM_DMA) + ((_OAM_DMA_End-_OAM_DMA) << 8)
 	ld	hl,_OAM_DMA
 .loop
 	ld	a,[hl+]
@@ -771,7 +615,7 @@ _OAM_DMA::
 	ld	a,high(OAMBuffer)
 	ldh	[rDMA],a
 	ld	a,$28
-.wait
+.wait	; wait for OAM DMA to finish
 	dec	a
 	jr	nz,.wait
 	ret

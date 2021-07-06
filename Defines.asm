@@ -173,9 +173,13 @@ sys_ResetTimer:		db
 sys_CurrentFrame:	db	; incremented each frame, used for timing
 sys_btnPress:		db	; buttons pressed this frame
 sys_btnHold:		db	; buttons held
+
 sys_VBlankFlag:		db
-sys_TimerFlag:		db
 sys_LCDCFlag:		db
+sys_TimerFlag:		db
+sys_SerialFlag:		db
+sys_JoypadFlag:		db
+
 sys_EmuCheck:		db
 ; project-specific
 
@@ -194,5 +198,6 @@ tempSP:				dw
 sys_CurrentBank:	db
 sys_LastBank:		db
 sys_TempCounter:	db
+sys_TempSVBK:		db
 
 endc

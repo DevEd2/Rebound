@@ -18,17 +18,6 @@ GetTileCoordinates:
 	swap	a
 	add		b
 	ret
-	
-; Input:    HL = Map pointer (compressed)
-LoadMap:
-	ld		de,Engine_ScreenMap
-	call	DecodeWLE
-	xor		a
-.loop
-	call	DrawMetatile
-	inc		a
-	jr		nz,.loop
-	ret
 
 ; Input:    A = Tile coordinates
 ;           B = Tile ID
