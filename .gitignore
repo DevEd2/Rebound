@@ -14,15 +14,11 @@ data/scene1_16k.bin
 
 # rgbds extras
 *.sym
-*.map
-*.o
+*.obj
 
 # precompiled Python
 *.pyc
 *$py.class
-
-# bgb dumps for denicccer
-*.dump
 
 # from github/gitignore/blob/master/Global/Windows.gitignore
 # Windows image file caches
