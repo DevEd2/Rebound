@@ -12,7 +12,7 @@ include "Defines.asm"
 ; Reset vectors
 ; =============
 section "Reset $00",rom0[$00]
-CallHL::		jp	_CallHL
+Trap00::		jp	Trap00
 	
 section	"Reset $08",rom0[$08]
 FillRAM::		jp	_FillRAM
@@ -90,7 +90,7 @@ ROMChecksum:	dw								; ROM checksum (2 bytes) (handled by post-linking tool)
 
 ProgramStart::
 	di
-	ld		sp,$e000
+	ld		sp,$d000
 	push	bc
 	push	af
 	
@@ -304,23 +304,36 @@ include	"Engine/Level.asm"
 ; - Second byte of tile for attributes
 	
 ParallaxTileset:
-	db	$00,%00000000,$01,%00000000	
+	; background 1 (horizontal + vertical parallax)
+	db	$00,%00000000,$01,%00000000
 	db	$02,%00000000,$03,%00000000
-	
+	; background 2 (horizontal + vertical parallax)
 	db	$04,%00000000,$05,%00000000
 	db	$06,%00000000,$07,%00000000
-
+	; background 3 (horizontal parallax)
 	db	$08,%00000000,$09,%00000000
 	db	$0a,%00000000,$0b,%00000000
-	
+	; background 4 (horizontal parallax)
 	db	$0c,%00000000,$0d,%00000000
 	db	$0e,%00000000,$0f,%00000000
-
+	; solid tile
 	db	$10,%00000001,$12,%00000001
 	db	$11,%00000001,$13,%00000001
-	
+	; foreground tile
+	db	$17,%10000010,$17,%10100010
+	db	$17,%11000010,$17,%11100010
+	; topsolid tile (background 1)
 	db	$14,%00000001,$15,%00000001
 	db	$02,%00000001,$03,%00000001
+	; topsolid tile (background 2)
+	db	$14,%00000001,$15,%00000001
+	db	$06,%00000001,$07,%00000001
+	; topsolid tile (background 3)
+	db	$14,%00000001,$15,%00000001
+	db	$0a,%00000001,$0b,%00000001
+	; topsolid tile (background 4)
+	db	$14,%00000001,$15,%00000001
+	db	$0e,%00000001,$0f,%00000001
 
 ; ==================
 ; Interrupt handlers
@@ -392,10 +405,15 @@ DoVBlank::
 	xor		a
 	ld		[sys_ResetTimer],a		; reset timer
 .continue							; done
-	
-	; update music
+
+	ldh		a,[rSVBK]
+	ldh		[sys_TempSVBK],a
+	ld		a,1
+	ldh		[rSVBK],a
 	farcall	GHX_Update
-	
+	ldh		a,[sys_TempSVBK]
+	ldh		[rSVBK],a
+
 	pop		hl
 	pop		de
 	pop		bc
@@ -813,9 +831,6 @@ ParallaxTiles_End:
 
 	incbin	"GFX/TestTiles.2bpp"
 TestMapTiles_End:
-
-ParallaxMap:
-	incbin	"GFX/ParallaxMap.bin.wle"
 
 section "Player tiles",romx,align[8]
 PlayerTiles:

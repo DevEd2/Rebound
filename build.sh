@@ -7,7 +7,7 @@ BuildError () {
     exit 1
 }
 
-echo "Converting maps..."
+echo "Converting maps... (This may take a while)"
 cd Levels
 for file in *.json; do
 	python3 ../convertmap.py -c $file

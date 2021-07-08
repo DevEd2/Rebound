@@ -41,6 +41,11 @@ _Down			equ	128
 ; Project-specific constants
 ; ==========================
 
+TILESET_TEST	equ	0
+
+MUSIC_TEST1		equ	1
+MUSIC_TEST2		equ	9
+
 ; ======
 ; Macros
 ; ======

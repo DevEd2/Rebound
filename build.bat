@@ -2,7 +2,7 @@
 set PROJECTNAME="Rebound"
 
 rem	Build ROM
-echo Converting maps...
+echo Converting maps... (This may take a while)
 cd Levels
 for %%i in (*.json) do py ..\convertmap.py -c %%i
 cd ..
