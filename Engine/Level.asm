@@ -7,6 +7,10 @@ Engine_ActiveScreens:	dw	; up to two screens can be "active" at once (note that 
 Engine_NumScreens:		db	; number of screens per subarea (effectively "map width")
 Engine_NumSubareas:		db	; number of subareas
 
+Engine_CameraX:		db
+Engine_CameraY:		db
+Engine_LockCamera:	db
+
 section	"Level memory",wramx[$d000]
 Engine_LevelData:		ds	256*16
 
@@ -15,7 +19,7 @@ section "Level routines",rom0
 GM_Level:
 	; initialize variables
 	xor		a
-	ld		[Engine_CurrentScreen],a	
+	ld		[Engine_CurrentScreen],a
 	; mark first and second screens as "active"
 	ld		[Engine_ActiveScreens],a
 	inc		a
@@ -61,7 +65,7 @@ GM_Level:
 	xor		a
 	ld		[Engine_CameraX],a
 	ld		[Engine_CameraY],a
-	ld		[Engine_CameraOdd],a
+	ld		[Engine_LockCamera],a
 	
 	; setup registers
 	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
@@ -74,6 +78,10 @@ GM_Level:
 LevelLoop::
 	
 .docamera
+	ld		a,[Engine_LockCamera]
+	and		a
+	jr		nz,.nocamera
+
 	ld		a,[Engine_CameraX]
 	rra
 	ld		d,a
@@ -107,12 +115,9 @@ LevelLoop::
 	ld		a,256 - SCRN_Y
 .setcamy
 	ld		[Engine_CameraY],a
-	
+		
 	; do parallax
-	ld		a,[Engine_CameraOdd]
-	xor		1
-	ld		[Engine_CameraOdd],a
-
+	and		a	; clear carry
 	push	de
 	ld		a,[Engine_CameraX]
 	rra
@@ -134,7 +139,8 @@ LevelLoop::
 	ld		c,1
 	call	Parallax_ShiftVertical
 .skipY
-.skipXY
+
+.nocamera
 
 	call	ProcessPlayer
 	call	DrawPlayer

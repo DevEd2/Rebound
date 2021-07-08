@@ -143,22 +143,14 @@ ProcessPlayer:
 		
 .moveUp
 	dec		[hl]
-	dec		[hl]
-	dec		[hl]
 	ret
 .moveDown
-	inc		[hl]
-	inc		[hl]
 	inc		[hl]
 	ret
 .moveLeft
 	dec		[hl]
-	dec		[hl]
-	dec		[hl]
 	ret
 .moveRight
-	inc		[hl]
-	inc		[hl]
 	inc		[hl]
 	ret
 	

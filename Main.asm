@@ -351,7 +351,6 @@ DoVBlank::
 	inc	a
 	ld	[sys_CurrentFrame],a	; increment current frame
 	call	CheckInput
-	rst		DoOAMDMA
 	
 	; setup HDMA for parallax GFX transfer
 	xor		a
@@ -371,6 +370,7 @@ DoVBlank::
 	ldh		[rSCX],a
 	ld		a,[Engine_CameraY]
 	ldh		[rSCY],a
+	rst		DoOAMDMA
 	
 ;	call	Pal_DoFade
 

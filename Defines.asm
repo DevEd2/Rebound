@@ -188,10 +188,6 @@ sys_JoypadFlag:		db
 sys_EmuCheck:		db
 ; project-specific
 
-Engine_CameraX:		db
-Engine_CameraY:		db
-Engine_CameraOdd:	db
-
 section "Zeropage",hram
 
 OAM_DMA:			ds	16
