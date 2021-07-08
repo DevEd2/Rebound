@@ -236,8 +236,6 @@ Level_LoadScreen:
 .loop
 	push	bc
 	push	de
-	xor		a
-	ldh		[rVBK],a
 	ld		a,[hl+]
 	push	hl
 	ld		b,a
@@ -271,6 +269,48 @@ Level_LoadScreen:
 ; INPUT: d = row to load
 ;        e = screen to load from
 Level_LoadMapRow:
+	ld		b,b
+	
 	ld		hl,Engine_LevelData
+	ldh		a,[rSVBK]
+	and		7
+	ldh		[sys_TempSVBK],a
+	; get subarea
+	ld		a,e
+	and		$f0
+	swap	a
+	; set correct WRAM bank
+	add		2
+	ldh		[rSVBK],a
+	
+	; get screen
+	ld		a,e
+	and		$f
+	add		h
+	ld		h,a
+	; get row
+	ld		a,d
+	and		$f
+	add		l
+	ld		l,a
+	
+	ld		b,16
+.loop
+	ld		a,[hl+]
+	push	hl
+	ld		b,a
+	; get Y coordinate
+	ld		a,e
+	and		$f
+	swap	a
+	ld		d,a
+	; get X coordinate
+	ld		a,c
+	and		$f
+	or		d
+	call	DrawMetatile
+	pop		hl
+	dec		b
+	jr		nz,.loop
 
 	ret

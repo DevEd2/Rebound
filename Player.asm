@@ -90,37 +90,35 @@ InitPlayer:
 ; ========
 
 ProcessPlayer:
-	; TODO
-;	ld		a,[sys_btnHold]
-;	ld		hl,Player_YPos
-;	bit		btnUp,a
-;	call	nz,.moveUp
-;	bit		btnDown,a
-;	call	nz,.moveDown
-;	ld		hl,Player_XPos
-;	bit		btnLeft,a
-;	call	nz,.moveLeft
-;	bit		btnRight,a
-;	call	nz,.moveRight
+	ld		a,[sys_btnHold]
+	ld		hl,Player_YPos
+	bit		btnUp,a
+	call	nz,.moveUp
+	bit		btnDown,a
+	call	nz,.moveDown
+	ld		hl,Player_XPos
+	bit		btnLeft,a
+	call	nz,.moveLeft
+	bit		btnRight,a
+	call	nz,.moveRight
 
-	ld		a,[sys_CurrentFrame]
-	ld		l,a
-	ld		h,high(SinTable)
-	ld		a,[hl]
-	srl		a
-	srl		a
-	add		$60
-	ld		[Player_XPos],a
-
-	ld		a,[sys_CurrentFrame]
-	ld		l,a
-	ld		h,high(CosTable)
-	ld		a,[hl]
-	srl		a
-	srl		a
-	add		$60
-	ld		[Player_YPos],a
-
+;	ld		a,[sys_CurrentFrame]
+;	ld		l,a
+;	ld		h,high(SinTable)
+;	ld		a,[hl]
+;	srl		a
+;	srl		a
+;	add		$60
+;	ld		[Player_XPos],a
+;
+;	ld		a,[sys_CurrentFrame]
+;	ld		l,a
+;	ld		h,high(CosTable)
+;	ld		a,[hl]
+;	srl		a
+;	srl		a
+;	add		$60
+;	ld		[Player_YPos],a
 	
 	ld		a,[sys_btnPress]
 	bit		btnA,a
@@ -136,9 +134,15 @@ ProcessPlayer:
 	jr		.done
 .smhtest
 	bit		btnStart,a
-	jr		z,.done
+	jr		z,.rowtest
 	ld		hl,Anim_Player_SMH
 	call	Player_SetAnimation
+	jr		.done
+.rowtest
+	bit		btnSelect,a
+	jr		z,.done
+	lb		de,0,1
+	call	Level_LoadMapRow
 	jr		.done
 		
 .moveUp

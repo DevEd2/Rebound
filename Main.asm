@@ -127,6 +127,7 @@ ProgramStart::
 	
 	ld		a,1
 	ldh		[rVBK],a
+	ldh		[sys_TempSVBK],a
 	xor		a
 	ld		hl,$8000
 	ld		bc,$2000
@@ -407,6 +408,7 @@ DoVBlank::
 .continue							; done
 
 	ldh		a,[rSVBK]
+	and		7
 	ldh		[sys_TempSVBK],a
 	ld		a,1
 	ldh		[rSVBK],a
