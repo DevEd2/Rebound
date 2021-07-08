@@ -180,11 +180,11 @@ if __name__ == "__main__":
 			hdrfile.write(".wle")
 			hdrfile.write("\"\n")
 	if sa == 1:
-		hdrfile.write(".data2\n.data3\n.data4      incbin \"Levels/Dummy.bin.wle\"\n")
+		hdrfile.write(".data2\n.data3\n.data4      db   $ff\n")
 	if sa == 2:
-		hdrfile.write(".data3\n.data4      incbin \"Levels/Dummy.bin.wle\"\n")
+		hdrfile.write(".data3\n.data4      db   $ff\n")
 	if sa == 3:
-		hdrfile.write(".data4      incbin \"Levels/Dummy.bin.wle\"\n")
+		hdrfile.write(".data4      db   $ff\n")
 	
 	hdrfile.close()
 	
