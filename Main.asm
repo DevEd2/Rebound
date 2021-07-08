@@ -726,7 +726,7 @@ include	"WLE_Decode.asm"
 ; =========
 
 section	"Sine table",rom0,align[8]
-SineTable:
+SinTable:
 angle=0.0
 	rept	256
 	db	mul(127.0,sin(angle)+1.0)>>16
@@ -841,6 +841,8 @@ PlayerTiles:
 ; ==========
 
 include "Levels/TestMap.inc"
+
+	db	"END"
 
 ; ==========
 ; Sound data

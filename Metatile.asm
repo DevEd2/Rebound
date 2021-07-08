@@ -1,6 +1,5 @@
 section "Metatile RAM defines",wram0,align[8]
 
-Engine_ScreenMap:		ds	256	; 16*16
 Engine_TilesetPointer:	ds	2
 
 section "Metatile routines",rom0
@@ -20,30 +19,18 @@ GetTileCoordinates:
 	ret
 
 ; Input:    A = Tile coordinates
-;           B = Tile ID
-; Output:   Metatile to map
-; Destroys: HL
-PlaceMetatile:
-	ld		hl,Engine_ScreenMap
-	ld		e,a
-	add		l
-	ld		l,a
-	ld		[hl],b
-	ld		a,e
-	; fall through to DrawMetatile
-
-; Input:    A = Tile coordinates
+;			B = Tile ID
 ; Output:   Metatile to screen RAM
 ; Destroys: BC, DE, HL
 DrawMetatile:
 	push	af
 	ld		e,a
 	; get tile ID
-	ld		hl,Engine_ScreenMap
-	add		l
-	ld		l,a
-	ld		a,[hl]
-	ld		b,a
+;	ld		hl,Engine_ScreenMap
+;	add		l
+;	ld		l,a
+;	ld		a,[hl]
+;	ld		b,a
 	; get VRAM coordinates
 	ld		a,e
 	and		$0f

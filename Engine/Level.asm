@@ -75,8 +75,11 @@ LevelLoop::
 	
 .docamera
 	ld		a,[Engine_CameraX]
+	rra
 	ld		d,a
+	and		a
 	ld		a,[Engine_CameraY]
+	rra
 	ld		e,a
 
 	ld		a,[Player_XPos]
@@ -106,20 +109,24 @@ LevelLoop::
 	ld		[Engine_CameraY],a
 	
 	; do parallax
-	; TODO: Replace with proper implementation
 	ld		a,[Engine_CameraOdd]
 	xor		1
 	ld		[Engine_CameraOdd],a
-	jr		nz,.skipXY
+
+	push	de
 	ld		a,[Engine_CameraX]
+	rra
 	sub		d
 	jr		z,.skipX
 	cpl
 	inc		a
 	ld		b,1
 	call	Parallax_ShiftHorizontal
+
 .skipX
+	pop		de
 	ld		a,[Engine_CameraY]
+	rra
 	sub		e
 	jr		z,.skipY
 	cpl
@@ -135,7 +142,7 @@ LevelLoop::
 	halt
 	jp		LevelLoop
 	
-; ========
+; ================================================================
 
 ; Input:    HL = Pointer to map header
 LoadMap:
@@ -237,7 +244,7 @@ Level_LoadScreen:
 	ld		a,c
 	and		$f
 	or		d
-	call	PlaceMetatile
+	call	DrawMetatile
 	
 	pop		hl
 	pop		de
@@ -258,4 +265,6 @@ Level_LoadScreen:
 ; INPUT: d = row to load
 ;        e = screen to load from
 Level_LoadMapRow:
+	ld		hl,Engine_LevelData
+
 	ret

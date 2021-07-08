@@ -15,7 +15,7 @@ Player_CurrentFrame:	db	; current animation frame being displayed
 
 PlayerRAM_End:
 
-Player_MoveSpeed		equ	2
+Player_MoveSpeed		equ	1
 
 ; ========================
 ; Player animation defines
@@ -91,17 +91,36 @@ InitPlayer:
 
 ProcessPlayer:
 	; TODO
-	ld		a,[sys_btnHold]
-	ld		hl,Player_YPos
-	bit		btnUp,a
-	call	nz,.moveUp
-	bit		btnDown,a
-	call	nz,.moveDown
-	ld		hl,Player_XPos
-	bit		btnLeft,a
-	call	nz,.moveLeft
-	bit		btnRight,a
-	call	nz,.moveRight
+;	ld		a,[sys_btnHold]
+;	ld		hl,Player_YPos
+;	bit		btnUp,a
+;	call	nz,.moveUp
+;	bit		btnDown,a
+;	call	nz,.moveDown
+;	ld		hl,Player_XPos
+;	bit		btnLeft,a
+;	call	nz,.moveLeft
+;	bit		btnRight,a
+;	call	nz,.moveRight
+
+	ld		a,[sys_CurrentFrame]
+	ld		l,a
+	ld		h,high(SinTable)
+	ld		a,[hl]
+	srl		a
+	srl		a
+	add		$60
+	ld		[Player_XPos],a
+
+	ld		a,[sys_CurrentFrame]
+	ld		l,a
+	ld		h,high(CosTable)
+	ld		a,[hl]
+	srl		a
+	srl		a
+	add		$60
+	ld		[Player_YPos],a
+
 	
 	ld		a,[sys_btnPress]
 	bit		btnA,a
@@ -124,14 +143,22 @@ ProcessPlayer:
 		
 .moveUp
 	dec		[hl]
+	dec		[hl]
+	dec		[hl]
 	ret
 .moveDown
+	inc		[hl]
+	inc		[hl]
 	inc		[hl]
 	ret
 .moveLeft
 	dec		[hl]
+	dec		[hl]
+	dec		[hl]
 	ret
 .moveRight
+	inc		[hl]
+	inc		[hl]
 	inc		[hl]
 	ret
 	
