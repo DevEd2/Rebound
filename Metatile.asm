@@ -25,14 +25,14 @@ GetTileCoordinates:
 DrawMetatile:
 	push	af
 	ld		e,a
-	; get tile ID
+;	; get tile ID
 ;	ld		hl,Engine_ScreenMap
 ;	add		l
 ;	ld		l,a
 ;	ld		a,[hl]
 ;	ld		b,a
-	; get VRAM coordinates
-	ld		a,e
+;	; get VRAM coordinates
+;	ld		a,e
 	and		$0f
 	rla
 	ld		l,a

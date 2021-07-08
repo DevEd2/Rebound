@@ -1,6 +1,6 @@
-; ======================
-; Retroboyz GB/GBC shell
-; ======================
+; =======================
+; Rebound GBC main source
+; =======================
 
 ; If set to 1, enable debugging features.
 DebugMode	= 1

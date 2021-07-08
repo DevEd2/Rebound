@@ -268,9 +268,7 @@ Level_LoadScreen:
 
 ; INPUT: d = row to load
 ;        e = screen to load from
-Level_LoadMapRow:
-	ld		b,b
-	
+Level_LoadMapRow:	
 	ld		hl,Engine_LevelData
 	ldh		a,[rSVBK]
 	and		7
@@ -296,20 +294,17 @@ Level_LoadMapRow:
 	
 	ld		b,16
 .loop
-	ld		a,[hl+]
+	push	bc
+	ld		a,[hl]
 	push	hl
 	ld		b,a
-	; get Y coordinate
-	ld		a,e
-	and		$f
-	swap	a
-	ld		d,a
-	; get X coordinate
-	ld		a,c
-	and		$f
-	or		d
+	
+	ld		a,l	; L = tile coordinates
+	swap	a	; DrawMetatile expects unswapped coordinates
 	call	DrawMetatile
 	pop		hl
+	inc		l
+	pop		bc
 	dec		b
 	jr		nz,.loop
 

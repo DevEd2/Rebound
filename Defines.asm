@@ -152,6 +152,7 @@ dbw:					macro
 	dw		\2
 endm
 
+if DebugMode
 debugmsg:				macro
 	ld		d,d
 	jr		.\@
@@ -162,6 +163,7 @@ debugmsg:				macro
 	dw		0
 .\@
 endm
+endc
 	
 ; === Project-specific macros ===
 
