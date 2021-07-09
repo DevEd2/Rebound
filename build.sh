@@ -21,13 +21,13 @@ if test $? -eq 1; then
 fi
 
 echo Linking...
-rgblink -p 255 -o $PROJECTNAME.gb -n $PROJECTNAME.sym $PROJECTNAME.obj
+rgblink -p 255 -o $PROJECTNAME.gbc -n $PROJECTNAME.sym $PROJECTNAME.obj
 if test $? -eq 1; then
     BuildError
 fi
 
 echo Fixing...
-rgbfix -v -p 255 $PROJECTNAME.gb
+rgbfix -v -p 255 $PROJECTNAME.gbc
 
 echo Cleaning up...
 rm $PROJECTNAME.obj

@@ -3,7 +3,6 @@ section "Level state memory",wram0
 ; Levels are divided into 16-block tall "subareas", which are further divided into 16-block wide "screens"
 Engine_CurrentSubarea:
 Engine_CurrentScreen:	db	; upper two bits = subarea, remaining bits = screen number
-Engine_ActiveScreens:	dw	; up to two screens can be "active" at once (note that the subscreen is ignored here)
 Engine_NumScreens:		db	; number of screens per subarea (effectively "map width")
 Engine_NumSubareas:		db	; number of subareas
 
@@ -20,10 +19,6 @@ GM_Level:
 	; initialize variables
 	xor		a
 	ld		[Engine_CurrentScreen],a
-	; mark first and second screens as "active"
-	ld		[Engine_ActiveScreens],a
-	inc		a
-	ld		[Engine_ActiveScreens+1],a
 	; initialize player object
 	call	InitPlayer
 
@@ -94,12 +89,28 @@ LevelLoop::
 .checkleft
 	sub		SCRN_X / 2
 	jr		nc,.checkright
+	ld		b,a
+	ld		a,[Engine_CurrentScreen]
+	and		a
+	ld		a,b
+	jr		nz,.setcamx
 	xor		a
 	jr		.setcamx
 .checkright
+	ld		a,[Engine_CurrentScreen]
+	ld		b,a
+	ld		a,[Engine_NumScreens]
+	cp		b
+	jr		nz,.skipright
+	ld		a,[Player_XPos]
+	sub		SCRN_X / 2
 	cp		256 - SCRN_X
 	jr		c,.setcamx
 	ld		a,256 - SCRN_X
+	jr		.setcamx
+.skipright
+	ld		a,[Player_XPos]
+	sub		SCRN_X / 2
 .setcamx
 	ld		[Engine_CameraX],a
 
@@ -125,7 +136,17 @@ LevelLoop::
 	jr		z,.skipX
 	cpl
 	inc		a
-	ld		b,1
+.check7F
+	cp		$7f
+	jr		nz,.check81
+	ld		a,$ff
+	jr		.dohoriz
+.check81
+	cp		$81
+	jr		nz,.dohoriz
+	ld		a,$01
+	
+.dohoriz
 	call	Parallax_ShiftHorizontal
 
 .skipX
@@ -142,8 +163,8 @@ LevelLoop::
 
 .nocamera
 
-	call	ProcessPlayer
 	call	DrawPlayer
+	call	ProcessPlayer
 
 	halt
 	jp		LevelLoop

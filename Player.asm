@@ -84,11 +84,11 @@ InitPlayer:
 	ldfar	hl,Pal_Player
 	ld		a,8
 	call	LoadPal
-	; TODO
 	ret
 
 ; ========
 
+; TODO: Replace this
 ProcessPlayer:
 	ld		a,[sys_btnHold]
 	ld		hl,Player_YPos
@@ -110,7 +110,7 @@ ProcessPlayer:
 ;	srl		a
 ;	add		$60
 ;	ld		[Player_XPos],a
-;
+
 ;	ld		a,[sys_CurrentFrame]
 ;	ld		l,a
 ;	ld		h,high(CosTable)
@@ -152,10 +152,57 @@ ProcessPlayer:
 	inc		[hl]
 	ret
 .moveLeft
-	dec		[hl]
+	ld		c,a
+	ld		a,[hl]
+	sub		1	; dec doesn't set carry
+	ld		[hl],a
+	ld		a,c
+	ret		nc
+	
+	ld		a,[Engine_CurrentScreen]
+	and		$30
+	ld		b,a
+	ld		a,[Engine_CurrentScreen]
+	sub		1	; dec doesn't set carry
+	jr		c,.nodecscreen
+	and		$f
+	or		b
+	ld		[Engine_CurrentScreen],a
+	jr		.continueL
+.nodecscreen
+	xor		a
+	ld		[Player_XPos],a
+.continueL
+	ld		a,c
 	ret
 .moveRight
-	inc		[hl]
+	ld		c,a
+	ld		a,[hl]
+	add		1	; inc doesn't set carry
+	ld		[hl],a
+	ld		a,c
+	ret		nc
+	
+	ld		a,[Engine_CurrentScreen]
+	and		$30
+	ld		b,a
+	ld		a,[Engine_CurrentScreen]
+	push	bc
+	ld		b,a
+	ld		a,[Engine_NumScreens]
+	cp		b
+	ld		a,b
+	pop		bc
+	jr		z,.noincscreen
+	inc		a
+	or		b
+	ld		[Engine_CurrentScreen],a
+	jr		.continueR
+.noincscreen
+	ld		a,-1
+	ld		[Player_XPos],a
+.continueR
+	ld		a,c
 	ret
 	
 .done

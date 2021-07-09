@@ -12,11 +12,11 @@ rgbasm -o %PROJECTNAME%.obj -p 255 Main.asm
 if errorlevel 1 goto :BuildError
 
 echo Linking...
-rgblink -p 255 -o %PROJECTNAME%.gb -n %PROJECTNAME%.sym %PROJECTNAME%.obj
+rgblink -p 255 -o %PROJECTNAME%.gbc -n %PROJECTNAME%.sym %PROJECTNAME%.obj
 if errorlevel 1 goto :BuildError
 
 echo Fixing...
-rgbfix -v -p 255 %PROJECTNAME%.gb
+rgbfix -v -p 255 %PROJECTNAME%.gbc
 
 echo Cleaning up...
 del %PROJECTNAME%.obj
