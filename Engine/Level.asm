@@ -163,9 +163,59 @@ LevelLoop::
 
 .nocamera
 
+	ld		a,[Player_XPos]
+	push	af
 	call	DrawPlayer
 	call	ProcessPlayer
+	pop		bc
+	ld		a,[Player_XPos]
+	cp		b
+	jr		z,.skipload
+	jr		nc,.loadright
+.loadleft
+	ld		a,[Engine_CurrentScreen]
+	and		$30
+	ld		c,a
+	ld		a,[Engine_CurrentScreen]
+	and		$0f
+	ld		e,a
 
+	ld		a,[Player_XPos]
+	sub		SCRN_X / 2
+	jr		nc,.skipdecscreen
+	dec		e
+.skipdecscreen
+	and		$f0
+	ld		d,a
+	
+	ld		a,e
+	or		c
+	ld		e,a
+	jr		.doload
+.loadright
+	ld		a,[Engine_CurrentScreen]
+	and		$30
+	ld		c,a
+	ld		a,[Engine_CurrentScreen]
+	and		$0f
+	ld		e,a
+
+	ld		a,[Player_XPos]
+	add		SCRN_X / 2
+	jr		nc,.skipincscreen
+	inc		e
+.skipincscreen
+	and		$f0
+	ld		d,a
+	
+	ld		a,e
+	or		c
+	ld		e,a
+	; fall through
+.doload
+	call	Level_LoadMapRow
+	; fall through
+.skipload
 	halt
 	jp		LevelLoop
 	
@@ -289,7 +339,7 @@ Level_LoadScreen:
 
 ; INPUT: d = row to load
 ;        e = screen to load from
-Level_LoadMapRow:	
+Level_LoadMapRow:
 	ld		hl,Engine_LevelData
 	ldh		a,[rSVBK]
 	and		7
@@ -309,7 +359,7 @@ Level_LoadMapRow:
 	ld		h,a
 	; get row
 	ld		a,d
-	and		$f
+	and		$f0
 	add		l
 	ld		l,a
 	
