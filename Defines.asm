@@ -43,8 +43,8 @@ _Down			equ	128
 
 TILESET_TEST	equ	0
 
-MUSIC_TEST1		equ	1
-MUSIC_TEST2		equ	9
+MUSIC_TEST1		equ	0
+MUSIC_TEST2		equ	1
 
 ; ======
 ; Macros

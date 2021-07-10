@@ -268,12 +268,6 @@ SkipGBCScreen:
 	xor		a
 	call	_FillRAMSmall
 	
-	; clear GHX's RAM
-	ld		hl,$de00
-	ld		b,0
-	xor		a
-	call	_FillRAMSmall
-	
 	call	DoubleSpeed
 	
 	jp		GM_Level
@@ -412,7 +406,7 @@ DoVBlank::
 	ldh		[sys_TempSVBK],a
 	ld		a,1
 	ldh		[rSVBK],a
-	farcall	GHX_Update
+	farcall	DevSound_Play
 	ldh		a,[sys_TempSVBK]
 	ldh		[rSVBK],a
 
@@ -848,11 +842,4 @@ include "Levels/TestMap.inc"
 ; Sound data
 ; ==========
 
-section "GHX sound driver + data",romx
-GHX_Play:	incbin	"Music.bin",$0,3	; $4000
-GHX_Update:	incbin	"Music.bin",$3,3	; $4003
-GHX_Unk1:	incbin	"Music.bin",$6,3	; $4006
-GHX_Unk2:	incbin	"Music.bin",$9,3	; $4009
-GHX_Init:	incbin	"Music.bin",$c,3	; $400c
-GHX_Unk3:	incbin	"Music.bin",$f,3	; $400f
-GHX_Data:	incbin	"Music.bin",$12
+include	"Audio/DevSound.asm"

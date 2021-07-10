@@ -263,7 +263,7 @@ LoadMap:
 	; load music
 	ld		a,[hl+]
 	push	hl
-	farcall	GHX_Play
+	farcall	DevSound_Init
 	pop		hl
 	resbank
 	
