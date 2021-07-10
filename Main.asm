@@ -844,8 +844,6 @@ PlayerTiles:
 
 include "Levels/TestMap.inc"
 
-	db	"END"
-
 ; ==========
 ; Sound data
 ; ==========

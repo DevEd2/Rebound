@@ -9,6 +9,7 @@ Engine_NumSubareas:		db	; number of subareas
 Engine_CameraX:		db
 Engine_CameraY:		db
 Engine_LockCamera:	db
+Engine_LastRow:		db
 
 section	"Level memory",wramx[$d000]
 Engine_LevelData:		ds	256*16
@@ -180,6 +181,8 @@ LevelLoop::
 	and		$0f
 	ld		e,a
 
+	ld		a,[Engine_LastRow]
+	ld		b,a
 	ld		a,[Player_XPos]
 	sub		SCRN_X / 2
 	jr		nc,.skipdecscreen
@@ -187,6 +190,9 @@ LevelLoop::
 .skipdecscreen
 	and		$f0
 	ld		d,a
+	cp		b
+	jr		z,.skipload
+	ld		[Engine_LastRow],a
 	
 	ld		a,e
 	or		c
@@ -200,6 +206,8 @@ LevelLoop::
 	and		$0f
 	ld		e,a
 
+	ld		a,[Engine_LastRow]
+	ld		b,a
 	ld		a,[Player_XPos]
 	add		SCRN_X / 2
 	jr		nc,.skipincscreen
@@ -207,6 +215,9 @@ LevelLoop::
 .skipincscreen
 	and		$f0
 	ld		d,a
+	cp		b
+	jr		z,.skipload
+	ld		[Engine_LastRow],a
 	
 	ld		a,e
 	or		c
