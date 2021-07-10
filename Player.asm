@@ -134,15 +134,9 @@ ProcessPlayer:
 	jr		.done
 .smhtest
 	bit		btnStart,a
-	jr		z,.rowtest
+	jr		z,.done
 	ld		hl,Anim_Player_SMH
 	call	Player_SetAnimation
-	jr		.done
-.rowtest
-	bit		btnSelect,a
-	jr		z,.done
-	lb		de,0,1
-	call	Level_LoadMapRow
 	jr		.done
 		
 .moveUp
