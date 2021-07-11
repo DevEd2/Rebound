@@ -749,9 +749,11 @@ include	"Metatile.asm"
 include	"Parallax.asm"
 include	"Player.asm"
 
-; ========
-; SFX data
-; ========
+; ==========
+; Sound data
+; ==========
+
+include	"Audio/DevSound.asm"
 
 ; =============
 ; Graphics data
@@ -837,9 +839,3 @@ PlayerTiles:
 ; ==========
 
 include "Levels/TestMap.inc"
-
-; ==========
-; Sound data
-; ==========
-
-include	"Audio/DevSound.asm"

@@ -124,27 +124,61 @@ SetInsAlternate		equ	$88
 EnablePWM			equ	$89
 Arp					equ	$8a
 DummyCommand		equ	$8b
-EndChannel			equ	$FF
+EndChannel			equ	$ff
 
 ; ================================================================
 
 Instrument:		macro
-	db	\1
-	dw	\2,\3,\4,\5
+	db		\1
+if "\2" == "_"
+	dw		DummyTable
+else
+	dw		vol_\2
+endc
+if "\3" == "_"
+	dw		DummyTable
+else
+	dw		arp_\3
+endc
+if "\4" == "_"
+	dw		DummyTable
+else
+	dw		waveseq_\4
+endc
+if "\5" == "_"
+	dw		vib_Dummy
+else
+	dw		vib_\5
+endc
 	endm
 
 Drum:			macro
-	db	SetInstrument,\1,fix,\2
+	db		SetInstrument,_\1,fix,\2
 	endm
 
-;dbw:			macro
-;	db	\1
-;	dw	\2
-;	endm
+; Enumerate constants
+
+const_def:		macro
+const_value = 0
+endm
+
+const:			macro
+if "\1" != "skip"
+\1	equ const_value
+endc
+const_value = const_value + 1
+ENDM
+
+dins:			macro
+	const	_\1
+	dw	ins_\1
+endm
 
 ; ================================================================
 
 SECTION	"DevSound varialbes",WRAM0
+
+DS_RAMStart:
 
 GlobalVolume::		db
 GlobalSpeed1::		db
@@ -253,7 +287,9 @@ PWMSpeed::			db
 PWMTimer::			db
 PWMDir::			db
 
-ArpBuffer::			ds	8
+arp_Buffer::		ds	8
+
+DS_RAMEnd:		
 
 endc
 
@@ -288,15 +324,67 @@ DevSound_Init:
 	ld		[WaveBufUpdateFlag],a
 
 	; init sound RAM area
-	ld		de,GlobalVolume
-	ld		b,DSVarsEnd-GlobalVolume
-	ld		hl,DefaultRegTable
+	ld		hl,DS_RAMStart
+	ld		b,DS_RAMEnd-DS_RAMStart
+	xor		a
 .initLoop
-	ld		a,[hl+]
-	ld		[de],a
-	inc		de
+	ld		[hl+],a
 	dec		b
 	jr		nz,.initLoop
+	
+	; initialize variables
+	ld		a,$77
+	ld		[GlobalVolume],a
+	ld		a,1
+	ld		[SoundEnabled],a
+	ld		[CH1Enabled],a
+	ld		[CH2Enabled],a
+	ld		[CH3Enabled],a
+	ld		[CH4Enabled],a
+	
+	ld		a,-1
+	ld		[CH3Wave],a
+	
+	ld		a,low(DummyTable)
+	ld		[CH1VolPtr],a
+	ld		[CH1PulsePtr],a
+	ld		[CH1ArpPtr],a
+	ld		[CH1RetPtr],a
+	ld		[CH2VolPtr],a
+	ld		[CH2PulsePtr],a
+	ld		[CH2ArpPtr],a
+	ld		[CH2RetPtr],a
+	ld		[CH3VolPtr],a
+	ld		[CH3WavePtr],a
+	ld		[CH3ArpPtr],a
+	ld		[CH3RetPtr],a
+	ld		[CH4VolPtr],a
+	ld		[CH4NoisePtr],a
+	ld		[CH4RetPtr],a
+	ld		a,high(DummyTable)
+	ld		[CH1VolPtr+1],a
+	ld		[CH1PulsePtr+1],a
+	ld		[CH1ArpPtr+1],a
+	ld		[CH1RetPtr+1],a
+	ld		[CH2VolPtr+1],a
+	ld		[CH2PulsePtr+1],a
+	ld		[CH2ArpPtr+1],a
+	ld		[CH2RetPtr+1],a
+	ld		[CH3VolPtr+1],a
+	ld		[CH3WavePtr+1],a
+	ld		[CH3ArpPtr+1],a
+	ld		[CH3RetPtr+1],a
+	ld		[CH4VolPtr+1],a
+	ld		[CH4NoisePtr+1],a
+	ld		[CH4RetPtr+1],a
+	ld		a,low(vib_Dummy)
+	ld		[CH1VibPtr],a
+	ld		[CH2VibPtr],a
+	ld		[CH3VibPtr],a
+	ld		a,high(vib_Dummy)
+	ld		[CH1VibPtr+1],a
+	ld		[CH2VibPtr+1],a
+	ld		[CH3VibPtr+1],a
 	
 	ld		d,c		; Transfer song ID
 
@@ -2318,7 +2406,7 @@ DoPWM:
 ; ================================================================
 
 ClearArpBuffer:
-	ld		hl,ArpBuffer
+	ld		hl,arp_Buffer
 	push	hl
 	inc		hl
 	ld		b,7
@@ -2334,7 +2422,8 @@ ClearArpBuffer:
 	
 ; TODO: Rewrite
 DoArp:
-	ld		de,ArpBuffer
+	ld		b,b
+	ld		de,arp_Buffer
 	ld		a,[hl+]
 	and		a
 	jr		nz,.slow
