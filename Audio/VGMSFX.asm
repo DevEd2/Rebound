@@ -19,8 +19,11 @@ section "VGMSFX",rom0
 
 ;  A = SFX bank
 ; HL = SFX pointer
+; Destroys: a, b, hl
 VGMSFX_Init:
     ld      [VGMSFX_Bank],a
+    ld      b,a
+    call    _Bankswitch
     ld      a,[hl+]
     or      %10000000
     ld      [VGMSFX_Flags],a
@@ -30,6 +33,7 @@ VGMSFX_Init:
     ld      [VGMSFX_Pointer+1],a
     ret
     
+; Destroys: a, bc, hl
 VGMSFX_Update:
     ld      a,[VGMSFX_Flags]
     bit     7,a                 ; is a sound effect playing?
