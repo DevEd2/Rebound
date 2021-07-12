@@ -486,7 +486,7 @@ Desert_CH4:
     
 ; =================================================================
 
-PT_Menu:    dw  Menu_CH1,Menu_CH2,Menu_CH3,Menu_CH4
+PT_Menu:    dw  Menu_CH2,Menu_CH1,Menu_CH3,Menu_CH4
 
 ; ========
 

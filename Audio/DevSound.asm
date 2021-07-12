@@ -156,19 +156,6 @@ Drum:           macro
     db      SetInstrument,_\1,fix,\2
     endm
 
-; Enumerate constants
-
-const_def:      macro
-const_value = 0
-endm
-
-const:          macro
-if "\1" != "skip"
-\1  equ const_value
-endc
-const_value = const_value + 1
-ENDM
-
 dins:           macro
     const   _\1
     dw  ins_\1
@@ -296,8 +283,6 @@ endc
 ; =====================
 
 section "DevSound Lite",romx
-
-UseFXHammer set 1
 
 DevSound:
 
@@ -555,7 +540,11 @@ CH1_CheckByte:
     xor     a
     ld      [CH1VolPos],a
     ld      [CH1ArpPos],a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.noupdate
     ldh     [rNR12],a
+.noupdate
     inc     a
     ld      [CH1VibPos],a
     ld      hl,CH1VibPtr
@@ -807,11 +796,10 @@ CH2_CheckByte:
     xor     a
     ld      [CH2VolPos],a
     ld      [CH2ArpPos],a
-    if(UseFXHammer)
-        ld      a,[$c7cc]
-        cp      3
-        jp      z,.noupdate
-    endc
+    
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH2,a
+    jr      nz,.noupdate
     ldh     [rNR22],a
 .noupdate
     inc     a
@@ -1082,8 +1070,12 @@ CH3_CheckByte:
     inc     a
     ld      [CH3NoteCount],a
     ld      b,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.noupdate
     ld      a,[CH3Vol]
-    ldh     [rNR32],a   ; fix for volume not updating when unpausing
+    ldh     [rNR32],a
+.noupdate
     
     ; check if instrument mode is 1 (alternating)
     ld      a,[CH3InsMode]
@@ -1333,11 +1325,9 @@ CH4_CheckByte:
     xor     a
     ld      [CH4VolPos],a
     ld      [CH4NoisePos],a
-    if(UseFXHammer)
-        ld      a,[$c7d9]
-        cp      3
-        jp      z,.noupdate
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.noupdate
     ldh     [rNR42],a
 .noupdate
     ld      a,[CH4NoteCount]
@@ -1560,6 +1550,10 @@ CH1_UpdateRegisters:
     ld      a,[CH1Enabled]
     and     a
     jp      z,CH2_UpdateRegisters
+    
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.norest
 
     ld      a,[CH1Note]
     cp      rest
@@ -1600,9 +1594,6 @@ CH1_UpdateRegisters:
     ld      [CH1ArpPos],a
 .continue
     
-    ; update sweep (TODO)
-    xor     a
-    ldh     [rNR10],a
     
     ; update pulse
     ld      hl,CH1PulsePtr
@@ -1623,6 +1614,12 @@ CH1_UpdateRegisters:
     swap    a           ; swap lower and upper nybbles
     rla                 ; rotate left
     rla                 ;   ""    ""
+    
+    ld      e,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.noreset2
+    ld      a,e
     ldh     [rNR11],a   ; transfer to register
 .noreset2
     ld      a,[CH1PulsePos]
@@ -1697,7 +1694,10 @@ CH1_UpdateRegisters:
     ld      a,d
     add     c
     ld      d,a
-.setFreq    
+.setFreq   
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.updateVolume
     ld      a,d
     ldh     [rNR13],a
     ld      a,e
@@ -1720,6 +1720,9 @@ CH1_UpdateRegisters:
     jr      z,.done
     swap    a
     ld      b,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH1,a
+    jr      nz,.noreset3
     ldh     a,[rNR12]
     cp      b
     jr      z,.noreset3
@@ -1746,11 +1749,10 @@ CH2_UpdateRegisters:
     and     a
     jp      z,CH3_UpdateRegisters
     
-    if(UseFXHammer)
-        ld      a,[$c7cc]
-        cp      3
-        jr      z,.norest
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH2,a
+    jr      nz,.norest
+
     ld      a,[CH2Note]
     cp      rest
     jr      nz,.norest
@@ -1809,13 +1811,12 @@ CH2_UpdateRegisters:
     swap    a       ; swap lower and upper nybbles
     rla             ; rotate left
     rla             ;   ""    ""
-    if(UseFXHammer)
-        ld      e,a
-        ld      a,[$c7cc]
-        cp      3
-        jp      z,.noreset2
-        ld      a,e
-    endc
+
+    ld      e,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH2,a
+    jr      nz,.noreset2
+    ld      a,e
     ldh     [rNR21],a   ; transfer to register
 .noreset2
     ld      a,[CH2PulsePos]
@@ -1891,11 +1892,9 @@ CH2_UpdateRegisters:
     add     c
     ld      d,a
 .setFreq    
-    if(UseFXHammer)
-        ld      a,[$c7cc]
-        cp      3
-        jp      z,.updateVolume
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH2,a
+    jr      nz,.updateVolume
     ld      a,d
     ldh     [rNR23],a
     ld      a,e
@@ -1918,11 +1917,10 @@ CH2_UpdateRegisters:
     jr      z,.done
     swap    a
     ld      b,a
-    if(UseFXHammer)
-        ld      a,[$c7cc]
-        cp      3
-        jp      z,.noreset3
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH2,a
+    jr      nz,.noreset3
+
     ldh     a,[rNR22]
     cp      b
     jr      z,.noreset3
@@ -2170,11 +2168,10 @@ CH4_UpdateRegisters:
     and     a
     jp      z,DoneUpdatingRegisters
     
-    if(UseFXHammer)
-    ld      a,[$c7d9]
-        cp      3
-        jr      z,.norest
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH4,a
+    jr      nz,.norest
+
     ld      a,[CH4Mode]
     cp      rest
     jr      nz,.norest
@@ -2228,11 +2225,9 @@ CH4_UpdateRegisters:
     inc     h
 .nocarry2
     
-    if(UseFXHammer)
-        ld      a,[$c7d9]
-        cp      3
-        jr      z,.updateVolume
-    endc
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH4,a
+    jr      nz,.updateVolume
     ld      a,[hl+]
     ldh     [rNR43],a   
 
@@ -2253,11 +2248,11 @@ CH4_UpdateRegisters:
     jr      z,.done
     swap    a
     ld      b,a
-    if(UseFXHammer)
-        ld      a,[$c7d9]
-        cp      3
-        jr      z,.noreset3
-    endc
+   
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH4,a
+    jr      nz,.noreset3
+    
     ldh     a,[rNR42]
     cp      b
     jr      z,.noreset3

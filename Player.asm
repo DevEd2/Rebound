@@ -123,20 +123,28 @@ ProcessPlayer:
     ld      a,[sys_btnPress]
     bit     btnA,a
     jr      z,.hurttest
-    ld      hl,Anim_Player_IdleBlink
-    call    Player_SetAnimation
+    PlaySFX death
+;   ld      hl,Anim_Player_IdleBlink
+;   call    Player_SetAnimation
     jr      .done
 .hurttest
     bit     btnB,a
     jr      z,.smhtest
-    ld      hl,Anim_Player_Hurt
-    call    Player_SetAnimation
+    PlaySFX menuselect
+;   ld      hl,Anim_Player_Hurt
+;   call    Player_SetAnimation
     jr      .done
 .smhtest
     bit     btnStart,a
+    jr      z,.sfxtest
+    PlaySFX coin
+;   ld      hl,Anim_Player_SMH
+;   call    Player_SetAnimation
+    jr      .done
+.sfxtest
+    bit     btnSelect,a
     jr      z,.done
-    ld      hl,Anim_Player_SMH
-    call    Player_SetAnimation
+    PlaySFX pause
     jr      .done
         
 .moveUp

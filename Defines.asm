@@ -164,6 +164,24 @@ debugmsg:               macro
 .\@
 endm
 endc
+
+const_def:      macro
+const_value = 0
+endm
+
+const:          macro
+if "\1" != "skip"
+\1  equ const_value
+endc
+const_value = const_value + 1
+ENDM
+
+PlaySFX:    macro
+    ld      a,bank(SFX_\1)
+    ld      hl,SFX_\1
+    call    VGMSFX_Init
+    ret
+endm
     
 ; === Project-specific macros ===
 

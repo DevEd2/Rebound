@@ -262,6 +262,7 @@ SkipGBCScreen:
     ld      [sys_VBlankFlag],a
     ld      [sys_TimerFlag],a
     ld      [sys_LCDCFlag],a
+    ld      [VGMSFX_Flags],a
     ; clear OAM buffer
     ld      hl,OAMBuffer
     ld      b,40*4
@@ -401,14 +402,8 @@ DoVBlank::
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
 
-    ldh     a,[rSVBK]
-    and     7
-    ldh     [sys_TempSVBK],a
-    ld      a,1
-    ldh     [rSVBK],a
+    call    VGMSFX_Update
     farcall DevSound_Play
-    ldh     a,[sys_TempSVBK]
-    ldh     [rSVBK],a
 
     pop     hl
     pop     de
@@ -753,6 +748,7 @@ include "Player.asm"
 ; Sound data
 ; ==========
 
+include "Audio/VGMSFX.asm"
 include "Audio/DevSound.asm"
 
 ; =============
