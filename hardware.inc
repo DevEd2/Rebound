@@ -32,7 +32,7 @@ rev_Check_hardware_inc: MACRO
         ENDC
         ENDM
 
-_HW	EQU $FF00
+_HW EQU $FF00
 
 _VRAM         EQU  $8000 ; $8000->$A000
 _SCRN0        EQU  $9800 ; $9800->$9BFF
@@ -42,7 +42,7 @@ _OAMRAM       EQU  $FE00 ; $FE00->$FE9F
 _AUD3WAVERAM  EQU  $FF30 ; $FF30->$FF3F
 _HRAM         EQU  $FF80 ; $FF80->$FFFE
 
-waveBuffer		EQU	$FF30	; because I felt like it
+waveBuffer      EQU $FF30   ; because I felt like it
 
 ; *** MBC5 Equates ***
 
@@ -387,7 +387,7 @@ IEF_VBLANK  EQU  %00000001 ; V-Blank
 ; -- Bit 2-0 - SO1 output level (volume) (# 0-7)
 ; --
 rNR50 EQU $FF24
-rAUDVOL	EQU rNR50
+rAUDVOL EQU rNR50
 
 
 ; --
@@ -404,7 +404,7 @@ rAUDVOL	EQU rNR50
 ; -- Bit 0   - Output sound 0 to SO1 terminal
 ; --
 rNR51 EQU $FF25
-rAUDTERM	EQU rNR51
+rAUDTERM    EQU rNR51
 
 
 ; --
@@ -418,7 +418,7 @@ rAUDTERM	EQU rNR51
 ; -- Bit 0   - Sound 1 ON flag (doesn't work!)
 ; --
 rNR52 EQU $FF26
-rAUDENA	EQU rNR52
+rAUDENA EQU rNR52
 
 
 ;***************************************************************************
@@ -439,9 +439,9 @@ rAUDENA	EQU rNR52
 ; -- Sweep Time: (n*7.8ms)
 ; --
 rNR10 EQU $FF10
-rAUD1SWEEP	EQU rNR10
+rAUD1SWEEP  EQU rNR10
 
-_CH1Sweep	EQU	rNR10
+_CH1Sweep   EQU rNR10
 
 
 ; --
@@ -452,9 +452,9 @@ _CH1Sweep	EQU	rNR10
 ; -- Bit 5-0 - Sound length data (# 0-63)
 ; --
 rNR11 EQU $FF11
-rAUD1LEN	EQU rNR11
+rAUD1LEN    EQU rNR11
 
-_CH1DutyCycle	EQU	rNR11
+_CH1DutyCycle   EQU rNR11
 
 
 ; --
@@ -468,18 +468,18 @@ _CH1DutyCycle	EQU	rNR11
 ; -- Bit 2-0 - Number of envelope sweep (# 0-7)
 ; --
 rNR12 EQU $FF12
-rAUD1ENV	EQU rNR12
+rAUD1ENV    EQU rNR12
 
-_CH1Envelope	EQU	rNR12
+_CH1Envelope    EQU rNR12
 
 ; --
 ; -- AUD1LOW/NR13 ($FF13)
 ; -- Frequency lo (W)
 ; --
 rNR13 EQU $FF13
-rAUD1LOW	EQU rNR13
+rAUD1LOW    EQU rNR13
 
-_CH1FreqLo	EQU	rNR13
+_CH1FreqLo  EQU rNR13
 
 ; --
 ; -- AUD1HIGH/NR14 ($FF14)
@@ -490,9 +490,9 @@ _CH1FreqLo	EQU	rNR13
 ; -- Bit 2-0 - Frequency's higher 3 bits
 ; --
 rNR14 EQU $FF14
-rAUD1HIGH	EQU rNR14
+rAUD1HIGH   EQU rNR14
 
-_CH1FreqHi	EQU	rNR14
+_CH1FreqHi  EQU rNR14
 
 
 ;***************************************************************************
@@ -508,9 +508,9 @@ _CH1FreqHi	EQU	rNR14
 ; -- see AUD1LEN for info
 ; --
 rNR21 EQU $FF16
-rAUD2LEN	EQU rNR21
+rAUD2LEN    EQU rNR21
 
-_CH2DutyCycle	EQU	rNR21
+_CH2DutyCycle   EQU rNR21
 
 
 ; --
@@ -520,9 +520,9 @@ _CH2DutyCycle	EQU	rNR21
 ; -- see AUD1ENV for info
 ; --
 rNR22 EQU $FF17
-rAUD2ENV	EQU rNR22
+rAUD2ENV    EQU rNR22
 
-_CH2Envelope	EQU	rNR22
+_CH2Envelope    EQU rNR22
 
 
 ; --
@@ -530,9 +530,9 @@ _CH2Envelope	EQU	rNR22
 ; -- Frequency lo (W)
 ; --
 rNR23 EQU $FF18
-rAUD2LOW	EQU rNR23
+rAUD2LOW    EQU rNR23
 
-_CH2FreqLo	EQU	rNR23
+_CH2FreqLo  EQU rNR23
 
 
 ; --
@@ -542,9 +542,9 @@ _CH2FreqLo	EQU	rNR23
 ; -- see AUD1HIGH for info
 ; --
 rNR24 EQU $FF19
-rAUD2HIGH	EQU rNR24
+rAUD2HIGH   EQU rNR24
 
-_CH2FreqHi	EQU	rNR24
+_CH2FreqHi  EQU rNR24
 
 
 ;***************************************************************************
@@ -560,9 +560,9 @@ _CH2FreqHi	EQU	rNR24
 ; -- Bit 7   - Sound ON/OFF (1EQUON,0EQUOFF)
 ; --
 rNR30 EQU $FF1A
-rAUD3ENA	EQU rNR30
+rAUD3ENA    EQU rNR30
 
-_CH3Enable	EQU	rNR30
+_CH3Enable  EQU rNR30
 
 
 ; --
@@ -572,9 +572,9 @@ _CH3Enable	EQU	rNR30
 ; -- Bit 7-0 - Sound length
 ; --
 rNR31 EQU $FF1B
-rAUD3LEN	EQU rNR31
+rAUD3LEN    EQU rNR31
 
-_CH3SndLength	EQU	rNR31
+_CH3SndLength   EQU rNR31
 
 ; --
 ; -- AUD3LEVEL/NR32 ($FF1C)
@@ -587,9 +587,9 @@ _CH3SndLength	EQU	rNR31
 ; --           11: 1/4
 ; --
 rNR32 EQU $FF1C
-rAUD3LEVEL	EQU rNR32
+rAUD3LEVEL  EQU rNR32
 
-_CH3Volume	EQU	rNR32
+_CH3Volume  EQU rNR32
 
 ; --
 ; -- AUD3LOW/NR33 ($FF1D)
@@ -598,9 +598,9 @@ _CH3Volume	EQU	rNR32
 ; -- see AUD1LOW for info
 ; --
 rNR33 EQU $FF1D
-rAUD3LOW	EQU rNR33
+rAUD3LOW    EQU rNR33
 
-_CH3FreqLo	EQU	rNR33
+_CH3FreqLo  EQU rNR33
 
 ; --
 ; -- AUD3HIGH/NR34 ($FF1E)
@@ -609,9 +609,9 @@ _CH3FreqLo	EQU	rNR33
 ; -- see AUD1HIGH for info
 ; --
 rNR34 EQU $FF1E
-rAUD3HIGH	EQU rNR34
+rAUD3HIGH   EQU rNR34
 
-_CH3FreqHi	EQU	rNR33
+_CH3FreqHi  EQU rNR33
 
 ; --
 ; -- AUD4LEN/NR41 ($FF20)
@@ -620,9 +620,9 @@ _CH3FreqHi	EQU	rNR33
 ; -- Bit 5-0 - Sound length data (# 0-63)
 ; --
 rNR41 EQU $FF20
-rAUD4LEN	EQU rNR41
+rAUD4LEN    EQU rNR41
 
-_CH4SndLength	EQU	rNR41
+_CH4SndLength   EQU rNR41
 
 ; --
 ; -- AUD4ENV/NR42 ($FF21)
@@ -631,9 +631,9 @@ _CH4SndLength	EQU	rNR41
 ; -- see AUD1ENV for info
 ; --
 rNR42 EQU $FF21
-rAUD4ENV	EQU rNR42
+rAUD4ENV    EQU rNR42
 
-_CH4Envelope	EQU	rNR42
+_CH4Envelope    EQU rNR42
 
 ; --
 ; -- AUD4POLY/NR43 ($FF22)
@@ -652,7 +652,7 @@ _CH4Envelope	EQU	rNR42
 rNR43 EQU $FF22
 rAUD4POLY EQU rNR43
 
-_CH4NoiseMode	EQU	rNR43
+_CH4NoiseMode   EQU rNR43
 
 ; --
 ; -- AUD4GO/NR44 ($FF23)
@@ -732,20 +732,20 @@ SCRN_Y     EQU  144 ; Height of screen in pixels
 SCRN_X_B   EQU  20  ; Width of screen in bytes
 SCRN_Y_B   EQU  18  ; Height of screen in bytes
 
-scrWidth_pixels		EQU	160
-scrHeight_pixels	EQU	144
-scrWidth_tiles		EQU	20
-scrHeight_tiles		EQU	18
+scrWidth_pixels     EQU 160
+scrHeight_pixels    EQU 144
+scrWidth_tiles      EQU 20
+scrHeight_tiles     EQU 18
 
 SCRN_VX    EQU  256 ; Virtual width of screen in pixels
 SCRN_VY    EQU  256 ; Virtual height of screen in pixels
 SCRN_VX_B  EQU  32  ; Virtual width of screen in bytes
 SCRN_VY_B  EQU  32  ; Virtual height of screen in bytes
 
-mapWidth_pixels		EQU	256
-mapHeight_pixels	EQU 256
-mapWidth_tiles		EQU	32
-mapHeight_tiles		EQU	32
+mapWidth_pixels     EQU 256
+mapHeight_pixels    EQU 256
+mapWidth_tiles      EQU 32
+mapHeight_tiles     EQU 32
 
 nintendoLogo:   MACRO
 ;*
