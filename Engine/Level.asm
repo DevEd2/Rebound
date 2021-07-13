@@ -2,14 +2,16 @@ section "Level state memory",wram0
 
 ; Levels are divided into 16-block tall "subareas", which are further divided into 16-block wide "screens"
 Engine_CurrentSubarea:
-Engine_CurrentScreen:   db  ; upper two bits = subarea, remaining bits = screen number
-Engine_NumScreens:      db  ; number of screens per subarea (effectively "map width")
-Engine_NumSubareas:     db  ; number of subareas
+Engine_CurrentScreen:       db  ; upper two bits = subarea, remaining bits = screen number
+Engine_NumScreens:          db  ; number of screens per subarea (effectively "map width")
+Engine_NumSubareas:         db  ; number of subareas
+Engine_CollisionBank:       db  ; bank of current collision table
+Engine_CollisionPointer:    dw  ; pointer to current collision table
 
-Engine_CameraX:     db
-Engine_CameraY:     db
-Engine_LockCamera:  db
-Engine_LastRow:     db
+Engine_CameraX:             db
+Engine_CameraY:             db
+Engine_LockCamera:          db
+Engine_LastRow:             db
 
 section "Level memory",wramx[$d000]
 Engine_LevelData:       ds  256*16

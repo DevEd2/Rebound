@@ -5,17 +5,35 @@
 section "Player RAM",wram0
 PlayerRAM:
 
-Player_ScreenID:        db  ; which subscreen the player is currently on
-Player_XPos:            db  ; current X position
-Player_YPos:            db  ; current Y position
-Player_SubpixelXY:      db  ; upper nybble = X subpixel, lower nybble = Y subpixel
-Player_AnimPointer:     dw  ; pointer to current animation sequence
-Player_AnimTimer:       db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
-Player_CurrentFrame:    db  ; current animation frame being displayed
+Player_ScreenID::       db  ; which subscreen the player is currently on
+Player_XPos::           db  ; current X position
+Player_XSubpixel::      db  ; current X subpixel
+Player_YPos::           db  ; current Y position
+Player_YSubpixel::      db  ; current Y subpixel
+Player_XVelocity::      db  ; current X velocity
+Player_XVelocityS::     db  ; current X fractional velocity
+Player_YVelocity::      db  ; current Y velocity
+Player_YVelocityS::     db  ; current Y fractional velocity
+Player_AnimPointer::    dw  ; pointer to current animation sequence
+Player_AnimTimer::      db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
+Player_CurrentFrame::   db  ; current animation frame being displayed
+
+
+Player_TopLeftTile:     db
+Player_TopRightTile:    db
+Player_BottomLeftTile:  db
+Player_BottomRightTile: db
+Player_CenterTile:      db
 
 PlayerRAM_End:
 
-Player_MoveSpeed        equ 1
+Player_MaxSpeed         equ $180
+Player_Accel            equ $030
+Player_Decel            equ $015
+Player_Gravity          equ $25
+Player_BounceHeight     equ -$400
+Player_TerminalVelocity equ 6
+Player_HitboxSize       equ 6
 
 ; ========================
 ; Player animation defines
@@ -92,67 +110,23 @@ InitPlayer:
 ProcessPlayer:
     ld      a,[sys_btnHold]
     ld      hl,Player_YPos
-    bit     btnUp,a
-    call    nz,.moveUp
-    bit     btnDown,a
-    call    nz,.moveDown
+;    bit     btnUp,a
+;    call    nz,.moveUp
+;    bit     btnDown,a
+;    call    nz,.moveDown
     ld      hl,Player_XPos
     bit     btnLeft,a
     call    nz,.moveLeft
     bit     btnRight,a
     call    nz,.moveRight
-
-;   ld      a,[sys_CurrentFrame]
-;   ld      l,a
-;   ld      h,high(SinTable)
-;   ld      a,[hl]
-;   srl     a
-;   srl     a
-;   add     $60
-;   ld      [Player_XPos],a
-
-;   ld      a,[sys_CurrentFrame]
-;   ld      l,a
-;   ld      h,high(CosTable)
-;   ld      a,[hl]
-;   srl     a
-;   srl     a
-;   add     $60
-;   ld      [Player_YPos],a
-    
-    ld      a,[sys_btnPress]
-    bit     btnA,a
-    jr      z,.hurttest
-    PlaySFX splash
-;   ld      hl,Anim_Player_IdleBlink
-;   call    Player_SetAnimation
-    jr      .done
-.hurttest
-    bit     btnB,a
-    jr      z,.smhtest
-    PlaySFX impact1
-;   ld      hl,Anim_Player_Hurt
-;   call    Player_SetAnimation
-    jr      .done
-.smhtest
-    bit     btnStart,a
-    jr      z,.sfxtest
-    PlaySFX menudeny
-;   ld      hl,Anim_Player_SMH
-;   call    Player_SetAnimation
-    jr      .done
-.sfxtest
-    bit     btnSelect,a
-    jr      z,.done
-    PlaySFX menucursor
     jr      .done
         
-.moveUp
-    dec     [hl]
-    ret
-.moveDown
-    inc     [hl]
-    ret
+;.moveUp
+;    dec     [hl]
+;    ret
+;.moveDown
+;    inc     [hl]
+;    ret
 .moveLeft
     ld      c,a
     ld      a,[hl]
@@ -208,7 +182,246 @@ ProcessPlayer:
     ret
     
 .done
+
+Player_UpdateCollision::
+    ; center tile
+    ld      a,[Player_YPos]
+    ld      l,a
+    ld      a,[Player_XPos]
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    and     a   ; clear carry
+    call    GetTileL
+    ld      [Player_CenterTile],a
+    ; top left corner
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    ld      [Player_TopLeftTile],a
+    ; bottom right corner
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    ld      [Player_TopRightTile],a
+    ; bottom left corner
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    ld      [Player_BottomLeftTile],a
+    ; bottom right corner
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    ld      [Player_BottomRightTile],a
+
+    ; check for collision (temp routine)
+      
+    ; ceiling
+    ld      a,[Player_TopLeftTile]
+    ld      b,a
+    ld      a,[Player_TopRightTile]
+    or      b
+    jr      z,.skipceiling
+    cp      4
+    jr      nz,.skipceiling
+    ld      a,[Player_YPos]
+    inc     a
+    ld      [Player_YPos],a
+    xor     a
+    ld      [Player_YVelocity],a
+    ld      [Player_YVelocityS],a
+;    jp      Player_UpdateCollision
+.skipceiling
+    ; floor
+    ld      a,[Player_BottomLeftTile]
+    ld      b,a
+    ld      a,[Player_BottomRightTile]
+    or      b
+    jr      z,.skipfloor
+    cp      4
+    jr      nz,.skipfloor
+    ld      a,[Player_YPos]
+    dec     a
+    ld      [Player_YPos],a
+    call    Player_Bounce
+.skipfloor
+    ; left wall
+    ld      a,[Player_TopLeftTile]
+    ld      b,a
+    ld      a,[Player_BottomLeftTile]
+    or      b
+    jr      z,.skipleft
+    cp      4
+    jr      nz,.skipleft
+    ld      a,[Player_XPos]
+    inc     a
+    ld      [Player_XPos],a
+.skipleft
+    ; right wall
+    ld      a,[Player_TopRightTile]
+    ld      b,a
+    ld      a,[Player_BottomRightTile]
+    or      b
+    jr      z,.skipright
+    cp      4
+    jr      nz,.skipright
+    ld      a,[Player_XPos]
+    dec     a
+    ld      [Player_XPos],a
+.skipright
+    ; top left inside corner
+    ld      a,[Player_TopLeftTile] 
+    ld      c,a
+    ld      a,[Player_TopRightTile]
+    ld      b,a
+    ld      a,[Player_BottomLeftTile]
+    and     b
+    and     c
+    jr      z,.skiptopleft
+    cp      4
+    jr      nz,.skiptopleft
+    ld      a,[Player_XPos]
+    inc     a
+    ld      [Player_XPos],a
+    ld      a,[Player_YPos]
+    inc     a
+    ld      [Player_YPos],a
+    xor     a
+    ld      [Player_YVelocity],a
+    ld      [Player_YVelocityS],a
+.skiptopleft
+    ; top right inside corner
+    ld      a,[Player_TopLeftTile] 
+    ld      c,a
+    ld      a,[Player_TopRightTile]
+    ld      b,a
+    ld      a,[Player_BottomRightTile]
+    and     b
+    and     c
+    jr      z,.skiptopright
+    cp      4
+    jr      nz,.skiptopright
+    ld      a,[Player_XPos]
+    dec     a
+    ld      [Player_XPos],a
+    ld      a,[Player_YPos]
+    inc     a
+    ld      [Player_YPos],a
+    xor     a
+    ld      [Player_YVelocity],a
+    ld      [Player_YVelocityS],a
+.skiptopright
+    ; bottom left inside corner
+    ld      a,[Player_BottomLeftTile] 
+    ld      c,a
+    ld      a,[Player_BottomRightTile]
+    ld      b,a
+    ld      a,[Player_TopLeftTile]
+    and     b
+    and     c
+    jr      z,.skipbottomleft
+    cp      4
+    jr      nz,.skipbottomleft
+    ld      a,[Player_XPos]
+    inc     a
+    ld      [Player_XPos],a
+    ld      a,[Player_YPos]
+    dec     a
+    ld      [Player_YPos],a
+    call    Player_Bounce
+.skipbottomleft
+    ; top right inside corner
+    ld      a,[Player_BottomLeftTile] 
+    ld      c,a
+    ld      a,[Player_BottomRightTile]
+    ld      b,a
+    ld      a,[Player_TopRightTile]
+    and     b
+    and     c
+    jr      z,.skipbottomright
+    cp      4
+    jr      nz,.skipbottomright
+    ld      a,[Player_XPos]
+    dec     a
+    ld      [Player_XPos],a
+    ld      a,[Player_YPos]
+    dec     a
+    ld      [Player_YPos],a
+    call    Player_Bounce
+.skipbottomright
+
+.done
     call    AnimatePlayer
+
+Player_SpeedToPos::
+    ; TODO: x speed
+    ; gravity
+    ld      a,[Player_YVelocityS]
+    add     Player_Gravity
+    ld      b,a
+    ld      [Player_YVelocityS],a
+    jr      nc,.skipgrav
+    ld      a,[Player_YVelocity]
+    ld      b,a
+    inc     a
+    cp      Player_TerminalVelocity
+    jr      nz,.noclamp
+    ld      a,Player_TerminalVelocity
+.noclamp
+    ld      [Player_YVelocity],a
+.skipgrav
+    ld      a,[Player_YSubpixel]
+    add     b
+    ld      [Player_YSubpixel],a
+    ld      a,[Player_YPos]
+    jr      nc,.noincY
+    inc     a
+.noincY
+    ld      b,a
+    ld      a,[Player_YVelocity]
+    add     b
+    ld      [Player_YPos],a
+    
+    ret
+    
+Player_Bounce:
+    ld      a,high(Player_BounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_BounceHeight)
+    ld      [Player_YVelocityS],a
     ret
     
 ; ========

@@ -10,12 +10,66 @@ section "Metatile routines",rom0
 ; Destroys: B
 GetTileCoordinates:
     ld      a,l
-    and     $f
+    and     $f0
+    swap    a
     ld      b,a
     ld      a,h
-    and     $f
-    swap    a
+    and     $f0
     add     b
+    ret
+    
+; Input:        E = Tile coordinates
+;           Carry = Subtract 1 from screen 
+; Output:       A = Tile ID
+; Destroys:    HL
+GetTileL:
+    push    af
+    ldh     a,[rSVBK]
+    and     $7
+    ldh     [sys_TempSVBK],a
+    ld      a,[Engine_CurrentSubarea]
+    and     $30
+    swap    a
+    add     2
+    ldh     [rSVBK],a
+    ld      a,[Engine_CurrentScreen]
+    and     $f
+    ld      hl,Engine_LevelData
+    add     h
+    ld      h,a
+    pop     af
+    jr      nc,.nocarry
+    dec     h
+.nocarry
+    ld      l,e
+    ld      a,[hl]
+    ret
+    
+; Input:        E = Tile coordinates
+;           Carry = Add 1 to screen 
+; Output:       A = Tile ID
+; Destroys:    HL
+GetTileR:
+    push    af
+    ldh     a,[rSVBK]
+    and     $7
+    ldh     [sys_TempSVBK],a
+    ld      a,[Engine_CurrentSubarea]
+    and     $30
+    swap    a
+    add     2
+    ldh     [rSVBK],a
+    ld      a,[Engine_CurrentScreen]
+    and     $f
+    ld      hl,Engine_LevelData
+    add     h
+    ld      h,a
+    pop     af
+    jr      nc,.nocarry
+    inc     h
+.nocarry
+    ld      l,e
+    ld      a,[hl]
     ret
 
 ; Input:    A = Tile coordinates
