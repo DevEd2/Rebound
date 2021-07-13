@@ -1326,7 +1326,7 @@ CH4_CheckByte:
     ld      [CH4VolPos],a
     ld      [CH4NoisePos],a
     ld      a,[VGMSFX_Flags]
-    bit     bSFX_CH1,a
+    bit     bSFX_CH4,a
     jr      nz,.noupdate
     ldh     [rNR42],a
 .noupdate

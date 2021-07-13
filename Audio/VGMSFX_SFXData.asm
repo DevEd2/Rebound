@@ -1,4 +1,4 @@
-; VGMSFX sound effect pointers
+; VGMSFX sound effect data
 
 defsfx: macro
 section "SFX Data - \1",romx
@@ -14,3 +14,6 @@ endm
     defsfx  pause,SFX_CH1
     defsfx  coin,SFX_CH1
     defsfx  death,SFX_CH1
+    defsfx  jump,SFX_CH1
+    defsfx  impact1,SFX_CH1
+    defsfx  splash,SFX_CH4

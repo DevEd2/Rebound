@@ -43,6 +43,8 @@ VGMSFX_Init:
     ld      [VGMSFX_Pointer],a
     ld      a,h
     ld      [VGMSFX_Pointer+1],a
+    xor     a
+    ldh     [rNR10],a           ; reset sweep (prevents glitches)
     ret                         ; done!
     
 ; Destroys: a, bc, hl
