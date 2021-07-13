@@ -31,7 +31,9 @@ Player_MaxSpeed         equ $180
 Player_Accel            equ $030
 Player_Decel            equ $015
 Player_Gravity          equ $25
-Player_BounceHeight     equ -$400
+Player_BounceHeight     equ -$380
+Player_HighBounceHeight equ -$440
+Player_LowBounceHeight  equ -$200
 Player_TerminalVelocity equ 6
 Player_HitboxSize       equ 6
 
@@ -418,9 +420,27 @@ Player_SpeedToPos::
     ret
     
 Player_Bounce:
+    ld      a,[sys_btnHold]
+    bit     btnA,a
+    jr      nz,.highbounce
+    bit     btnB,a
+    jr      nz,.lowbounce
+.normalbounce
     ld      a,high(Player_BounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_BounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+.lowbounce
+    ld      a,high(Player_LowBounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_LowBounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+.highbounce
+    ld      a,high(Player_HighBounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_HighBounceHeight)
     ld      [Player_YVelocityS],a
     ret
     
