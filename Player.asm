@@ -250,7 +250,30 @@ Player_UpdateCollision::
     ld      [Player_BottomRightTile],a
 
     ; check for collision (temp routine)
-      
+    ; left wall
+    ld      a,[Player_TopLeftTile]
+    ld      b,a
+    ld      a,[Player_BottomLeftTile]
+    or      b
+    jr      z,.skipleft
+    cp      4
+    jr      nz,.skipleft
+    ld      a,[Player_XPos]
+    inc     a
+    ld      [Player_XPos],a
+.skipleft
+    ; right wall
+    ld      a,[Player_TopRightTile]
+    ld      b,a
+    ld      a,[Player_BottomRightTile]
+    or      b
+    jr      z,.skipright
+    cp      4
+    jr      nz,.skipright
+    ld      a,[Player_XPos]
+    dec     a
+    ld      [Player_XPos],a
+.skipright      
     ; ceiling
     ld      a,[Player_TopLeftTile]
     ld      b,a
@@ -280,30 +303,7 @@ Player_UpdateCollision::
     ld      [Player_YPos],a
     call    Player_Bounce
 .skipfloor
-    ; left wall
-    ld      a,[Player_TopLeftTile]
-    ld      b,a
-    ld      a,[Player_BottomLeftTile]
-    or      b
-    jr      z,.skipleft
-    cp      4
-    jr      nz,.skipleft
-    ld      a,[Player_XPos]
-    inc     a
-    ld      [Player_XPos],a
-.skipleft
-    ; right wall
-    ld      a,[Player_TopRightTile]
-    ld      b,a
-    ld      a,[Player_BottomRightTile]
-    or      b
-    jr      z,.skipright
-    cp      4
-    jr      nz,.skipright
-    ld      a,[Player_XPos]
-    dec     a
-    ld      [Player_XPos],a
-.skipright
+
     ; top left inside corner
     ld      a,[Player_TopLeftTile] 
     ld      c,a

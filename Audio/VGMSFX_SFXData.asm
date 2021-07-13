@@ -17,3 +17,4 @@ endm
     defsfx  jump,SFX_CH1
     defsfx  impact1,SFX_CH1
     defsfx  splash,SFX_CH4
+    defsfx  wavetest,SFX_CH3

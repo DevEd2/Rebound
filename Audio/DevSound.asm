@@ -1071,7 +1071,7 @@ CH3_CheckByte:
     ld      [CH3NoteCount],a
     ld      b,a
     ld      a,[VGMSFX_Flags]
-    bit     bSFX_CH1,a
+    bit     bSFX_CH3,a
     jr      nz,.noupdate
     ld      a,[CH3Vol]
     ldh     [rNR32],a
@@ -1947,6 +1947,10 @@ CH3_UpdateRegisters:
     and     a
     jp      z,CH4_UpdateRegisters
 
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.norest
+    
     ld      a,[CH3Note]
     cp      rest
     jr      nz,.norest
@@ -1984,7 +1988,11 @@ CH3_UpdateRegisters:
     inc     a
     ld      [CH3ArpPos],a
 .continue
-
+    
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.updateNote
+    
     xor     a
     ldh     [rNR31],a
     or      %10000000
@@ -2053,13 +2061,16 @@ CH3_UpdateRegisters:
     ld      a,d
     add     c
     ld      d,a
-.setFreq    
+.setFreq  
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.updateWave
     ld      a,d
     ldh     [rNR33],a
     ld      a,e
     ldh     [rNR34],a
-    
-    ; update wave
+
+.updateWave
     ld      hl,CH3WavePtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -2095,6 +2106,10 @@ CH3_UpdateRegisters:
     ld      h,[hl]
     ld      l,a
 .loadwave
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.noreset2
+    
     call    LoadWave
     ld      a,e
     or      %10000000
@@ -2124,6 +2139,10 @@ CH3_UpdateRegisters:
     cp      $ff
     jr      z,.done
     ld      b,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.noreset3
+    
     ld      a,[CH3Vol]
     cp      b
     jr      z,.noreset3
@@ -2156,6 +2175,9 @@ CH3_UpdateRegisters:
     call    LoadWave
     xor     a
     ld      [WaveBufUpdateFlag],a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.noupdate
     ld      a,e
     or      $80
     ldh     [rNR34],a
@@ -2283,6 +2305,9 @@ DoneUpdatingRegisters:
 ; ================================================================
 
 LoadWave:
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    ret     nz
     xor     a
     ldh     [rNR30],a   ; disable CH3
     ld      bc,$1030    ; b = counter, c = HRAM address
