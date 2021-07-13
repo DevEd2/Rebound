@@ -71,8 +71,8 @@ vol_MenuLead:       db  w3,w3,w3,w3,w3,w3,w3,w2,w1,w2,w2,w2,w2,w2,w2,w1,$ff
 
 vol_MenuOctave:     db  w3,w3,w3,w2,w2,w1,$ff
 vol_MenuOctaveEcho: db  w1,$ff
-vol_MenuBass:       db  $2f,$ff
-vol_MenuArp:        db  $1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$53,$ff
+vol_MenuBass:       db  $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$38,$ff
+vol_MenuArp:        db  $1b,$1b,$1b,$1b,$27,$27,$27,$27,$27,$27,$27,$27,$27,$27,$53,$ff
                 
 ; =================================================================
 ; Arpeggio sequences
@@ -166,8 +166,8 @@ WaveTable:
 wave_DesertLead:    db      $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
 wave_DesertSquare:  db      $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
 
-wave_MenuLead1:     db      $fe,$de,$11,$22,$22,$22,$22,$22,$22,$23,$33,$45,$44,$44,$32,$56
-wave_MenuLead2:     db      $ce,$ff,$ff,$ff,$ff,$f0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$13
+wave_MenuLead1:     db      $cb,$ab,$11,$22,$22,$22,$22,$22,$22,$23,$33,$45,$44,$44,$32,$56
+wave_MenuLead2:     db      $9a,$cc,$cc,$cc,$cc,$c0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$13
 wave_MenuTri:       db      $68,$8c,$ef,$fd,$b9,$75,$32,$02,$68,$8c,$ef,$fd,$b9,$75,$32,$02
 
 wave_ForestBass:    db      $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,$44,$44,$45

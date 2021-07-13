@@ -3,17 +3,28 @@
 section "VGMSFX RAM",wram0
 VGMSFX_Bank:            db  ; bank of currently playing sound effect
 VGMSFX_Pointer:         dw  ; pointer of currently playing sound effect
-VGMSFX_Flags:           db  ; bit 0 - 3 denote whether a sound effect is playing on CH1-CH4; bit 7 = playing
+VGMSFX_Flags:           db
+; VGMSFX_Flags bits:
+; 0 - CH1 registers (NR1x) in use
+; 1 - CH2 registers (NR2x) in use
+; 2 - CH3 registers (NR3x + wave RAM) in use
+; 3 - CH4 registers (NR4x) in use
+; 4 - Control registers (NR5x) in use
+; 5 - Unused
+; 6 - Unused
+; 7 - SFX playing
 
-SFX_CH1     equ %00000001
-SFX_CH2     equ %00000010
-SFX_CH3     equ %00000100
-SFX_CH4     equ %00001000
+SFX_CH1     equ $0001
+SFX_CH2     equ %0010
+SFX_CH3     equ %0100
+SFX_CH4     equ %1000
 
 bSFX_CH1    equ 0
 bSFX_CH2    equ 1
 bSFX_CH3    equ 2
 bSFX_CH4    equ 3
+bSFX_Ctrl   equ 4
+bSFX_Enable equ 7
 
 section "VGMSFX",rom0
 
@@ -21,42 +32,44 @@ section "VGMSFX",rom0
 ; HL = SFX pointer
 ; Destroys: a, b, hl
 VGMSFX_Init:
-    ld      [VGMSFX_Bank],a
+    ld      [VGMSFX_Bank],a     ; set ROM bank
     ld      b,a
     call    _Bankswitch
-    ld      a,[hl+]
-    or      %10000000
+    ld      a,[hl+]             ; get channel flags
+    set     bSFX_Enable,a       ; set "enable SFX" flag
     ld      [VGMSFX_Flags],a
+    ; write pointer
     ld      a,l
     ld      [VGMSFX_Pointer],a
     ld      a,h
     ld      [VGMSFX_Pointer+1],a
-    ret
+    ret                         ; done!
     
 ; Destroys: a, bc, hl
 VGMSFX_Update:
     ld      a,[VGMSFX_Flags]
-    bit     7,a                 ; is a sound effect playing?
+    bit     bSFX_Enable,a       ; is a sound effect playing?
     ret     z                   ; if not, exit
-    ld      a,[VGMSFX_Bank]
+    ld      a,[VGMSFX_Bank]     ; get ROM bank
     ld      b,a
-    call    _Bankswitch
+    call    _Bankswitch         ; do a bankswitch
+    ; get pointer
     ld      hl,VGMSFX_Pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    
+    ; fall through
 .getbyte
     ld      a,[hl+]
-    cp      $b3             ; $B3 - DMG write to register
+    cp      $b3             ; $B3 - write to register
     jr      z,.writereg
-    cp      $62             ; $62 - wait a 60th of a second (one frame @60hz)
+    cp      $62             ; $62 - wait one tick
     jr      z,.waitframe
     ; all other commands are interpreted as end of stream
 .endstream
     xor     a
     ld      [VGMSFX_Flags],a
-    ldh     [rNR10],a   ; reset sweep
+    ldh     [rNR10],a   ; reset sweep (prevents glitches)
     ret
 .writereg
     ld      a,[hl+]
