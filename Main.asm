@@ -182,9 +182,7 @@ EmuScreen:
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
-    ei
 EmuLoop:
-    halt
     jr      EmuLoop
 GBCOnlyScreen:
     ld      b,b
