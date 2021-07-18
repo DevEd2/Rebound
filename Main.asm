@@ -67,22 +67,19 @@ section "ROM header",rom0[$100]
 EntryPoint::
     nop
     jp  ProgramStart
-NintendoLogo:   ; DO NOT MODIFY OR ROM WILL NOT BOOT!!!
-    db  $ce,$ed,$66,$66,$cc,$0d,$00,$0b,$03,$73,$00,$83,$00,$0c,$00,$0d
-    db  $00,$08,$11,$1f,$88,$89,$00,$0e,$dc,$cc,$6e,$e6,$dd,$dd,$d9,$99
-    db  $bb,$bb,$67,$63,$6e,$0e,$ec,$cc,$dd,$dc,$99,$9f,$bb,$b9,$33,$3e
+NintendoLogo:   ds  48,0                        ; Nintendo logo bitmap (handled by post-linking tool)
 ROMTitle:       dbp "REBOUND",15,0              ; ROM title (15 bytes)
 GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80 = DMG/GBC, $C0 = GBC only)
 NewLicenseCode: db  "DV"                        ; new license code (2 bytes)
 SGBSupport:     db  0                           ; SGB support
 CartType:       db  $19                         ; Cart type, see hardware.inc for a list of values
-ROMSize:        db                              ; ROM size (handled by post-linking tool)
+ROMSize:        db  0                           ; ROM size (handled by post-linking tool)
 RAMSize:        db  0                           ; RAM size
 DestCode:       db  1                           ; Destination code (0 = Japan, 1 = All others)
 OldLicenseCode: db  $33                         ; Old license code (if $33, check new license code)
 ROMVersion:     db  0                           ; ROM version
-HeaderChecksum: db                              ; Header checksum (handled by post-linking tool)
-ROMChecksum:    dw                              ; ROM checksum (2 bytes) (handled by post-linking tool)
+HeaderChecksum: db  0                           ; Header checksum (handled by post-linking tool)
+ROMChecksum:    dw  0                           ; ROM checksum (2 bytes) (handled by post-linking tool)
 
 ; =====================
 ; Start of program code
