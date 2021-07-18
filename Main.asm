@@ -90,6 +90,15 @@ ProgramStart::
     ld      sp,$d000
     push    bc
     push    af
+
+    ; wait for VBlank
+    ld  hl,rLY
+    ld  a,144
+.wait
+    cp  [hl]
+    jr  nz,.wait
+    xor a
+    ldh [rLCDC],a   ; disable LCD
     
 ; init memory
 ;   ld      hl,$c000    ; start of WRAM
@@ -106,15 +115,6 @@ ProgramStart::
     jr      nz,.loop
     call    CopyDMARoutine
 ;   rst     DoOAMDMA
-    
-    ; wait for VBlank
-    ld  hl,rLY
-    ld  a,144
-.wait
-    cp  [hl]
-    jr  nz,.wait
-    xor a
-    ldh [rLCDC],a   ; disable LCD
     
     ; clear VRAM
     ldh     [rVBK],a
@@ -167,22 +167,23 @@ EmuScreen:
     ; since we're on an emulator we don't need to wait for VBlank before disabling the LCD  
     xor     a
     ldh     [rLCDC],a   ; disable LCD
-    ld      a,bank(Pal_EmuScreen)
-    ld      [rROMB0],a
-    ld      hl,Pal_EmuScreen
+    ldfar   hl,Pal_DebugScreen
     xor     a
     call    LoadPal
-    call    UpdatePalettes
+    call    CopyPalettes
     ld      hl,Font
     ld      de,$8000
     call    DecodeWLE
     ld      hl,EmuText
     call    LoadTilemapText
+    call    DevSound_Stop
     ld      a,%10010001
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
+    ei
 EmuLoop:
+    halt
     jr      EmuLoop
 GBCOnlyScreen:
     xor     a
@@ -257,6 +258,9 @@ SkipGBCScreen:
     ld      [sys_TimerFlag],a
     ld      [sys_LCDCFlag],a
     ld      [VGMSFX_Flags],a
+    ld      [Engine_CameraX],a
+    ld      [Engine_CameraY],a
+    ld      [sys_EnableHDMA],a
     ; clear OAM buffer
     ld      hl,OAMBuffer
     ld      b,40*4
@@ -265,8 +269,7 @@ SkipGBCScreen:
     
     call    DoubleSpeed
     
-    jp      GM_Level
-    ; fall through
+    jp      GM_DebugMenu
     
 ; ================================
 
@@ -345,6 +348,9 @@ DoVBlank::
     call    CheckInput
     
     ; setup HDMA for parallax GFX transfer
+    ld      a,[sys_EnableHDMA]
+    and     a
+    jr      z,.skiphdma
     xor     a
     ldh     [rVBK],a
     ld      a,high(Engine_ParallaxBuffer)
@@ -357,7 +363,8 @@ DoVBlank::
     ldh     [rHDMA4],a  ; HDMA dest low
     ld      a,%00001111
     ldh     [rHDMA5],a  ; HDMA length + type (length 256, hblank wait)
-    
+.skiphdma
+
     ld      a,[Engine_CameraX]
     ldh     [rSCX],a
     ld      a,[Engine_CameraY]
@@ -390,6 +397,8 @@ DoVBlank::
     ld      b,1
     ; fall through to .dorestart
 .dorestart
+    ld      hl,rHDMA5
+    set     0,[hl]                  ; cancel any pending HDMA transfers
     jp      ProgramStart            ; restart game
 .noreset                            ; if A+B+Start+Select aren't held...
     xor     a
@@ -759,7 +768,7 @@ Pal_Grayscale:
     RGB 10,10,10
     RGB  0, 0, 0
 
-Pal_EmuScreen:
+Pal_DebugScreen:
     RGB 31,31,31
     RGB  0, 0, 0
     RGB  0, 0, 0

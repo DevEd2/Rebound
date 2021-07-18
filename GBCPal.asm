@@ -88,8 +88,11 @@ _InitFade:
     ld      [sys_FadeLevel],a
     ret
 
-; WARNING: Assumes color RAM is unlocked! Only run during VBlank!
+; Must be run during VBlank, otherwise exits
 UpdatePalettes:
+    ldh     a,[rLY]
+    cp      144
+    ret     c
     ; bg palettes
     ld      a,$80
     ldh     [rBCPS],a

@@ -72,6 +72,8 @@ GM_Level:
     ld      [Engine_LockCamera],a
     ld      a,SCRN_Y/2
     ld      [Engine_CameraY],a
+    ld      a,1
+    ld      [sys_EnableHDMA],a      ; enable parallax HDMA transfer
     
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
