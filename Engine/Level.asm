@@ -1,7 +1,7 @@
 section "Level state memory",wram0
 
 ; Levels are divided into 16-block tall "subareas", which are further divided into 16-block wide "screens"
-Engine_CurrentSubarea:
+Engine_CurrentSubarea:          ; (shared with Engine_CurrentScreen)
 Engine_CurrentScreen:       db  ; upper two bits = subarea, remaining bits = screen number
 Engine_NumScreens:          db  ; number of screens per subarea (effectively "map width")
 Engine_NumSubareas:         db  ; number of subareas
@@ -10,6 +10,8 @@ Engine_CollisionPointer:    dw  ; pointer to current collision table
 
 Engine_CameraX:             db
 Engine_CameraY:             db
+Engine_CameraTargetX:       db
+Engine_CameraTargetY:       db
 Engine_LockCamera:          db
 Engine_LastRow:             db
 
@@ -39,6 +41,10 @@ GM_Level:
     dec     b
     jr      nz,.loop
 
+    call    ConvertPals
+
+    call    PalFadeInWhite
+
     ; TODO: Load "background" graphics from map header
     ldfar   hl,ParallaxTiles
     ld      de,Engine_ParallaxBuffer
@@ -62,15 +68,23 @@ GM_Level:
     ; initialize camera
     xor     a
     ld      [Engine_CameraX],a
-    ld      [Engine_CameraY],a
+    ld      [Engine_CameraTargetX],a
     ld      [Engine_LockCamera],a
+    ld      a,SCRN_Y/2
+    ld      [Engine_CameraY],a
     
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
-    
+
+    ; wait for VBlank to avoid VRAM access violations during palette copy
+.w  ldh     a,[rLY]
+    cp      144
+    jr      nz,.w
+
+
     ei
     
 LevelLoop::
@@ -78,8 +92,8 @@ LevelLoop::
 .docamera
     ld      a,[Engine_LockCamera]
     and     a
-    jr      nz,.nocamera
-
+    jp      nz,.nocamera
+    
     ld      a,[Engine_CameraX]
     rra
     ld      d,a
@@ -115,7 +129,7 @@ LevelLoop::
     ld      a,[Player_XPos]
     sub     SCRN_X / 2
 .setcamx
-    ld      [Engine_CameraX],a
+    ld      [Engine_CameraTargetX],a
 
     ld      a,[Player_YPos]
 .checkup
@@ -128,9 +142,17 @@ LevelLoop::
     jr      c,.setcamy
     ld      a,256 - SCRN_Y
 .setcamy
+    ld      [Engine_CameraTargetY],a
+    
+    ; TODO: camera target logic
+    ld      a,[Engine_CameraTargetX]
+    ld      [Engine_CameraX],a
+    
+    ld      a,[Engine_CameraTargetY]
     ld      [Engine_CameraY],a
-        
-    ; do parallax
+    
+    
+.doparallax
     and     a   ; clear carry
     push    de
     ld      a,[Engine_CameraX]
@@ -155,7 +177,7 @@ LevelLoop::
 .skipX
     pop     de
     ld      a,[Engine_CameraY]
-    rra
+    srl     a
     sub     e
     jr      z,.skipY
     cpl
@@ -168,8 +190,8 @@ LevelLoop::
 
     ld      a,[Player_XPos]
     push    af
-    call    DrawPlayer
     call    ProcessPlayer
+    call    DrawPlayer
     pop     bc
     ld      a,[Player_XPos]
     cp      b
@@ -254,9 +276,11 @@ LoadMap:
     swap    a       ; | correct 
     add     8       ; / format
     ld      [Player_YPos],a
+    add     16
+    ld      [Player_LastBounceY],a
     ; load player starting screen + subarea
     ld      a,[hl+]
-    ld      [Player_ScreenID],a ; no need to convert to different format here
+    ld      [Engine_CurrentScreen],a ; no need to convert to different format here
     
     
     ; TODO: load tileset
@@ -294,7 +318,7 @@ LoadMap:
     dec     b
     jr      nz,.loop
     
-    ld      a,[Player_ScreenID]
+    ld      a,[Engine_CurrentScreen]
     call    Level_LoadScreen
     
     ld      a,1

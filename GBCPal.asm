@@ -1,11 +1,17 @@
 section "Color RAM",wram0,align[8]
-sys_BGPalBuffer::       ds  4*8
-sys_ObjPalBuffer::      ds  4*8
-sys_FadeState::         db  ; 0 = not fading, 1 = fade in from white, 2 = fade out to white
-sys_FadeBGPals::        db  ; which BG palettes are fading (bitmask)
-sys_FadeOBJPals::       db  ; which OBJ palettes are fading (bitmask)
-sys_FadeSpeed::         db  ; fade speed in ticks
-sys_FadeTimer::         db  ; used in conjunction with above
+sys_PalTransferBuf:
+sys_BGPalTransferBuf::  ds  (2*4)*8 ; 8 PalTransferBuf, 4 colors per palette, 2 bytes per color
+sys_ObjPalTransferBuf:: ds  (2*4)*8 ; 8 PalTransferBuf, 4 colors per palette, 2 bytes per color
+sys_PalBuffer:
+sys_BGPalBuffer::       ds  (3*4)*8 ; BG palette work area (8 PalTransferBuf, 4 colors per palette, 3 bytes per color)
+sys_ObjPalBuffer::      ds  (3*4)*8 ; OBJ palette work area (8 PalTransferBuf, 4 colors per palette, 3 bytes per color)
+sys_Palettes:
+sys_BGPalettes:         ds  (2*4)*8 ; main BG palette
+sys_ObjPalettes:        ds  (2*4)*8 ; main OBJ palette
+.end
+sys_FadeState::         db  ; bit 0 = fading, bit 1 = fade type (0 = white, 1 = black), bit 1 = fade dir (0 = in, 1 = out)
+sys_FadeBGPals::        db  ; which bg palettes are fading (bitmask)
+sys_FadeOBJPals::       db  ; which OBJ PalTransferBuf are fading (bitmask)
 sys_FadeLevel::         db  ; current intensity level
 
 section "Color routines",rom0
@@ -15,488 +21,366 @@ section "Color routines",rom0
 ; DESTROYS:  a, b, hl
 SetColor::
     push    de
-    and 15
-    bit 3,a
-    jr  nz,.obj
-    add a   ; x2
-    ld  b,a
-    ld  de,sys_BGPalBuffer
-    add e
-    ld  e,a
-    WaitForVRAM
-    ld  a,b
-    set 7,b ; auto-increment
-    ldh [rBCPS],a
-    WaitForVRAM
-    ld  a,h
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    WaitForVRAM
-    ld  a,l
-    ldh [rBCPD],a
-    ld  [de],a
-    pop de
+    and     15
+    bit     3,a
+    jr      nz,.obj
+    add     a   ; x2
+    ld      b,a
+    ld      de,sys_BGPalTransferBuf
+    add     e
+    ld      e,a
+    
+    ld      a,h
+    ld      [de],a
+    inc     e
+    ld      a,l
+    ld      [de],a
+    pop     de
     ret
 .obj
-    add a   ; x2
-    add a   ; x4
-    add a   ; x8
-    ld  b,a
-    ld  de,sys_ObjPalBuffer
-    add e
-    ld  e,a
-    WaitForVRAM
-    ld  a,b
-    set 7,b ; auto-increment
-    ldh [rOCPS],a
-    WaitForVRAM
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    WaitForVRAM
-    ld  a,[hl]
-    ldh [rOCPD],a
-    ld  [de],a
-    pop de
+    add     a   ; x2
+    add     a   ; x4
+    add     a   ; x8
+    ld      b,a
+    ld      de,sys_ObjPalTransferBuf
+    add     e
+    ld      e,a
+
+    ld      a,h
+    ld      [de],a
+    inc     e
+    ld      a,l
+    ld      [de],a
+    pop     de
     ret
 
 ; Routines to initialize palette fading
 ; INPUT:    b = BG palette mask
 ;           c = OBJ palette mask
-;           e = fade speed (minus 1)
 ; DESTROYS: a
 PalFadeInWhite:
-    ld  a,1
-    jr  _InitFade
+    ld      a,%00000001
+    ld      e,31
+    jr      _InitFade
 
 PalFadeOutWhite:
-    ld  a,2
-    jr  _InitFade
+    ld      a,%00000101
+    ld      e,0
+    jr      _InitFade
     
 PalFadeInBlack:
-    ret
+    ld      a,%00000011
+    ld      e,31
+    jr      _InitFade
     
 PalFadeOutBlack:
-    ret
+    ld      a,%00000111
+    ld      e,0
+    ; fall through
     
 _InitFade:
-    ld  [sys_FadeState],a
-    ld  a,31
-    ld  [sys_FadeLevel],a
-    ld  a,b
-    ld  [sys_FadeBGPals],a
-    ld  a,c
-    ld  [sys_FadeOBJPals],a
-    ld  a,e
-    ld  [sys_FadeSpeed],a
+    ld      [sys_FadeState],a
+    ld      a,b
+    ld      [sys_FadeBGPals],a
+    ld      a,c
+    ld      [sys_FadeOBJPals],a
+    ld      a,e
+    ld      [sys_FadeLevel],a
     ret
 
-; Called each VBlank
-Pal_DoFade:
-    ld  a,[sys_FadeState]
-    ld  b,a
-    and a
-    ret z
-    ld  a,[sys_FadeLevel]
-    dec a
-    cp  -1
-    jp  z,_DoneFade
-    ld  [sys_FadeLevel],a
-    ld  hl,.fadeproc
-    ld  a,b
-    dec a
-    and 1
-    add a
-    add l
-    ld  l,a
-    jr  nc,.nocarry
-    inc h
-.nocarry
-    ld  a,[hl+]
-    ld  h,[hl]
-    ld  l,a
-    jp  hl
-.fadeproc
-    dw  _PalFadeInWhite
-    dw  _PalFadeOutWhite
-    
-_PalFadeInWhite:
+; WARNING: Assumes color RAM is unlocked! Only run during VBlank!
+UpdatePalettes:
+    ; bg palettes
+    ld      a,$80
+    ldh     [rBCPS],a
+    ld      hl,sys_BGPalTransferBuf
+    rept    2*32
+        ld      a,[hl+]
+        ldh     [rBCPD],a
+    endr
+
+    ; obj palettes
+    ld      a,$80
+    ldh     [rOCPS],a
+    ld      hl,sys_ObjPalTransferBuf
+    rept    2*32
+        ld      a,[hl+]
+        ldh     [rOCPD],a
+    endr
     ret
+
+Pal_DoFade:
+    ld      a,[sys_FadeState]
+    bit     0,a
+    ret     z
+    bit     1,a
+    jr      nz,.black
+.white
+    bit     2,a
+    jr      z,_PalFadeInWhite
+    jr      _PalFadeOutWhite
+.black
+    bit     2,a
+    jr      z,_PalFadeInBlack
+    jr      _PalFadeOutBlack
+    
+_FinishFade:
+    xor     a
+    ld      [sys_FadeState],a
+    jr      UpdatePalsWhite ; doesn't matter which table we use here
+
+_PalFadeInWhite:
+    ld      a,[sys_FadeLevel]
+    dec     a
+    ld      [sys_FadeLevel],a
+    jr      z,_FinishFade
+    call    UpdatePalsWhite
+    jp      SyncPalettes
     
 _PalFadeOutWhite:
-    ret ; nope, fuck this shit
-;   ld  d,0
-;   ld  hl,sys_BGPalBuffer
-;   ld  a,[sys_FadeBGPals]
-;   ld  e,a
-;   call    _FadeOutProc
-;   ld  a,[sys_FadeOBJPals]
-;   ld  e,a
-;   ; fall trough
-; _FadeOutProc:
-    ; ld    b,b
-    ; bit   0,e
-    ; jr    z,.skip1
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop0
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop0
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip1
-    ; bit   1,e
-    ; jr    z,.skip2
-    ; push  de
-    ; ld    a,d
-    ; add   4
-    ; ld    c,a
-    ; ld    a,d
-    ; add   4
-    ; ld    c,a
-    ; ld    e,4
-    ; push  bc
-; .loop1
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop1
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip2
-    ; bit   2,e
-    ; jr    z,.skip3
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop2
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop2
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip3
-    ; bit   3,e
-    ; jr    z,.skip4
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop3
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop3
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip4
-    ; bit   4,e
-    ; jr    z,.skip5
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop4
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop4
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip5
-    ; bit   5,e
-    ; jr    z,.skip6
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop5
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop5
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip6
-    ; bit   6,e
-    ; jr    z,.skip7
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop6
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop6
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip7
-    ; bit   7,e
-    ; jr    z,.skip8
-    ; push  de
-    ; ld    a,d
-    ; ld    b,d
-    ; add   4
-    ; ld    c,a
-    ; ld    d,b
-    ; ld    e,4
-    ; push  bc
-; .loop7
-    ; ld    a,[hl+]
-    ; ld    b,a
-    ; ld    a,[hl+]
-    ; push  hl
-    ; ld    h,a
-    ; ld    l,b
-    ; call  _IncColor
-    ; ld    a,d
-    ; call  SetColor
-    ; pop   hl
-    ; dec   e
-    ; jr    nz,.loop7
-    ; pop   bc
-    ; pop   de
-    ; ld    d,c
-; .skip8
-    ; ret
+    ld      a,[sys_FadeLevel]
+    inc     a
+    ld      [sys_FadeLevel],a
+    cp      31
+    jr      z,_FinishFade
+    call    UpdatePalsWhite
+    jr      SyncPalettes
+
+_PalFadeInBlack:
+    ld      a,[sys_FadeLevel]
+    dec     a
+    ld      [sys_FadeLevel],a
+    jr      z,_FinishFade
+    call    UpdatePalsBlack
+    jp      SyncPalettes
     
-_DecColor:
-    call    SplitColors
-    dec a
-    jr  nz,.skip1
-    xor a
-.skip1
-    push    af
-    dec b
-    jr  nz,.skip2
-    ld  b,0
-.skip2
-    dec c
-    jr  nz,.skip3
-    ld  c,0
-.skip3
-    pop af
-    jp  CombineColors
-    
-_IncColor:
-    call    SplitColors
-    inc a
-    cp  $1f
-    jr  c,.skip1
-    ld  a,$1f
-.skip1
-    push    af
-    inc b
-    ld  a,b
-    cp  $1f
-    jr  c,.skip2
-    ld  b,$1f
-.skip2
-    inc c
-    ld  a,c
-    cp  $1f
-    jr  c,.skip3
-    ld  c,$1f
-.skip3
-    pop af
-    jp  CombineColors
-    
-_DoneFade:
-    xor a
-    ld  [sys_FadeState],a
+_PalFadeOutBlack:
+    ld      a,[sys_FadeLevel]
+    inc     a
+    ld      [sys_FadeLevel],a
+    cp      31
+    jr      z,_FinishFade
+    call    UpdatePalsBlack
+    jr      SyncPalettes
+
+UpdatePalsWhite:
+    call    ConvertPals
+    ld      b,(3*4)*16
+    ld      hl,sys_PalBuffer
+.loop
+    push    hl
+    ld      a,[sys_FadeLevel]
+    dec     a
+    ld      l,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    add     hl,hl   ; x16
+    add     hl,hl   ; x32
+    ld      d,h
+    ld      e,l
+    ld      hl,PalFadeWhiteTable
+    add     hl,de
+    ld      d,h
+    ld      e,l
+
+    pop     hl
+    ld      a,[hl]
+    add     e
+    ld      e,a
+    jr      nc,.nocarry
+    inc     d
+.nocarry
+    ld      a,[de]
+    ld      [hl+],a
+    dec     b
+    jr      nz,.loop
+    ret
+
+UpdatePalsBlack:
+    call    ConvertPals
+    ld      b,(3*4)*16
+    ld      hl,sys_PalBuffer
+.loop
+    push    hl
+    ld      a,[sys_FadeLevel]
+    dec     a
+    ld      l,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    add     hl,hl   ; x16
+    add     hl,hl   ; x32
+    ld      d,h
+    ld      e,l
+    ld      hl,PalFadeBlackTable
+    add     hl,de
+    ld      d,h
+    ld      e,l
+
+    pop     hl
+    ld      a,[hl]
+    add     e
+    ld      e,a
+    jr      nc,.nocarry
+    inc     d
+.nocarry
+    ld      a,[de]
+    ld      [hl+],a
+    dec     b
+    jr      nz,.loop
+    ret
+
+SyncPalettes:
+    ld      hl,sys_PalBuffer
+    ld      de,sys_PalTransferBuf
+    ld      b,8*8
+.syncloop
+    push    bc
+    push    hl
+    push    de
+    ld      a,[hl+]
+    ld      e,a
+    ld      a,[hl+]
+    ld      b,a
+    ld      a,[hl+]
+    ld      c,a
+    ld      a,e
+    call    CombineColors
+    pop     de
+    ld      a,l
+    ld      [de],a
+    inc     e
+    ld      a,h
+    ld      [de],a
+    inc     e
+    pop     hl
+    inc     hl
+    inc     hl
+    inc     hl
+    pop     bc
+    dec     b
+    jr      nz,.syncloop
     ret
 
 ; INPUT:     a = palette number to load into (bit 3 for object palette)
 ;           hl = palette pointer
 ; DESTROYS:  a, b, de, hl
 LoadPal:
-    and 15
-    bit 3,a
-    jr  nz,.obj
-    add a   ; x2
-    add a   ; x4
-    add a   ; x8
-    ld  b,a
-    ld  de,sys_BGPalBuffer
-    add e
-    ld  e,a
-    ld  a,b
-    set 7,a ; auto-increment
-    ldh [rBCPS],a
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rBCPD],a
-    ld  [de],a
-    inc e
+    push    af
+    xor     a
+    ld      [sys_FadeState],a
+    pop     af
+
+    and     15
+    bit     3,a
+    jr      nz,.obj
+    add     a   ; x2
+    add     a   ; x4
+    add     a   ; x8
+    ld      b,a
+    ld      de,sys_BGPalettes
+    add     e
+    ld      e,a
+
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
     ret
 .obj
-    add a   ; x2
-    add a   ; x4
-    add a   ; x8
-    ld  b,a
-    ld  de,sys_ObjPalBuffer
-    add e
-    ld  e,a
-    ld  a,b
-    set 7,a ; auto-increment
-    ldh [rOCPS],a
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
-    ld  a,[hl+]
-    ldh [rOCPD],a
-    ld  [de],a
-    inc e
+    sub     8
+    add     a   ; x2
+    add     a   ; x4
+    add     a   ; x8
+    ld      b,a
+    ld      de,sys_ObjPalettes
+    add     e
+    ld      e,a
+
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    ld      a,[hl+]
+    ld      [de],a
+    inc     e
     ret
-    
+
+ConvertPals:
+    call    CopyPalettes
+    ld      hl,sys_PalTransferBuf
+    ld      de,sys_PalBuffer
+    ld      b,8*8
+.loop
+    push    bc
+    ld      a,[hl+]
+    ld      b,a
+    ld      a,[hl+]
+    push    hl
+    ld      h,a
+    ld      l,b
+    call    SplitColors
+    ld      [de],a
+    inc     de
+    ld      a,b
+    ld      [de],a
+    inc     de
+    ld      a,c
+    ld      [de],a
+    inc     de
+    pop     hl
+    pop     bc
+    dec     b
+    jr      nz,.loop
+    ret
+
+CopyPalettes:
+    ld      hl,sys_Palettes
+    ld      de,sys_PalTransferBuf
+    ld      b,sys_ObjPalettes.end-sys_Palettes
+    call    _CopyRAMSmall
+    ret
+
 ; Takes a palette color and splits it into its RGB components.
 ; INPUT:    hl = color
 ; OUTPUT:    a = red
@@ -504,27 +388,27 @@ LoadPal:
 ;            c = blue
 SplitColors:
     push    de
-    ld  a,l         ; GGGRRRRR
-    and %00011111   ; xxxRRRRR
-    ld  e,a
-    ld  a,l
-    and %11100000   ; GGGxxxxx
-    swap    a       ; xxxxGGGx
-    rra             ; xxxxxGGG
-    ld  b,a
-    ld  a,h         ; xBBBBBGG
-    and %00000011   ; xxxxxxGG
-    swap    a       ; xxGGxxxx
-    rra             ; xxxGGxxx
-    or  b           ; xxxGGGGG
-    ld  b,a
-    ld  a,h         ; xBBBBBGG
-    and %01111100   ; xBBBBBxx
-    rra             ; xxBBBBBx
-    rra             ; xxxBBBBB
-    ld  c,a
-    ld  a,e
-    pop de
+    ld      a,l         ; GGGRRRRR
+    and     %00011111   ; xxxRRRRR
+    ld      e,a
+    ld      a,l
+    and     %11100000   ; GGGxxxxx
+    swap    a           ; xxxxGGGx
+    rra                 ; xxxxxGGG
+    ld      b,a
+    ld      a,h         ; xBBBBBGG
+    and     %00000011   ; xxxxxxGG
+    swap    a           ; xxGGxxxx
+    rra                 ; xxxGGxxx
+    or      b           ; xxxGGGGG
+    ld      b,a
+    ld      a,h         ; xBBBBBGG
+    and     %01111100   ; xBBBBBxx
+    rra                 ; xxBBBBBx
+    rra                 ; xxxBBBBB
+    ld      c,a
+    ld      a,e
+    pop     de
     ret
     
 ; Takes a set of RGB components and converts it to a palette color.
@@ -534,22 +418,88 @@ SplitColors:
 ; OUTPUT:   hl = color
 ; DESTROYS:  a
 CombineColors:
-    ld  h,0         ; hl = xxxxxxxx ????????
-    ld  l,a         ; hl = xxxxxxxx xxxRRRRR
-    ld  a,b         ;  a = xxxGGGGG
-    and %00000111   ;  a = xxxxxGGG
-    swap    a       ;  a = xGGGxxxx
-    rla             ;  a = GGGxxxxx
-    or  l           ;  a = GGGRRRRR
-    ld  l,a         ; hl = xxxxxxxx GGGRRRRR
-    ld  a,b         ;  a = xxxGGGGG
-    and %00011000   ;  a = xxxGGxxx
-    rla             ;  a = xxGGxxxx
-    swap    a       ;  a = xxxxxxGG
-    ld  h,a         ; hl = xxxxxxGG GGGRRRRR
-    ld  a,c         ;  a = xxxBBBBB
-    rla             ;  a = xxBBBBBx
-    rla             ;  a = xBBBBBxx
-    or  h           ;  a = xBBBBBGG
-    ld  h,a         ; hl = xBBBBBGG GGGRRRRR
+    ld      l,a         ; hl = ???????? xxxRRRRR
+    ld      a,b         ;  a = xxxGGGGG
+    and     %00000111   ;  a = xxxxxGGG
+    swap    a           ;  a = xGGGxxxx
+    rla                 ;  a = GGGxxxxx
+    or      l           ;  a = GGGRRRRR
+    ld      l,a         ; hl = ???????? GGGRRRRR
+    ld      a,b         ;  a = xxxGGGGG
+    and     %00011000   ;  a = xxxGGxxx
+    rla                 ;  a = xxGGxxxx
+    swap    a           ;  a = xxxxxxGG
+    ld      h,a         ; hl = xxxxxxGG GGGRRRRR
+    ld      a,c         ;  a = xxxBBBBB
+    rla                 ;  a = xxBBBBBx
+    rla                 ;  a = xBBBBBxx
+    or      h           ;  a = xBBBBBGG
+    ld      h,a         ; hl = xBBBBBGG GGGRRRRR
     ret
+
+PalFadeBlackTable:
+    db       0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+    db       0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30
+    db       0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,22,23,24,25,26,27,28,29
+    db       0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9,10,11,12,13,14,14,15,16,17,18,19,20,21,22,23,23,24,25,26,27,28
+    db       0, 1, 2, 3, 3, 4, 5, 6, 7, 8, 9,10,10,11,12,13,14,15,16,17,17,18,19,20,21,22,23,24,24,25,26,27
+    db       0, 1, 2, 3, 3, 4, 5, 6, 7, 8, 8, 9,10,11,12,13,13,14,15,16,17,18,18,19,20,21,22,23,23,24,25,26
+    db       0, 1, 2, 2, 3, 4, 5, 6, 6, 7, 8, 9,10,10,11,12,13,14,15,15,16,17,18,19,19,20,21,22,23,23,24,25
+    db       0, 1, 2, 2, 3, 4, 5, 5, 6, 7, 8, 9, 9,10,11,12,12,13,14,15,15,16,17,18,19,19,20,21,22,22,23,24
+    db       0, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 8, 9,10,10,11,12,13,13,14,15,16,16,17,18,19,19,20,21,22,22,23
+    db       0, 1, 1, 2, 3, 4, 4, 5, 6, 6, 7, 8, 9, 9,10,11,11,12,13,13,14,15,16,16,17,18,18,19,20,21,21,22
+    db       0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 8, 9, 9,10,11,12,12,13,14,14,15,16,16,17,18,18,19,20,20,21
+    db       0, 1, 1, 2, 3, 3, 4, 5, 5, 6, 6, 7, 8, 8, 9,10,10,11,12,12,13,14,14,15,15,16,17,17,18,19,19,20
+    db       0, 1, 1, 2, 2, 3, 4, 4, 5, 6, 6, 7, 7, 8, 9, 9,10,10,11,12,12,13,13,14,15,15,16,17,17,18,18,19
+    db       0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7, 8, 8, 9, 9,10,10,11,12,12,13,13,14,15,15,16,16,17,17,18
+    db       0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 7, 8, 8, 9, 9,10,10,11,12,12,13,13,14,14,15,15,16,16,17
+    db       0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,10,10,11,11,12,12,13,13,14,14,15,15,16
+    db       0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,10,10,11,11,12,12,13,13,14,14,15,15
+    db       0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9,10,10,11,11,12,12,13,13,14,14
+    db       0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 9, 9,10,10,10,11,11,12,12,13,13
+    db       0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9,10,10,10,11,11,12,12
+    db       0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 9, 9, 9,10,10,10,11,11
+    db       0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9,10,10
+    db       0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 8, 8, 8, 8, 9, 9
+    db       0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8
+    db       0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7
+    db       0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6
+    db       0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5
+    db       0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4
+    db       0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3
+    db       0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2
+    db       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+    db       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+PalFadeWhiteTable:
+    db       1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,31
+    db       2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,31
+    db       3, 4, 5, 6, 7, 8, 9,10,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,25,26,27,28,29,30,31,31
+    db       4, 5, 6, 7, 8, 9, 9,10,11,12,13,14,15,16,17,18,18,19,20,21,22,23,24,25,26,27,27,28,29,30,31,31
+    db       5, 6, 7, 8, 8, 9,10,11,12,13,14,15,15,16,17,18,19,20,21,22,22,23,24,25,26,27,28,29,29,30,31,31
+    db       6, 7, 8, 9, 9,10,11,12,13,14,14,15,16,17,18,19,19,20,21,22,23,24,24,25,26,27,28,29,29,30,31,31
+    db       7, 8, 9, 9,10,11,12,13,13,14,15,16,17,17,18,19,20,21,22,22,23,24,25,26,26,27,28,29,30,30,31,31
+    db       8, 9,10,10,11,12,13,13,14,15,16,17,17,18,19,20,20,21,22,23,23,24,25,26,27,27,28,29,30,30,31,31
+    db       9,10,10,11,12,13,13,14,15,16,16,17,18,19,19,20,21,22,22,23,24,25,25,26,27,28,28,29,30,31,31,31
+    db      10,11,11,12,13,14,14,15,16,16,17,18,19,19,20,21,21,22,23,23,24,25,26,26,27,28,28,29,30,31,31,31
+    db      11,12,12,13,14,14,15,16,16,17,18,18,19,20,20,21,22,23,23,24,25,25,26,27,27,28,29,29,30,31,31,31
+    db      12,13,13,14,15,15,16,17,17,18,18,19,20,20,21,22,22,23,24,24,25,26,26,27,27,28,29,29,30,31,31,31
+    db      13,14,14,15,15,16,17,17,18,19,19,20,20,21,22,22,23,23,24,25,25,26,26,27,28,28,29,30,30,31,31,31
+    db      14,15,15,16,16,17,17,18,19,19,20,20,21,22,22,23,23,24,24,25,26,26,27,27,28,29,29,30,30,31,31,31
+    db      15,16,16,17,17,18,18,19,19,20,20,21,22,22,23,23,24,24,25,25,26,27,27,28,28,29,29,30,30,31,31,31
+    db      16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,31
+    db      17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,31,31,31,31
+    db      18,18,19,19,20,20,21,21,22,22,23,23,23,24,24,25,25,26,26,27,27,27,28,28,29,29,30,30,31,31,31,31
+    db      19,19,20,20,21,21,22,22,22,23,23,24,24,24,25,25,26,26,27,27,27,28,28,29,29,29,30,30,31,31,31,31
+    db      20,20,21,21,22,22,22,23,23,23,24,24,25,25,25,26,26,27,27,27,28,28,29,29,29,30,30,30,31,31,31,31
+    db      21,21,22,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,28,28,28,29,29,30,30,30,31,31,31,31,31
+    db      22,22,23,23,23,24,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,30,30,30,31,31,31,31,31
+    db      23,23,24,24,24,24,25,25,25,26,26,26,26,27,27,27,28,28,28,29,29,29,29,30,30,30,31,31,31,31,31,31
+    db      24,24,25,25,25,25,26,26,26,26,27,27,27,27,28,28,28,28,29,29,29,29,30,30,30,30,31,31,31,31,31,31
+    db      25,25,25,26,26,26,26,27,27,27,27,27,28,28,28,28,29,29,29,29,30,30,30,30,30,31,31,31,31,31,31,31
+    db      26,26,26,27,27,27,27,27,28,28,28,28,28,29,29,29,29,29,29,30,30,30,30,30,31,31,31,31,31,31,31,31
+    db      27,27,27,27,28,28,28,28,28,28,29,29,29,29,29,29,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31
+    db      28,28,28,28,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31,31,31
+    db      29,29,29,29,29,29,30,30,30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31
+    db      30,30,30,30,30,30,30,30,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31
+    db      31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31

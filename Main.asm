@@ -70,7 +70,7 @@ EntryPoint::
 NintendoLogo:   ds  48,0                        ; Nintendo logo bitmap (handled by post-linking tool)
 ROMTitle:       dbp "REBOUND",15,0              ; ROM title (15 bytes)
 GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80 = DMG/GBC, $C0 = GBC only)
-NewLicenseCode: db  "DV"                        ; new license code (2 bytes)
+NewLicenseCode: db  "56"                        ; new license code (2 bytes)
 SGBSupport:     db  0                           ; SGB support
 CartType:       db  $19                         ; Cart type, see hardware.inc for a list of values
 ROMSize:        db  0                           ; ROM size (handled by post-linking tool)
@@ -172,6 +172,7 @@ EmuScreen:
     ld      hl,Pal_EmuScreen
     xor     a
     call    LoadPal
+    call    UpdatePalettes
     ld      hl,Font
     ld      de,$8000
     call    DecodeWLE
@@ -340,6 +341,8 @@ DoVBlank::
     ld  a,1
     ld  [sys_VBlankFlag],a      ; set VBlank flag
     
+    call    UpdatePalettes
+
     ld  a,[sys_CurrentFrame]
     inc a
     ld  [sys_CurrentFrame],a    ; increment current frame
@@ -364,8 +367,6 @@ DoVBlank::
     ld      a,[Engine_CameraY]
     ldh     [rSCY],a
     rst     DoOAMDMA
-    
-;   call    Pal_DoFade
 
     ; A+B+Start+Select restart sequence
     ld      a,[sys_btnHold]
@@ -399,8 +400,10 @@ DoVBlank::
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
 
-    call    VGMSFX_Update
+    farcall VGMSFX_Update
     farcall DevSound_Play
+
+    call    Pal_DoFade
 
     pop     hl
     pop     de

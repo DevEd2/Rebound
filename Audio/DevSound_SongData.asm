@@ -172,6 +172,8 @@ wave_MenuTri:       db      $68,$8c,$ef,$fd,$b9,$75,$32,$02,$68,$8c,$ef,$fd,$b9,
 
 wave_ForestBass:    db      $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,$44,$44,$45
 
+wave_DirtyOctTri:   db      $11,$36,$9b,$de,$ec,$98,$75,$53,$21,$26,$9c,$ee,$dc,$99,$85,$43 
+
 waveseq_Tri:            db  0,$ff
 waveseq_DesertLead:     db  1,$ff
 waveseq_DesertSquare:   db  2,$ff
