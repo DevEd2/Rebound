@@ -185,7 +185,6 @@ EmuScreen:
 EmuLoop:
     jr      EmuLoop
 GBCOnlyScreen:
-    ld      b,b
     xor     a
     ld      [sys_GBType],a
     
@@ -231,14 +230,14 @@ EmuText:
     db  "                    "
     db  "                    "
     db  "   THIS GAME WILL   "
-    db  "  NOT WORK IN THIS  "
+    db  "  NOT WORK IN YOUR  "
     db  "      EMULATOR.     "
     db  "                    "
     db  "    PLEASE USE A    "
     db  "   NEWER EMULATOR   "
-    db  "   SUCH AS BGB OR   "
-    db  "   SAMEBOY TO RUN   "
-    db  "      THIS GAME.    "
+    db  " SUCH AS SAMEBOY OR "
+    db  "  BGB TO PLAY THIS  "
+    db  "        GAME.       "
     db  "                    "
     db  "                    "
     db  "                    "
