@@ -99,6 +99,8 @@ ProgramStart::
     jr  nz,.wait
     xor a
     ldh [rLCDC],a   ; disable LCD
+
+    farcall DevSound_Stop   ; prevent glitch music from playing
     
 ; init memory
 ;   ld      hl,$c000    ; start of WRAM
@@ -171,12 +173,13 @@ EmuScreen:
     xor     a
     call    LoadPal
     call    CopyPalettes
+
     ld      hl,Font
     ld      de,$8000
     call    DecodeWLE
     ld      hl,EmuText
     call    LoadTilemapText
-    call    DevSound_Stop
+
     ld      a,%10010001
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
@@ -199,7 +202,6 @@ GBCOnlyScreen:
     
     ld      a,%10010001
     ldh     [rLCDC],a
-    
     ld      a,IEF_VBLANK
     ldh     [rIE],a
     
@@ -269,7 +271,7 @@ SkipGBCScreen:
     
     call    DoubleSpeed
     
-    jp      GM_DebugMenu
+    jp      GM_SplashScreens
     
 ; ================================
 
@@ -277,10 +279,8 @@ include "Engine/DebugMenu.asm"
 
 ; ================================
 
-GM_SplashScreens:
-    ; TODO
-    ret
-    
+include "Engine/SplashScreens.asm"
+
 ; ================================
 
 GM_TitleAndMenus:
@@ -289,7 +289,13 @@ GM_TitleAndMenus:
 
 ; ================================
 
+include "Engine/SoundTest.asm"
+
+; ================================
+
 include "Engine/Level.asm"
+
+; ================================
     
 ; Metatile format:
 ; 16x16, 2 bytes per tile
@@ -588,6 +594,27 @@ _CopyTileset1BPPSafe::              ; same as _CopyTileset1BPP, but waits for VR
     jr  nz,_CopyTileset1BPP         ; if bc != 0, loop
     ret
 
+LoadTilemapScreen:
+    ld  de,_SCRN0
+    ld  b,$12
+    ld  c,$14
+.loop
+    ld  a,[hl+]
+    ld  [de],a
+    inc de
+    dec c
+    jr  nz,.loop
+    ld  c,$14
+    ld  a,e
+    add $C
+    jr  nc,.continue
+    inc d
+.continue
+    ld  e,a
+    dec b
+    jr  nz,.loop
+    ret
+
 LoadTilemapText:
     ld  de,_SCRN0
     ld  b,$12
@@ -768,6 +795,12 @@ Pal_Grayscale:
     RGB 10,10,10
     RGB  0, 0, 0
 
+Pal_GrayscaleInverted:
+    RGB  0, 0, 0
+    RGB 10,10,10
+    RGB 20,20,20
+    RGB 31,31,31
+
 Pal_DebugScreen:
     RGB 31,31,31
     RGB  0, 0, 0
@@ -830,10 +863,6 @@ ParallaxTiles_End:
 
     incbin  "GFX/TestTiles.2bpp"
 TestMapTiles_End:
-
-section "Player tiles",romx,align[8]
-PlayerTiles:
-    incbin  "GFX/PlayerTiles.2bpp"
 
 ; ==========
 ; Level data

@@ -179,7 +179,7 @@ ENDM
 PlaySFX:    macro
     ld      a,bank(SFX_\1)
     ld      hl,SFX_\1
-    call    VGMSFX_Init
+    farcall VGMSFX_Init
 endm
     
 ; === Project-specific macros ===
@@ -207,6 +207,8 @@ sys_JoypadFlag:     db
 sys_EmuCheck:       db
 
 sys_EnableHDMA:     db
+sys_TilemapBuffer:  ds  20*18
+
 ; project-specific
 
 section "Zeropage",hram

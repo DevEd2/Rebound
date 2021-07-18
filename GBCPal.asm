@@ -59,6 +59,7 @@ SetColor::
 ;           c = OBJ palette mask
 ; DESTROYS: a
 PalFadeInWhite:
+    call    AllPalsWhite
     ld      a,%00000001
     ld      e,31
     jr      _InitFade
@@ -69,6 +70,7 @@ PalFadeOutWhite:
     jr      _InitFade
     
 PalFadeInBlack:
+    call    AllPalsBlack
     ld      a,%00000011
     ld      e,31
     jr      _InitFade
@@ -90,10 +92,14 @@ _InitFade:
 
 ; Must be run during VBlank, otherwise exits
 UpdatePalettes:
+    ldh     a,[rLCDC]
+    bit     7,a         ; is LCD on?
+    jr      z,.skiply
     ldh     a,[rLY]
     cp      144
     ret     c
     ; bg palettes
+.skiply
     ld      a,$80
     ldh     [rBCPS],a
     ld      hl,sys_BGPalTransferBuf
@@ -347,6 +353,27 @@ LoadPal:
     ld      a,[hl+]
     ld      [de],a
     inc     e
+    ret
+
+AllPalsWhite:
+    ld      hl,sys_PalTransferBuf
+    ld      b,sys_PalBuffer-sys_PalTransferBuf
+    ld      a,$ff
+.loop
+    ld      [hl+],a
+    xor     %10000000
+    dec     b
+    jr      nz,.loop
+    ret
+
+AllPalsBlack:
+    ld      hl,sys_PalTransferBuf
+    ld      b,sys_PalBuffer-sys_PalTransferBuf
+    xor     a
+.loop
+    ld      [hl+],a
+    dec     b
+    jr      nz,.loop
     ret
 
 ConvertPals:

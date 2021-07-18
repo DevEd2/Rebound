@@ -762,3 +762,9 @@ AnimatePlayer:
     db      F_Player_Right2,2
     db      F_Player_Right1,2
     dbw     C_SetAnim,Anim_Player_Idle
+
+; ================================
+
+section "Player tiles",romx,align[8]
+PlayerTiles:
+    incbin  "GFX/PlayerTiles.2bpp"

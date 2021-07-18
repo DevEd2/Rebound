@@ -15,6 +15,9 @@ Engine_CameraTargetY:       db
 Engine_LockCamera:          db
 Engine_LastRow:             db
 
+section "Level background buffer",wram0,align[8]
+Engine_BackgroundBuffer:    ds  16*16
+
 section "Level memory",wramx[$d000]
 Engine_LevelData:       ds  256*16
 
@@ -42,7 +45,6 @@ GM_Level:
     jr      nz,.loop
 
     call    ConvertPals
-
     call    PalFadeInWhite
 
     ; TODO: Load "background" graphics from map header

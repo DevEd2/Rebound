@@ -19,14 +19,6 @@ GM_DebugMenu:
     ld      hl,Debug_MainMenuText
     call    LoadTilemapText
 
-    call    DevSound_Stop
-;   ld      a,%10000000
-;   ldh     [rNR52],a   ; enable sound
-;   or      %11111111
-;   ldh     [rNR51],a   ; output sound to left+right speakers
-;   xor     %10001000
-;   ldh     [rNR50],a   ; disable VIN + global volume left/right to 7
-
     ld      a,3
     ld      [Debug_MenuMax],a
     xor     a
@@ -44,6 +36,8 @@ DebugLoop:
     ld      a,[sys_btnPress]
     bit     btnStart,a
     jr      nz,Debug_Exit
+    bit     btnSelect,a
+    jp      nz,GM_SoundTest
 
     bit     btnUp,a
     jr      z,.checkdown
@@ -75,7 +69,6 @@ DebugLoop:
 .checka
     bit     btnA,a
     jr      z,.drawcursor
-    ; TODO
     PlaySFX menuselect
 
 .drawcursor
