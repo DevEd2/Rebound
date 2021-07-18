@@ -187,6 +187,7 @@ EmuLoop:
     halt
     jr      EmuLoop
 GBCOnlyScreen:
+    ld      b,b
     xor     a
     ld      [sys_GBType],a
     
@@ -203,10 +204,8 @@ GBCOnlyScreen:
     
     ld      a,IEF_VBLANK
     ldh     [rIE],a
-    ei
     
 GBCOnlyLoop:
-    halt
     jr      GBCOnlyLoop
 
 GBCOnlyText:    ; 20x18 char tilemap
@@ -223,7 +222,7 @@ GBCOnlyText:    ; 20x18 char tilemap
     db  "   GAME BOY COLOR   "
     db  "    OR A GAME BOY   "
     db  "     ADVANCE TO     "
-    db  "   RUN THIS GAME.   "
+    db  "   PLAY THIS GAME.  "
     db  "                    "
     db  "                    "
     db  "                    "
