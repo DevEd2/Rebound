@@ -1,5 +1,7 @@
 section "Sound test RAM",wram0
 
+SoundTest_SongID:	db
+
 ; ================
 
 section "Sound test routines",rom0
@@ -15,6 +17,21 @@ GM_SoundTest:
 	ld		bc,SoundTestTiles.end-SoundTestTiles
 	call	_CopyTileset
 
+	; load bottom half of font
+	ld		a,1
+	ldh		[rVBK],a
+	ld		hl,SoundTestFontBottom
+	ld		de,$8000 + (" " * 16)
+	push	de
+	call	DecodeWLE
+	; load top half of font
+	xor		a
+	ldh		[rVBK],a
+	ld		hl,SoundTestFontTop
+	pop		de
+	call	DecodeWLE
+
+
 	ld		hl,SoundTestMap
 	ld		de,sys_TilemapBuffer
 	ld		bc,SoundTestMap.end-SoundTestMap
@@ -23,24 +40,96 @@ GM_SoundTest:
 	ld		hl,sys_TilemapBuffer
 	call	LoadTilemapScreen
 
+	ld		a,1
+	ldh		[rVBK],a
+	ld		hl,SoundTest_AttributeMap
+	ld		de,$9800
+	ld		bc,SoundTest_AttributeMap.end-SoundTest_AttributeMap
+	call	_CopyRAM
+
 	ld		hl,Pal_SoundTest
 	xor		a
 	call	LoadPal
 	ld		a,1
 	call	LoadPal
+	; hl = Pal_SoundTestCursor
+	ld		a,8
+	call	LoadPal
     call    ConvertPals
     call    PalFadeInWhite
     call	UpdatePalettes
 
-	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
+	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ16
 	ldh		[rLCDC],a
 	ld		a,IEF_VBLANK
 	ldh		[rIE],a
 	ei
 
+	xor		a
+	ld		[SoundTest_SongID],a
+	farcall	DS_Init
+
 SoundTestLoop:
+	ld		hl,OAMBuffer
+	; left cursor Y pos
+	ld		a,144
+	ld		[hl+],a
+	; left cursor X pos
+	ld		a,[sys_CurrentFrame]
+	and		$1f
+	ld		de,SoundTest_CursorOscillationTable
+	add		e
+	ld		e,a
+	jr		nc,.nocarry
+	inc		d
+.nocarry
+	ld		a,[de]
+	add		8
+	ld		[hl+],a
+	; left cursor tile
+	ld		a,4
+	ld		[hl+],a
+	; left cursor attributes
+	xor		a
+	ld		[hl+],a
+
+	; right cursor Y pos
+	ld		a,144
+	ld		[hl+],a
+	; right cursor X pos
+	ld		a,[de]
+	cpl
+	add		162
+	ld		[hl+],a
+	; right cursor tile
+	ld		a,6
+	ld		[hl+],a
+	; left cursor attributes
+	xor		a
+	ld		[hl+],a
+
 	halt
 	jr		SoundTestLoop
+
+SoundTest_CursorOscillationTable:
+	db		 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1
+	db		 0, 0,-1,-1,-1,-2,-2,-2,-2,-2,-2,-2,-2,-1,-1,-1
+
+; ================
+
+SoundTest_SongNames:
+;		 -##################-------------
+	db	"     Main Theme                 "
+	db	" Humble  Beginnings             "
+	db	"   Rock the Block               "
+	db	"    Pyramid Jams                "
+	db	"   Mystic  Medley               "
+	db	"   Temple of ????               " ; TODO: Come up with a name for the temple tune
+	db	"    Bonus  Time!                "
+	db	"    Happy Ending                "
+.end
+
+NUM_SONGS	equ	(SoundTest_SongNames.end-SoundTest_SongNames)/32
 
 ; ================
 
@@ -159,31 +248,37 @@ Pal_SoundTest:
 	RGB     31,31, 0
 	RGB     31,31,31
 
+Pal_SoundTestCursor:
+	RGB		31, 0,31
+	RGB		 5, 5, 5
+	RGB		10,10,10
+	RGB		15,15,15
+
 SoundTest_AttributeMap:
-	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1	
-	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+	db		8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
 .end
 
 SoundTestMap:
 	;       # # # # # # # # # # # # # # # # # # # # 
-	db		1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,4,4,4,4,4
-	db		1,1,1,1,1,1,1,1,1,1,2,0,0,0,0,0,0,0,0,0
+	db		"SOUND TEST",		2,3,3,3,3,3,3,3,3,3
+	db		"SOUND TEST",       1,0,0,0,0,0,0,0,0,0
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -198,6 +293,9 @@ SoundTestMap:
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-	db		1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+	db		"                    "
+	db		"                    "
 .end
+
+SoundTestFontTop:		incbin	"GFX/SoundTestFontTop.2bpp.wle"
+SoundTestFontBottom:	incbin	"GFX/SoundTestFontBottom.2bpp.wle"

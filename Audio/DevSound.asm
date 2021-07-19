@@ -173,6 +173,8 @@ GlobalSpeed2::      db
 GlobalTimer::       db
 TickCount::         db
 SoundEnabled::      db
+FadeType::          db
+FadeTimer::         db
 
 CH1Enabled::        db
 CH2Enabled::        db
@@ -291,6 +293,7 @@ DevSound_JumpTable:
 DS_Init:    jp  DevSound_Init
 DS_Play:    jp  DevSound_Play
 DS_Stop:    jp  DevSound_Stop
+DS_Fade:    jp  DevSound_Fade
 
 ; Driver thumbprint
 db  "DevSound Lite by DevEd | email: deved8@gmail.com"
@@ -443,8 +446,9 @@ DevSound_Init:
     ld      [GlobalSpeed2],a
     ld      a,%10000000
     ldh     [rNR52],a
-    ld      a,$FF
+    or      %01111111   ; a = $FF
     ldh     [rNR51],a
+    xor     %10001000   ; a = $77
     ldh     [rNR50],a
     ret
 
@@ -460,6 +464,22 @@ DevSound_Stop:
     ld      [CH3Enabled],a
     ld      [CH4Enabled],a
     ld      [SoundEnabled],a
+    ret
+
+; ================================================================
+; Fade routine
+; Note: if planning to call both this and DS_Init, call this first.
+; ================================================================
+
+DevSound_Fade:
+    and     3
+    cp      3
+    ret     z   ; 3 is an invalid value, silently ignore it
+    inc     a   ; Increment...
+    set     2,a ; Mark this fade as the first
+    ld      [FadeType],a
+    ld      a,7
+    ld      [FadeTimer],a
     ret
     
 ; ================================================================
@@ -1542,8 +1562,73 @@ UpdateRegisters:
     add     b
     ldh     [rNR51],a
 
-    ; update global volume
+    ; update global volume + fade system
+    ld      a,[FadeType]
+    ld      b,a
+    and     3                   ; Check if no fade
+    jr      z,.updateVolume     ; Update volume
+
+    bit     2,b ; Check if on first fade
+    jr      z,.notfirstfade
+    res     2,b
+    ld      a,b
+    ld      [FadeType],a
+    dec     a
+    dec     a                   ; If fading in (value 2), volume is 0 ; otherwise, it's 7
+    jr      z,.gotfirstfadevolume
+    ld      a,7
+.gotfirstfadevolume
+    ld      [GlobalVolume],a
+.notfirstfade
+
+    ld      a,[FadeTimer]
+    and     a
+    jr      z,.doupdate
+    dec     a
+    ld      [FadeTimer],a
+    jr      .updateVolume
+.fadeout
     ld      a,[GlobalVolume]
+    and     a
+    jr      z,.fadeFinished
+.decrementVolume
+    dec     a
+    ld      [GlobalVolume],a
+    jr      .directlyUpdateVolume
+.fadein
+    ld      a,[GlobalVolume]
+    cp      7
+    jr      z,.fadeFinished
+    inc     a
+    ld      [GlobalVolume],a
+    jr      .directlyUpdateVolume
+.doupdate
+    ld      a,7
+    ld      [FadeTimer],a
+    ld      a,[FadeType]
+    and     3
+    dec     a
+    jr      z,.fadeout
+    dec     a
+    jr      z,.fadein
+    dec     a
+    ld      a,[GlobalVolume]
+    jr      nz,.directlyUpdateVolume
+.fadeoutstop
+    and     a
+    jr      nz,.decrementVolume
+    call    DevSound_Stop
+    xor a
+.fadeFinished
+    ; a is zero
+    ld      [FadeType],a
+.updateVolume
+    ld      a,[GlobalVolume]
+.directlyUpdateVolume
+    and     7
+    ld      b,a
+    swap    a
+    or      b
     ldh     [rNR50],a
     
 CH1_UpdateRegisters:
