@@ -65,7 +65,8 @@ GM_SoundTest:
     ldh     [rIE],a
     ei
 
-    xor     a
+;    xor     a
+    ld      a,1
     ld      [SoundTest_SongID],a
     farcall DS_Init
 

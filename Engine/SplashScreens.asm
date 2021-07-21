@@ -109,7 +109,7 @@ GM_SplashScreens:
 	xor		a
 	ldh		[rLCDC],a
 
-	jp		GM_DebugMenu
+	jp		GM_Level
 
 SplashScreensLoop:
 	ld		a,[Splash_Timer]

@@ -97,9 +97,7 @@ DebugLoop:
 
 Debug_Exit:
     halt
-    xor     a
-    ldh     [rLCDC],a
-    jp      GM_Level
+    jp      GM_SplashScreens
 
 Debug_MainMenuText:
     db  "                    "

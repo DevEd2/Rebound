@@ -271,7 +271,7 @@ SkipGBCScreen:
     
     call    DoubleSpeed
     
-    jp      GM_SplashScreens
+    jp      GM_DebugMenu
     
 ; ================================
 
