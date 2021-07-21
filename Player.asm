@@ -482,13 +482,31 @@ Player_SpeedToPos::
     
 Player_Bounce:
     xor     a
-    ld      [Player_YSubpixel],a  ; reset subpixel (prevents camera glitches)
-    ld      a,[Player_YVelocity]
+    ld      [Player_YSubpixel],a    ; reset subpixel
+    ld      a,[Player_LastBounceY]
     ld      b,a
     ld      a,[Player_YPos]
-;   sub     b
-    ld      [Player_YPos],a
     ld      [Player_LastBounceY],a
+    push    af
+    cp      b                       ; compare previous bounce Y with current bounce Y
+    jr      nc,.skipcamtrack        ; if old Y < new Y, skip tracking
+    ld      a,1
+    ld      [Engine_CameraIsTracking],a
+.skipcamtrack
+    pop     af
+.checkup
+    sub     SCRN_Y / 2
+    jr      nc,.checkdown
+    xor     a
+    jr      .setcamy
+.checkdown
+    cp      256 - SCRN_Y
+    jr      c,.setcamy
+    ld      a,256 - SCRN_Y
+.setcamy
+    and     %11110000
+    ld      [Engine_BounceCamTarget],a
+
     ld      a,[sys_btnHold]
     bit     btnA,a
     jr      nz,.highbounce
