@@ -1,6 +1,30 @@
 ; ================================================================
 ; DevSound song data
 ; ================================================================
+
+; Song constants
+
+
+    const_def
+
+    const   MUS_MENU
+    const   MUS_PLAINS
+;   const   MUS_CITY
+    const   MUS_PYRAMID
+;   const   MUS_CAVE
+;   const   MUS_FOREST
+;   const   MUS_TEMPLE
+    const   MUS_PLAINS_CLEAR
+;   const   MUS_CITY_CLEAR
+;   const   MUS_PYRAMID_CLEAR
+;   const   MUS_FOREST_CLEAR
+;   const   MUS_CAVE_CLEAR
+;   const   MUS_TEMPLE_CLEAR
+;   const   MUS_PLAYER_DOWN
+;   const   MUS_BONUS
+;   const   MUS_CREDITS
+
+NUM_SONGS   equ const_value
     
 ; =================================================================
 ; Song speed table
@@ -11,25 +35,36 @@ SongSpeedTable:
     db  6,6 ; plains
 ;   db  3,3 ; city
     db  4,5 ; pyramid
+;   db  3,3 ; cave
 ;   db  3,3 ; forest
 ;   db  3,3 ; temple
+    db  6,6 ; plains stage clear
+;   db  3,3 ; city stage clear
+;   db  3,3 ; pyramid stage clear
+;   db  3,3 ; forest stage clear
+;   db  3,3 ; cave stage clear
+;   db  3,3 ; temple stage clear
+;   db  3,3 ; player down
 ;   db  3,3 ; bonus stage
 ;   db  3,3 ; credits
-;   db  3,3 ; stage clear
-;   db  3,3 ; player down
-    
-    
+
 SongPointerTable:
     dw  PT_Menu
     dw  PT_Plains
 ;   dw  PT_City
     dw  PT_Pyramid
+;   dw  PT_Cave
 ;   dw  PT_Forest
 ;   dw  PT_Temple
+    dw  PT_PlainsClear
+;   dw  PT_CityClear
+;   dw  PT_PyramidClear
+;   dw  PT_ForestClear
+;   dw  PT_CaveClear
+;   dw  PT_TempleClear
+;   dw  PT_PlayerDown
 ;   dw  PT_Bonus
 ;   dw  PT_Credits
-;   dw  PT_StageClear
-;   dw  PT_PlayerDown
 
 ; =================================================================
 ; Volume sequences
@@ -1329,7 +1364,6 @@ Plains_CH3:
     db      G_3,2
     db      G_2,2
     db      C_3,4
-    
     db      D_3,2
     db      F_3,2
     db      D_3,2
@@ -1366,3 +1400,69 @@ Plains_CH4:
     Drum    Snare,2
     Drum    Kick,2
     dbw     Goto,Plains_CH4
+
+; =================================================================
+
+PT_PlainsClear: dw  PlainsClear_CH1,PlainsClear_CH2,PlainsClear_CH3,PlainsClear_CH4
+
+PlainsClear_CH1:
+    db      SetInstrument,_PlainsEcho
+    db      rest,4
+    dbw     Goto,PlainsClear_CH2.skipinit
+
+PlainsClear_CH2:
+    db      SetInstrument,_PlainsLead
+.skipinit
+    db      G_4,4
+    db      G_4,2
+    db      D_4,2
+    db      F_4,2
+    db      D_4,4
+    db      C_4,4
+    db      D_4,4
+    db      F_4,2
+    db      G_4,4
+    db      B_4,2
+    db      G_4,2
+    db      rest,2
+    db      EndChannel
+
+PlainsClear_CH3:
+    db      SetInstrument,_PlainsBass
+    db      G_2,2
+    db      G_3,2
+    db      G_2,2
+    db      C_3,4
+    db      D_3,2
+    db      F_3,2
+    db      D_3,2
+    db      G_2,2
+    db      G_3,2
+    db      G_2,2
+    db      F_3,4
+    db      D_3,2
+    db      C_3,2
+    db      D_3,2
+    db      G_3,4
+    db      rest,2
+    db      EndChannel
+
+PlainsClear_CH4:
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Snare,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Snare,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Snare,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Kick,2
+    Drum    Snare,2
+    Drum    Kick,2
+    Drum    Kick,2
+    db      EndChannel

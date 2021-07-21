@@ -65,8 +65,8 @@ GM_SoundTest:
     ldh     [rIE],a
     ei
 
-;    xor     a
-    ld      a,1
+;   xor     a
+    ld      a,MUS_PLAINS
     ld      [SoundTest_SongID],a
     farcall DS_Init
 
@@ -125,12 +125,16 @@ SoundTest_SongNames:
     db  "   Rock the Block               "
     db  "    Pyramid Jams                "
     db  "   Mystic  Medley               "
-    db  "   Temple of ????               " ; TODO: Come up with a name for the temple tune
+    db  "   Cave Cacophony               "
+    db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune
+    db  "  Plains Perfected              "
+    db  "   City Completed               "
+    db  "   Pyramid Passed               "
+    db  "  Forest  Flourish              "
+    db  "   Temple Triumph               "
     db  "    Bonus  Time!                "
-    db  "    Happy Ending                "
+    db  "     Staff Roll                 "
 .end
-
-NUM_SONGS   equ (SoundTest_SongNames.end-SoundTest_SongNames)/32
 
 ; ================
 

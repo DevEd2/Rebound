@@ -802,7 +802,7 @@ Pal_GrayscaleInverted:
     RGB 31,31,31
 
 Pal_DebugScreen:
-    RGB 31,31,31
+    RGB  0,15,31
     RGB  0, 0, 0
     RGB  0, 0, 0
     RGB 31,31,31
