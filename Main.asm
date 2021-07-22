@@ -116,24 +116,8 @@ ProgramStart::
     dec     b
     jr      nz,.loop
     call    CopyDMARoutine
-;   rst     DoOAMDMA
     
-    ; clear VRAM
-    ldh     [rVBK],a
-    ld      hl,$8000
-    ld      bc,$2000
-    rst     FillRAM
-    
-    ld      a,1
-    ldh     [rVBK],a
-    ldh     [sys_TempSVBK],a
-    xor     a
-    ld      hl,$8000
-    ld      bc,$2000
-    rst     FillRAM
-    xor     a
-    ldh     [rVBK],a
-    
+    call    ClearScreen
     
 ; check GB type
 ; sets sys_GBType to 0 if DMG/SGB/GBP/GBL/SGB2, 1 if GBC, 2 if GBA/GBA SP/GB Player
@@ -263,12 +247,7 @@ SkipGBCScreen:
     ld      [Engine_CameraX],a
     ld      [Engine_CameraY],a
     ld      [sys_EnableHDMA],a
-    ; clear OAM buffer
-    ld      hl,OAMBuffer
-    ld      b,40*4
-    xor     a
-    call    _FillRAMSmall
-    
+        
     call    DoubleSpeed
     
     jp      GM_DebugMenu
@@ -675,6 +654,35 @@ _Bankswitch:
     ldh     [sys_CurrentBank],a
     ld      [rROMB0],a
     pop     af
+    ret
+
+ClearScreen:
+    ; clear VRAM
+    xor     a
+    ldh     [rVBK],a
+    ld      hl,$8000
+    ld      bc,$2000
+    rst     FillRAM
+    
+    ld      a,1
+    ldh     [rVBK],a
+    ldh     [sys_TempSVBK],a
+    xor     a
+    ld      hl,$8000
+    ld      bc,$2000
+    rst     FillRAM
+    xor     a
+    ldh     [rVBK],a
+    ; clear OAM
+    ld      hl,OAMBuffer
+    ld      b,OAMBuffer.end-OAMBuffer
+    xor     a
+    call    _FillRAMSmall
+
+    ; reset scrolling
+    xor     a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
     ret
     
 ; Fill RAM with a value.
