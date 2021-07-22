@@ -26,7 +26,7 @@ bSFX_CH4    equ 3
 bSFX_Ctrl   equ 4
 bSFX_Enable equ 7
 
-section "VGMSFX",romx
+section "VGMSFX",rom0
 
 ;  A = SFX bank
 ; HL = SFX pointer

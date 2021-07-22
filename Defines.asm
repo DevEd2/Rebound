@@ -179,7 +179,7 @@ ENDM
 PlaySFX:    macro
     ld      a,bank(SFX_\1)
     ld      hl,SFX_\1
-    farcall VGMSFX_Init
+    call    VGMSFX_Init
 endm
     
 ; === Project-specific macros ===

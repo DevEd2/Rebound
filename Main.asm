@@ -411,7 +411,7 @@ DoVBlank::
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
 
-    farcall VGMSFX_Update
+    call    VGMSFX_Update
     farcall DevSound_Play
 
     call    Pal_DoFade
