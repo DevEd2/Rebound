@@ -517,9 +517,38 @@ _WaitJoypad:
 ; Graphics routines
 ; =================
 
-include "GBCPal.asm"
+include "Engine/GBCPal.asm"
 
 ; =========
+
+ClearScreen:
+    ; clear VRAM
+    xor     a
+    ldh     [rVBK],a
+    ld      hl,$8000
+    ld      bc,$2000
+    rst     FillRAM
+    
+    ld      a,1
+    ldh     [rVBK],a
+    ldh     [sys_TempSVBK],a
+    xor     a
+    ld      hl,$8000
+    ld      bc,$2000
+    rst     FillRAM
+    xor     a
+    ldh     [rVBK],a
+    ; clear OAM
+    ld      hl,OAMBuffer
+    ld      b,OAMBuffer.end-OAMBuffer
+    xor     a
+    call    _FillRAMSmall
+
+    ; reset scrolling
+    xor     a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
+    ret
 
 _CopyTileset::                      ; WARNING: Do not use while LCD is on!
     ld  a,[hl+]                     ; get byte
@@ -655,35 +684,6 @@ _Bankswitch:
     ld      [rROMB0],a
     pop     af
     ret
-
-ClearScreen:
-    ; clear VRAM
-    xor     a
-    ldh     [rVBK],a
-    ld      hl,$8000
-    ld      bc,$2000
-    rst     FillRAM
-    
-    ld      a,1
-    ldh     [rVBK],a
-    ldh     [sys_TempSVBK],a
-    xor     a
-    ld      hl,$8000
-    ld      bc,$2000
-    rst     FillRAM
-    xor     a
-    ldh     [rVBK],a
-    ; clear OAM
-    ld      hl,OAMBuffer
-    ld      b,OAMBuffer.end-OAMBuffer
-    xor     a
-    call    _FillRAMSmall
-
-    ; reset scrolling
-    xor     a
-    ldh     [rSCX],a
-    ldh     [rSCY],a
-    ret
     
 ; Fill RAM with a value.
 ; INPUT:  a = value
@@ -780,9 +780,9 @@ Font::              incbin  "GFX/Font.bin.wle"
 ; Misc routines
 ; =============
 
-include "Metatile.asm"
-include "Parallax.asm"
-include "Player.asm"
+include "Engine/Metatile.asm"
+include "Engine/Parallax.asm"
+include "Engine/Player.asm"
 
 ; ==========
 ; Sound data
