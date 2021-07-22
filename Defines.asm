@@ -191,6 +191,7 @@ endm
 section "Variables",wram0,align[8]
 
 OAMBuffer:          ds  40*4    ; 40 sprites, 4 bytes each
+.end
 
 sys_GBType:         db  ; 0 = DMG, 1 = GBC, 2 = GBA
 sys_ResetTimer:     db
