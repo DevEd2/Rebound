@@ -547,6 +547,7 @@ DoJoypad::
 ; Interrupt wait routines
 ; =======================
 
+; Wait for vertical blank.
 _WaitVBlank::
     push    af
     ldh     a,[rIE]
@@ -563,6 +564,7 @@ _WaitVBlank::
     pop     af
     ret
 
+; Wait for LCD status interrupt.
 _WaitLCDC::
     push    af
     ldh     a,[rIE]
@@ -578,7 +580,8 @@ _WaitLCDC::
 .done
     pop     af
     ret
-    
+
+; Wait for timer interrupt.
 _WaitTimer::
     push    af
     ldh     a,[rIE]
@@ -595,6 +598,7 @@ _WaitTimer::
     pop     af
     ret
 
+; Wait for serial transfer interrupt.
 _WaitSerial::
     push    af
     ldh     a,[rIE]
@@ -610,7 +614,8 @@ _WaitSerial::
 .done
     pop     af
     ret
-    
+
+; Wait for joypad interrupt.
 _WaitJoypad:
     push    af
     ldh     a,[rIE]
@@ -635,6 +640,9 @@ include "Engine/GBCPal.asm"
 
 ; =========
 
+; Clear the screen.
+; TRASHES: a, bc, hl
+; RESTRICTIONS: Requires the LCD to be disabled, otherwise screen will not be properly cleared.
 ClearScreen:
     ; clear VRAM
     xor     a
@@ -664,17 +672,12 @@ ClearScreen:
     ldh     [rSCY],a
     ret
 
-_CopyTileset::                      ; WARNING: Do not use while LCD is on!
-    ld  a,[hl+]                     ; get byte
-    ld  [de],a                      ; write byte
-    inc de
-    dec bc
-    ld  a,b                         ; check if bc = 0
-    or  c
-    jr  nz,_CopyTileset             ; if bc != 0, loop
-    ret
-    
-_CopyTilesetSafe::                  ; same as _CopyTileset, but waits for VRAM accessibility before writing data
+; Copies a tileset to VRAM, waiting for VRAM accessibility.
+; INPUT:   hl = source
+;          de = destination
+;          bc = size
+; TRASHES: a, bc, de, hl
+_CopyTilesetSafe::
     ldh a,[rSTAT]
     and 2                           ; check if VRAM is accessible
     jr  nz,_CopyTilesetSafe         ; if it isn't, loop until it is
@@ -686,8 +689,14 @@ _CopyTilesetSafe::                  ; same as _CopyTileset, but waits for VRAM a
     or  c
     jr  nz,_CopyTilesetSafe         ; if bc != 0, loop
     ret
-    
-_CopyTileset1BPP::                  ; WARNING: Do not use while LCD is on!
+
+; Copies a 1BPP tileset to VRAM.
+; INPUT:   hl = source
+;          de = destination
+;          bc = size
+; TRASHES: a, bc, de, hl
+; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
+_CopyTileset1BPP::
     ld  a,[hl+]                     ; get byte
     ld  [de],a                      ; write byte
     inc de                          ; increment destination address
@@ -700,7 +709,12 @@ _CopyTileset1BPP::                  ; WARNING: Do not use while LCD is on!
     jr  nz,_CopyTileset1BPP         ; if bc != 0, loop
     ret
 
-_CopyTileset1BPPSafe::              ; same as _CopyTileset1BPP, but waits for VRAM accessibility before writing data
+; Copies a 1BPP tileset to VRAM, waiting for VRAM accessibility.
+; INPUT:   hl = source
+;          de = destination
+;          bc = size
+; TRASHES: a, bc, de, hl
+_CopyTileset1BPPSafe::
     ldh a,[rSTAT]
     and 2                           ; check if VRAM is accessible
     jr  nz,_CopyTileset1BPPSafe     ; if it isn't, loop until it is
@@ -716,6 +730,10 @@ _CopyTileset1BPPSafe::              ; same as _CopyTileset1BPP, but waits for VR
     jr  nz,_CopyTileset1BPP         ; if bc != 0, loop
     ret
 
+; Loads a 20x18 tilemap to VRAM.
+; INPUT:   hl = source
+; TRASHES: a, bc, de, hl
+; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
 LoadTilemapScreen:
     ld  de,_SCRN0
     ld  b,$12
@@ -737,13 +755,17 @@ LoadTilemapScreen:
     jr  nz,.loop
     ret
 
+; Same as LoadTilemapScreen, but performs ASCII conversion.
+; INPUT:   hl = source
+; TRASHES: a, bc, de, hl
+; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
 LoadTilemapText:
     ld  de,_SCRN0
     ld  b,$12
     ld  c,$14
 .loop
     ld  a,[hl+]
-    sub 32  
+    sub " "
     ld  [de],a
     inc de
     dec c
@@ -763,6 +785,8 @@ LoadTilemapText:
 ; Sprite stuff
 ; ============
 
+; Copies OAM DMA routine to HRAM.
+; TRASHES: a, bc, hl
 CopyDMARoutine::
     ld  bc,low(OAM_DMA) + ((_OAM_DMA_End-_OAM_DMA) << 8)
     ld  hl,_OAM_DMA
@@ -773,7 +797,9 @@ CopyDMARoutine::
     dec b
     jr  nz,.loop
     ret
-    
+
+; OAM DMA routine. This is copied to HRAM by CopyDMARoutine and run from there.
+; TRASHES: a
 _OAM_DMA::
     ld  a,high(OAMBuffer)
     ldh [rDMA],a
@@ -788,7 +814,8 @@ _OAM_DMA_End:
 ; Misc routines
 ; =============
 
-; INPUT: b = bank
+; Performs a bankswitch to bank B, preserving previous ROM bank.
+; INPUT:    b = bank
 _Bankswitch:
     push    af
     ldh     a,[sys_CurrentBank]
@@ -800,9 +827,10 @@ _Bankswitch:
     ret
     
 ; Fill RAM with a value.
-; INPUT:  a = value
-;        hl = address
-;        bc = size
+; INPUT:    a = value
+;          hl = address
+;          bc = size
+; TRASHES: a, bc, e, hl
 _FillRAM::
     ld  e,a
 .loop
@@ -815,9 +843,10 @@ _FillRAM::
     ret
     
 ; Fill up to 256 bytes of RAM with a value.
-; INPUT:  a = value
-;        hl = address
-;         b = size
+; INPUT:    a = value
+;          hl = address
+;           b = size
+; TRASHES: a, b, e, hl
 _FillRAMSmall::
     ld  e,a
 .loop
@@ -828,9 +857,10 @@ _FillRAMSmall::
     ret
     
 ; Copy up to 65536 bytes to RAM.
-; INPUT: hl = source
-;        de = destination
-;        bc = size
+; INPUT:   hl = source
+;          de = destination
+;          bc = size
+; TRASHES: a, bc, de, hl
 _CopyRAM::
     ld  a,[hl+]
     ld  [de],a
@@ -840,11 +870,14 @@ _CopyRAM::
     or  c
     jr  nz,_CopyRAM
     ret
+
+; ================
     
 ; Copy up to 256 bytes to RAM.
-; INPUT: hl = source
-;        de = destination
-;         b = size
+; INPUT:   hl = source
+;          de = destination
+;           b = size
+; TRASHES: a, b, de, hl
 _CopyRAMSmall::
     ld  a,[hl+]
     ld  [de],a
@@ -852,7 +885,11 @@ _CopyRAMSmall::
     dec b
     jr  nz,_CopyRAMSmall
     ret
-    
+
+; ================
+
+; Switches double speed mode on.
+; TRASHES: a
 DoubleSpeed:
     ldh a,[rKEY1]
     bit 7,a         ; already in double speed?

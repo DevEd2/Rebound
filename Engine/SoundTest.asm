@@ -17,7 +17,7 @@ GM_SoundTest:
     ldfar   hl,SoundTestTiles
     ld      de,$8000
     ld      bc,SoundTestTiles.end-SoundTestTiles
-    call    _CopyTileset
+    call    _CopyRAM
 
     ; load bottom half of font
     ld      a,1
