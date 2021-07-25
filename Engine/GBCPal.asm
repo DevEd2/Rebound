@@ -10,8 +10,6 @@ sys_BGPalettes:         ds  (2*4)*8 ; main BG palette
 sys_ObjPalettes:        ds  (2*4)*8 ; main OBJ palette
 .end
 sys_FadeState::         db  ; bit 0 = fading, bit 1 = fade type (0 = white, 1 = black), bit 1 = fade dir (0 = in, 1 = out)
-sys_FadeBGPals::        db  ; which bg palettes are fading (bitmask)
-sys_FadeOBJPals::       db  ; which OBJ PalTransferBuf are fading (bitmask)
 sys_FadeLevel::         db  ; current intensity level
 
 section "Color routines",rom0
@@ -82,10 +80,6 @@ PalFadeOutBlack:
     
 _InitFade:
     ld      [sys_FadeState],a
-    ld      a,b
-    ld      [sys_FadeBGPals],a
-    ld      a,c
-    ld      [sys_FadeOBJPals],a
     ld      a,e
     ld      [sys_FadeLevel],a
     ret
