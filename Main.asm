@@ -814,11 +814,15 @@ _OAM_DMA_End:
 ; Misc routines
 ; =============
 
+include "Engine/GBPrinter.asm"
+
+; ================
+
 ; Enter low-power mode until the user presses A, B, Start, or Select.
 SleepMode:
     di                      ; disable interrupts
     ldh     a,[rLCDC]
-    push    af
+    push    af              ; store current LCD enable state
     ; wait for VBlank
     ld      hl,rLY
     ld      a,SCRN_Y
@@ -841,9 +845,8 @@ SleepMode:
     ldh     [rNR52],a       ; re-enable sound
     ld      a,e
     ldh     [rIE],a         ; restore previously enabled interrupts
-    
     pop     af
-    ldh     [rLCDC],a
+    ldh     [rLCDC],a       ; restore previous LCD enable state
     ret
 
 ; Performs a bankswitch to bank B, preserving previous ROM bank.
