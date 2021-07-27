@@ -216,6 +216,7 @@ ProcessPlayer:
     ld      a,[Player_XPos]
     inc     a
     ld      [Player_XPos],a
+    call    Player_UpdateCollision
 .skipleft
     ; right wall
     ld      a,[Player_TopRightTile]
@@ -228,6 +229,7 @@ ProcessPlayer:
     ld      a,[Player_XPos]
     dec     a
     ld      [Player_XPos],a
+    call    Player_UpdateCollision
 .skipright
   
     ; ceiling
@@ -244,6 +246,7 @@ ProcessPlayer:
     xor     a
     ld      [Player_YVelocity],a
     ld      [Player_YVelocityS],a
+    call    Player_UpdateCollision
 .skipceiling
     ; floor
     ld      a,[Player_BottomLeftTile]
@@ -279,6 +282,7 @@ ProcessPlayer:
     xor     a
     ld      [Player_YVelocity],a
     ld      [Player_YVelocityS],a
+    call    Player_UpdateCollision
 .skiptopleft
     ; top right inside corner
     ld      a,[Player_TopLeftTile] 
@@ -300,6 +304,7 @@ ProcessPlayer:
     xor     a
     ld      [Player_YVelocity],a
     ld      [Player_YVelocityS],a
+    call    Player_UpdateCollision
 .skiptopright
     ; bottom left inside corner
     ld      a,[Player_BottomLeftTile] 
