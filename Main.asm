@@ -966,6 +966,20 @@ Font::              incbin  "GFX/Font.bin.wle"
 ; Misc routines
 ; =============
 
+; 16-bit Compare
+; INPUT:    bc = value 1
+;           de = value 2
+; OUTPUT:   zero = set if equal
+;           carry = set if bc < de
+; TRASHES:  a
+Compare16:
+    ld  a,b
+    cp  d
+    ret nz
+    ld  a,c
+    cp  e
+    ret
+
 include "Engine/Metatile.asm"
 include "Engine/Parallax.asm"
 include "Engine/Player.asm"

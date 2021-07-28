@@ -35,7 +35,7 @@ Player_Gravity          equ $25
 Player_BounceHeight     equ -$380
 Player_HighBounceHeight equ -$440
 Player_LowBounceHeight  equ -$200
-Player_TerminalVelocity equ 6
+Player_TerminalVelocity equ $600
 Player_HitboxSize       equ 6
 
 ; ========================
@@ -109,75 +109,67 @@ InitPlayer:
 
 ; ========
 
-; TODO: Replace this
 ProcessPlayer:
-    ld      a,[Player_MovementFlags]
-    res     0,a
-    ld      [Player_MovementFlags],a
+    ; Player Input
+    ld      b,0
     ld      a,[sys_btnHold]
-    
-    ld      hl,Player_XPos
     bit     btnLeft,a
-    call    nz,.moveLeft
+    jr      z,.noLeft
+    ld      b,-1
+.noLeft:
     bit     btnRight,a
-    call    nz,.moveRight
-
+    jr      z,.noRight
+    ld      b,1
+.noRight:
+    ld      a,b
+    ld      [Player_XVelocity],a
+    
+    ld      a,[sys_btnHold]
     bit     btnStart,a
-    call    nz,.fadeout
-    bit     btnSelect,a
-    call    nz,.fadein
-
-    jr      .done
-        
-.fadein
+    jr      z,:+
     push    af
     call    PalFadeInBlack
     pop     af
-    ret
-.fadeout
-    push    af
+:
+    bit     btnSelect,a
+    jr      z,:+
     call    PalFadeOutBlack
-    pop     af
-    ret
+:
 
-;.moveUp
-;    dec     [hl]
-;    ret
-;.moveDown
-;    inc     [hl]
-;    ret
-.moveLeft
-    ld      c,a
-    ld      a,[hl]
-    sub     1   ; dec doesn't set carry
-    ld      [hl],a
-    ld      a,c
-    ret     nc
-    
+    ; Horizontal Movement
+    ; Movement
+    ld      a,[Player_XVelocity]
+    ld      h,a
+    ld      a,[Player_XVelocityS]
+    ld      l,a
+    ld      a,[Player_XPos]
+    ld      d,a
+    ld      a,[Player_XSubpixel]
+    ld      e,a
+    add     hl,de
+    ld      a,h
+    ld      [Player_XPos],a
+    ld      a,l
+    ld      [Player_XSubpixel],a
+    ; Check Screen Crossing
+    ld      a,[Player_XVelocity]
+    bit     7,a
+    jr      z,:+
+    jr      c,.xMoveDone
+    ; Left edge crossed, decrement current screen
     ld      a,[Engine_CurrentScreen]
     and     $30
     ld      b,a
     ld      a,[Engine_CurrentScreen]
-    sub     1   ; dec doesn't set carry
-    jr      c,.nodecscreen
     and     $f
+    sub     1
+    jr      c,.xMoveDone
     or      b
     ld      [Engine_CurrentScreen],a
-    jr      .continueL
-.nodecscreen
-    xor     a
-    ld      [Player_XPos],a
-.continueL
-    ld      a,c
-    ret
-.moveRight
-    ld      c,a
-    ld      a,[hl]
-    add     1   ; inc doesn't set carry
-    ld      [hl],a
-    ld      a,c
-    ret     nc
-    
+    jr      .xMoveDone
+:
+    jr      nc,.xMoveDone
+    ; Right edge crosses, increment current screen
     ld      a,[Engine_CurrentScreen]
     and     $30
     ld      b,a
@@ -188,167 +180,268 @@ ProcessPlayer:
     cp      b
     ld      a,b
     pop     bc
-    jr      z,.noincscreen
+    jr      z,.xMoveDone
     inc     a
     or      b
     ld      [Engine_CurrentScreen],a
-    jr      .continueR
-.noincscreen
-    ld      a,-1
+.xMoveDone:
+
+    ; Horizontal Collision
+    ld      a,[Player_XVelocity]
+    bit     7,a
+    jr      z,.rightCollision
+    ; Check Left Collision
+    ; Top Left
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    cp      4
+    jr      z,:+
+    ; Bottom Left
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    cp      4
+    jp      nz,.xCollideEnd
+:
+    ; Collision with left wall
+    ; Clear Velocity
+    xor     a
+    ld      [Player_XVelocity],a
+    ld      [Player_XVelocityS],a
+    ; Calculate penetration depth
+    ld      a,[Player_XPos]
+    ld      c,a
+    sub     Player_HitboxSize
+    and     $f
+    ld      b,a
+    ld      a,16
+    sub     b
+    ; Push player out of tile
+    add     c
     ld      [Player_XPos],a
-.continueR
-    ld      a,c
-    ret
+    ; Check Screen Crossing
+    jr      nc,.xCollideEnd
+    ; Right edge crosses, increment current screen
+    ld      a,[Engine_CurrentScreen]
+    and     $30
+    ld      b,a
+    ld      a,[Engine_CurrentScreen]
+    push    bc
+    ld      b,a
+    ld      a,[Engine_NumScreens]
+    cp      b
+    ld      a,b
+    pop     bc
+    jr      z,.xCollideEnd
+    inc     a
+    or      b
+    ld      [Engine_CurrentScreen],a
+    jr      .xCollideEnd
+.rightCollision:
+    ; Check Right Collision
+    ; Top Right
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    cp      4
+    jr      z,:+
+    ; Bottom Right
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    cp      4
+    jr      nz,.xCollideEnd
+:
+    ; Collision with right wall
+    ; Clear Velocity
+    xor     a
+    ld      [Player_XVelocity],a
+    ld      [Player_XVelocityS],a
+    ; Calculate penetration depth
+    ld      a,[Player_XPos]
+    push    af
+    add     Player_HitboxSize
+    and     $f
+    inc     a
+    ld      b,a
+    pop     af
+    ; Push player out of tile
+    sub     b
+    ld      [Player_XPos],a
+    ; Check Screen Crossing
+    jr      nc,.xCollideEnd
+    ; Left edge crossed, decrement current screen
+    ld      a,[Engine_CurrentScreen]
+    and     $30
+    ld      b,a
+    ld      a,[Engine_CurrentScreen]
+    and     $f
+    sub     1
+    jr      c,.xCollideEnd
+    or      b
+    ld      [Engine_CurrentScreen],a
+.xCollideEnd:
     
-.done
-
-    call    Player_UpdateCollision
-
-    ; check for collision (temp routine)
-    ; left wall
-    ld      a,[Player_TopLeftTile]
-    ld      b,a
-    ld      a,[Player_BottomLeftTile]
-    or      b
-    jr      z,.skipleft
-    cp      4
-    jr      nz,.skipleft
-    ld      a,[Player_XPos]
-    inc     a
-    ld      [Player_XPos],a
-    call    Player_UpdateCollision
-.skipleft
-    ; right wall
-    ld      a,[Player_TopRightTile]
-    ld      b,a
-    ld      a,[Player_BottomRightTile]
-    or      b
-    jr      z,.skipright
-    cp      4
-    jr      nz,.skipright
-    ld      a,[Player_XPos]
-    dec     a
-    ld      [Player_XPos],a
-    call    Player_UpdateCollision
-.skipright
-  
-    ; ceiling
-    ld      a,[Player_TopLeftTile]
-    ld      b,a
-    ld      a,[Player_TopRightTile]
-    or      b
-    jr      z,.skipceiling
-    cp      4
-    jr      nz,.skipceiling
+    ; Vertical Movement
+    ; Gravity Acceleration
+    ld      a,[Player_YVelocity]
+    ld      h,a
+    ld      a,[Player_YVelocityS]
+    ld      l,a
+    ld      de,Player_Gravity
+    add     hl,de
+    ld      a,h
+    bit     7,a
+    jr      nz,:+
+    ld      b,h
+    ld      c,l
+    ld      de,Player_TerminalVelocity
+    call    Compare16
+    jr      c,:+
+    ld      hl,Player_TerminalVelocity
+:
+    ld      a,h
+    ld      [Player_YVelocity],a
+    ld      a,l
+    ld      [Player_YVelocityS],a
+    ; Velocity
+    ld      a,[Player_YSubpixel]
+    add     l
+    ld      [Player_YSubpixel],a
     ld      a,[Player_YPos]
-    inc     a
+    adc     h
     ld      [Player_YPos],a
+    
+    ; Vertical Collision
+    ld      a,[Player_YVelocity]
+    bit     7,a
+    jr      z,.bottomCollision
+    ; Check Top Collision
+    ; Top Left
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    cp      4
+    jr      z,:+
+    ; Top Right
+    ld      a,[Player_YPos]
+    sub     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    cp      4
+    jr      nz,.yCollideEnd
+:
+    ; Collision with ceiling
+    ; Clear Velocity
     xor     a
     ld      [Player_YVelocity],a
     ld      [Player_YVelocityS],a
-    call    Player_UpdateCollision
-.skipceiling
-    ; floor
-    ld      a,[Player_BottomLeftTile]
-    ld      b,a
-    ld      a,[Player_BottomRightTile]
-    or      b
-    jr      z,.skipfloor
-    cp      4
-    jr      nz,.skipfloor
+    ; Calculate penetration depth
     ld      a,[Player_YPos]
-    dec     a
+    ld      c,a
+    sub     Player_HitboxSize
+    and     $f
+    ld      b,a
+    ld      a,16
+    sub     b
+    ; Push player out of tile
+    add     c
     ld      [Player_YPos],a
+    jr      .yCollideEnd
+.bottomCollision:
+    ; Check Bottom Collision
+    ; Bottom Left
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    sub     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileL
+    cp      4
+    jr      z,:+
+    ld      a,[Player_YPos]
+    add     Player_HitboxSize
+    ld      l,a
+    ld      a,[Player_XPos]
+    add     Player_HitboxSize
+    push    af
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    pop     af
+    call    GetTileR
+    cp      4
+    jr      nz,.yCollideEnd
+:
+    ; Collision with floor
+    ; Calculate penetration depth
+    ld      a,[Player_YPos]
+    push    af
+    add     Player_HitboxSize
+    and     $f
+    inc     a
+    ld      b,a
+    pop     af
+    ; Push player out of tile
+    sub     b
+    ld      [Player_YPos],a
+    ; Bounce
     call    Player_Bounce
-.skipfloor
-
-    ; top left inside corner
-    ld      a,[Player_TopLeftTile] 
-    ld      c,a
-    ld      a,[Player_TopRightTile]
-    ld      b,a
-    ld      a,[Player_BottomLeftTile]
-    and     b
-    and     c
-    jr      z,.skiptopleft
-    cp      4
-    jr      nz,.skiptopleft
-    ld      a,[Player_XPos]
-    inc     a
-    ld      [Player_XPos],a
-    ld      a,[Player_YPos]
-    inc     a
-    ld      [Player_YPos],a
-    xor     a
-    ld      [Player_YVelocity],a
-    ld      [Player_YVelocityS],a
-    call    Player_UpdateCollision
-.skiptopleft
-    ; top right inside corner
-    ld      a,[Player_TopLeftTile] 
-    ld      c,a
-    ld      a,[Player_TopRightTile]
-    ld      b,a
-    ld      a,[Player_BottomRightTile]
-    and     b
-    and     c
-    jr      z,.skiptopright
-    cp      4
-    jr      nz,.skiptopright
-    ld      a,[Player_XPos]
-    dec     a
-    ld      [Player_XPos],a
-    ld      a,[Player_YPos]
-    inc     a
-    ld      [Player_YPos],a
-    xor     a
-    ld      [Player_YVelocity],a
-    ld      [Player_YVelocityS],a
-    call    Player_UpdateCollision
-.skiptopright
-    ; bottom left inside corner
-    ld      a,[Player_BottomLeftTile] 
-    ld      c,a
-    ld      a,[Player_BottomRightTile]
-    ld      b,a
-    ld      a,[Player_TopLeftTile]
-    and     b
-    and     c
-    jr      z,.skipbottomleft
-    cp      4
-    jr      nz,.skipbottomleft
-    ld      a,[Player_XPos]
-    inc     a
-    ld      [Player_XPos],a
-    ld      a,[Player_YPos]
-    dec     a
-    ld      [Player_YPos],a
-    call    Player_Bounce
-    jr      .skiptopright
-.skipbottomleft
-    ; top right inside corner
-    ld      a,[Player_BottomLeftTile] 
-    ld      c,a
-    ld      a,[Player_BottomRightTile]
-    ld      b,a
-    ld      a,[Player_TopRightTile]
-    and     b
-    and     c
-    jr      z,.skipbottomright
-    cp      4
-    jr      nz,.skipbottomright
-    ld      a,[Player_XPos]
-    dec     a
-    ld      [Player_XPos],a
-    ld      a,[Player_YPos]
-    dec     a
-    ld      [Player_YPos],a
-    call    Player_Bounce
-    jr      .skipbottomleft
-.skipbottomright
-
-    call    AnimatePlayer
-    jr      Player_SpeedToPos
+.yCollideEnd:
+    jp    AnimatePlayer
     
 Player_UpdateCollision::
     ; center tile
@@ -374,7 +467,7 @@ Player_UpdateCollision::
     pop     af
     call    GetTileL
     ld      [Player_TopLeftTile],a
-    ; bottom right corner
+    ; top right corner
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
     ld      l,a
@@ -522,19 +615,19 @@ Player_Bounce:
     ld      [Player_YVelocity],a
     ld      a,low(Player_BounceHeight)
     ld      [Player_YVelocityS],a
-    jp      Player_UpdateCollision
+    ret
 .lowbounce
     ld      a,high(Player_LowBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_LowBounceHeight)
     ld      [Player_YVelocityS],a
-    jp      Player_UpdateCollision
+    ret
 .highbounce
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighBounceHeight)
     ld      [Player_YVelocityS],a
-    jp      Player_UpdateCollision
+    ret
     
 ; ========
     
