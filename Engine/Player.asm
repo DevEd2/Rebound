@@ -582,8 +582,10 @@ Player_Bounce:
     xor     a
     ld      [Player_YSubpixel],a    ; reset subpixel
     ld      a,[Player_LastBounceY]
+    add     7
     ld      b,a
     ld      a,[Player_YPos]
+    add     7
     ld      [Player_LastBounceY],a
     push    af
     cp      b                       ; compare previous bounce Y with current bounce Y
