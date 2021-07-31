@@ -164,15 +164,16 @@ LevelLoop::
     ; if player is falling and Y position > Y position at last bounce, camera Y follows player directly
     ld      a,[Player_LastBounceY]
     ld      b,a
-    ld      a,[Player_YVelocity]
-    add     2
-    add     b                       ; add Y velocity + 1 to prevent camera following on bounce at same height
-    ld      b,a
+;   ld      a,[Player_YVelocity]
+;   add     2
+;   add     b                       ; add Y velocity + 1 to prevent camera following on bounce at same height
+;   ld      b,a
     ld      a,[Player_YPos]
     cp      b
     jr      c,.checkhigher
     ld      a,[Engine_CameraTargetY]
     ld      [Engine_CameraY],a
+    jr      .doparallax
 .checkhigher
     ; if player bounces on higher surface than previous surface, then move camera vertically to follow player    
     ld      a,[Player_LastBounceY]
