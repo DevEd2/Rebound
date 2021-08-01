@@ -111,30 +111,36 @@ InitPlayer:
 
 ProcessPlayer:
     ; Player Input
-    ld      b,0
+    lb      bc,0,0
+    ld      e,0
     ld      a,[sys_btnHold]
     bit     btnLeft,a
     jr      z,.noLeft
-    ld      b,-1
+    lb      bc,-1,1
+    ld      e,%10000000
 .noLeft:
     bit     btnRight,a
     jr      z,.noRight
-    ld      b,1
+    lb      bc,1,1
 .noRight:
+    ld      b,b
     ld      a,b
     ld      [Player_XVelocity],a
+    ld      a,c
+    or      e
+    ld      [Player_MovementFlags],a
     
-    ld      a,[sys_btnHold]
-    bit     btnStart,a
-    jr      z,:+
-    push    af
-    call    PalFadeInBlack
-    pop     af
-:
-    bit     btnSelect,a
-    jr      z,:+
-    call    PalFadeOutBlack
-:
+;   ld      a,[sys_btnHold]
+;   bit     btnStart,a
+;   jr      z,:+
+;   push    af
+;   call    PalFadeInBlack
+;   pop     af
+;:
+;   bit     btnSelect,a
+;   jr      z,:+
+;   call    PalFadeOutBlack
+;:
 
     ; Horizontal Movement
     ; Movement
@@ -506,76 +512,6 @@ Player_UpdateCollision::
     pop     af
     call    GetTileR
     ld      [Player_BottomRightTile],a
-    ret
-
-Player_SpeedToPos::
-    ; ld      a,[Player_XVelocityS]
-    ; ld      b,a
-    ; ld      a,[Player_XSubpixel]
-    ; add     b
-    ; ld      [Player_XSubpixel],a
-    ; ld      a,[Player_XPos]
-    ; jr      nc,.noincX
-    ; inc     a
-    ; ld      [Player_XPos],a
-; .noincX
-    ; ld      a,[Player_XVelocity]
-    ; ld      b,a
-    ; ld      a,[Player_XPos]
-    ; add     b
-    ; ld      b,a
-    
-    ; ; check for X pos overflow
-    ; ld      a,[Player_MovementFlags]
-    ; bit     7,a             ; are we moving right?
-    ; jr      nz,.checkright
-; .checkleft                  ; if we're moving left...
-    ; jr      nc,.skipX
-    ; ld      a,[Engine_CurrentSubarea]
-    ; and     $30
-    ; ld      b,a
-    ; ld      a,[Engine_CurrentScreen]
-    ; dec     a
-    ; and     $f
-    ; or      b
-    ; ld      [Engine_CurrentScreen],a
-    ; jr      .skipX
-; .checkright                 ; if we're moving right...
-    ; jr      nc,.skipX
-    ; ld      a,[Engine_CurrentSubarea]
-    ; and     $30
-    ; ld      b,a
-    ; ld      a,[Engine_CurrentScreen]
-    ; inc     a
-    ; and     $f
-    ; or      b
-    ; ld      [Engine_CurrentScreen],a
-    ; ; fall through
-    
-; .skipX
-    ; gravity
-    ld      a,[Player_YVelocityS]
-    add     Player_Gravity
-    ld      b,a
-    ld      [Player_YVelocityS],a
-    jr      nc,.skipgrav
-    ld      a,[Player_YVelocity]
-    ld      b,a
-    inc     a
-    ld      [Player_YVelocity],a
-.skipgrav
-    ld      a,[Player_YSubpixel]
-    add     b
-    ld      [Player_YSubpixel],a
-    ld      a,[Player_YPos]
-    jr      nc,.noincY
-    inc     a
-.noincY
-    ld      b,a
-    ld      a,[Player_YVelocity]
-    add     b
-    ld      [Player_YPos],a
-    
     ret
     
 Player_Bounce:
