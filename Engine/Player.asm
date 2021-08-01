@@ -32,9 +32,9 @@ Player_MaxSpeed         equ $180
 Player_Accel            equ $30
 Player_Decel            equ $15
 Player_Gravity          equ $25
-Player_BounceHeight     equ -$380
-Player_HighBounceHeight equ -$440
-Player_LowBounceHeight  equ -$200
+Player_BounceHeight     equ -$340
+Player_HighBounceHeight equ -$480
+Player_LowBounceHeight  equ -$1c0
 Player_TerminalVelocity equ $600
 Player_HitboxSize       equ 6
 
