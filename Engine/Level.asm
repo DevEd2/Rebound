@@ -29,6 +29,7 @@ GM_Level:
     ; initialize variables
     xor     a
     ld      [Engine_CurrentScreen],a
+    ld      [Engine_LastRow],a
     ; initialize player object
     call    InitPlayer
 

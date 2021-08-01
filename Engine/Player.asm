@@ -28,7 +28,7 @@ Player_CenterTile:      db
 
 PlayerRAM_End:
 
-Player_MaxSpeed         equ $180
+Player_MaxSpeed         equ $140
 Player_Accel            equ 24
 Player_Decel            equ 12
 Player_Gravity          equ $25
@@ -111,40 +111,84 @@ InitPlayer:
 
 ProcessPlayer:
     ; Player Input
-    lb      bc,0,0
-    ld      e,0
+    lb      bc,0,1
     ld      a,[sys_btnHold]
     bit     btnLeft,a
-    jr      z,.noLeft
-    lb      bc,-1,1
-    ld      e,%10000000
-.noLeft:
+    jr      nz,.accelLeft
     bit     btnRight,a
-    jr      z,.noRight
-    lb      bc,1,1
-.noRight:
-    ld      a,b
-    and     a
-    jr      z,.reset
-    ld      [Player_XVelocity],a
-    xor     a
-    ld      [Player_XVelocityS],a
-    ld      a,c
-    or      e
-    ld      [Player_MovementFlags],a
-    jr      :+
-.reset
+    jr      nz,.accelRight
+    ; if left or right aren't being held...
     ld      a,[Player_MovementFlags]
     res     0,a
     ld      [Player_MovementFlags],a
+    jr      .noaccel
+.accelLeft
+    ld      b,b
+    push    bc
+    ld      bc,-Player_Accel
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      b,h
+    ld      c,l
+    ld      de,-Player_MaxSpeed
+    call    Compare16
+    jr      c,.capLeft
+    jr      .noCapLeft
+.capLeft
+    ld      b,b
+    ld      hl,-Player_MaxSpeed
+.noCapLeft
+    ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
 
-:   ; Player deceleration
-    ld      a,[Player_MovementFlags]
+    ld      e,%10000000
+    jr      .continue
+.accelRight
+    ld      b,b
+    push    bc
+    ld      bc,Player_Accel
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      d,h
+    ld      e,l
+    ld      bc,Player_MaxSpeed
+    call    Compare16
+    jr      c,.capRight
+    jr      .noCapRight
+.capRight
+    ld      b,b
+    ld      hl,Player_MaxSpeed
+.noCapRight
+    ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%00000000
+    ; fall through
+    
+.continue
+    ld      a,c
+    or      e
+    ld      [Player_MovementFlags],a
+    
+.noaccel
+    ; Player deceleration
+    ; a = [Player_MovementFlags]
     bit     0,a
     jr      nz,.nodecel
     bit     7,a
-    jr      z,.right
-.left
+    jr      z,.decelRight
+.decelLeft
     ld      hl,Player_XVelocity
     ld      a,[hl+]
     ld      l,[hl]
@@ -157,9 +201,9 @@ ProcessPlayer:
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
-    ld      [Player_XVelocity+1],a
+    ld      [Player_XVelocityS],a
     jr      .nodecel
-.right
+.decelRight
     ld      hl,Player_XVelocity
     ld      a,[hl+]
     ld      l,[hl]
