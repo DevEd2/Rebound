@@ -167,8 +167,7 @@ _CallHL:
     ld      a,h
     bit     7,a
     jr      z,.skip
-    ld      b,b
-    jp      @
+    jr      @       ; infinite loop
 .skip
     jp      hl
 
@@ -187,13 +186,13 @@ GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80
 NewLicenseCode: db  "56"                        ; new license code (2 bytes)
 SGBSupport:     db  0                           ; SGB support
 CartType:       db  $19                         ; Cart type, see hardware.inc for a list of values
-ROMSize:        db  0                           ; ROM size (handled by post-linking tool)
+ROMSize:        db                              ; ROM size (handled by post-linking tool)
 RAMSize:        db  0                           ; RAM size
 DestCode:       db  1                           ; Destination code (0 = Japan, 1 = All others)
 OldLicenseCode: db  $33                         ; Old license code (if $33, check new license code)
 ROMVersion:     db  0                           ; ROM version
-HeaderChecksum: db  0                           ; Header checksum (handled by post-linking tool)
-ROMChecksum:    dw  0                           ; ROM checksum (2 bytes) (handled by post-linking tool)
+HeaderChecksum: db                              ; Header checksum (handled by post-linking tool)
+ROMChecksum:    dw                              ; ROM checksum (2 bytes) (handled by post-linking tool)
 
 ; =====================
 ; Start of program code
@@ -216,12 +215,7 @@ ProgramStart::
 
     farcall DevSound_Stop   ; prevent glitch music from playing
     
-; init memory
-;   ld      hl,$c000    ; start of WRAM
-;   ld      bc,$1ffa    ; don't clear stack
-;   xor     a
-;   rst     FillRAM
-        
+    ; clear HRAM    
     ld      bc,$7f80
     xor     a
 .loop
