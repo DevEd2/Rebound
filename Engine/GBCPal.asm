@@ -8,7 +8,7 @@ sys_ObjPalBuffer::      ds  (3*4)*8 ; OBJ palette work area (8 PalTransferBuf, 4
 sys_Palettes:
 sys_BGPalettes:         ds  (2*4)*8 ; main BG palette
 sys_ObjPalettes:        ds  (2*4)*8 ; main OBJ palette
-.end
+sys_PalBuffersEnd:
 sys_FadeState::         db  ; bit 0 = fading, bit 1 = fade type (0 = white, 1 = black), bit 1 = fade dir (0 = in, 1 = out)
 sys_FadeLevel::         db  ; current intensity level
 
@@ -401,7 +401,7 @@ ConvertPals:
 CopyPalettes:
     ld      hl,sys_Palettes
     ld      de,sys_PalTransferBuf
-    ld      b,sys_ObjPalettes.end-sys_Palettes
+    ld      b,sys_PalBuffersEnd-sys_Palettes
     call    _CopyRAMSmall
     ret
 

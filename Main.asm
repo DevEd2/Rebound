@@ -167,7 +167,8 @@ _CallHL:
     ld      a,h
     bit     7,a
     jr      z,.skip
-    jr      @       ; infinite loop
+    ld      b,b
+    jp      @
 .skip
     jp      hl
 
@@ -186,13 +187,13 @@ GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80
 NewLicenseCode: db  "56"                        ; new license code (2 bytes)
 SGBSupport:     db  0                           ; SGB support
 CartType:       db  $19                         ; Cart type, see hardware.inc for a list of values
-ROMSize:        db                              ; ROM size (handled by post-linking tool)
+ROMSize:        db  0                           ; ROM size (handled by post-linking tool)
 RAMSize:        db  0                           ; RAM size
 DestCode:       db  1                           ; Destination code (0 = Japan, 1 = All others)
 OldLicenseCode: db  $33                         ; Old license code (if $33, check new license code)
 ROMVersion:     db  0                           ; ROM version
-HeaderChecksum: db                              ; Header checksum (handled by post-linking tool)
-ROMChecksum:    dw                              ; ROM checksum (2 bytes) (handled by post-linking tool)
+HeaderChecksum: db  0                           ; Header checksum (handled by post-linking tool)
+ROMChecksum:    dw  0                           ; ROM checksum (2 bytes) (handled by post-linking tool)
 
 ; =====================
 ; Start of program code
@@ -215,7 +216,12 @@ ProgramStart::
 
     farcall DevSound_Stop   ; prevent glitch music from playing
     
-    ; clear HRAM    
+; init memory
+;   ld      hl,$c000    ; start of WRAM
+;   ld      bc,$1ffa    ; don't clear stack
+;   xor     a
+;   rst     FillRAM
+        
     ld      bc,$7f80
     xor     a
 .loop
@@ -638,13 +644,14 @@ include "Engine/GBCPal.asm"
 ; TRASHES: a, bc, hl
 ; RESTRICTIONS: Requires the LCD to be disabled, otherwise screen will not be properly cleared.
 ClearScreen:
-    ; clear VRAM
+    ; clear VRAM bank 0
     xor     a
     ldh     [rVBK],a
     ld      hl,$8000
     ld      bc,$2000
     rst     FillRAM
     
+    ; clear VRAM bank 1
     ld      a,1
     ldh     [rVBK],a
     ldh     [sys_TempSVBK],a
@@ -654,11 +661,18 @@ ClearScreen:
     rst     FillRAM
     xor     a
     ldh     [rVBK],a
+    
     ; clear OAM
     ld      hl,OAMBuffer
     ld      b,OAMBuffer.end-OAMBuffer
     xor     a
     call    _FillRAMSmall
+    
+    ; clear palette buffers
+    xor     a
+    ld      hl,sys_PalTransferBuf
+    ld      bc,sys_PalBuffersEnd-sys_PalTransferBuf
+    rst     FillRAM
 
     ; reset scrolling
     xor     a
