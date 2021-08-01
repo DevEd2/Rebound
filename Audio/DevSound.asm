@@ -278,7 +278,7 @@ PWMDir::            db
 
 arp_Buffer::        ds  8
 
-DS_RAMEnd:      
+DS_RAMEnd:
 
 endc
 

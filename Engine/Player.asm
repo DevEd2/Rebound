@@ -29,8 +29,8 @@ Player_CenterTile:      db
 PlayerRAM_End:
 
 Player_MaxSpeed         equ $180
-Player_Accel            equ $30
-Player_Decel            equ $15
+Player_Accel            equ 24
+Player_Decel            equ 12
 Player_Gravity          equ $25
 Player_BounceHeight     equ -$340
 Player_HighBounceHeight equ -$480
@@ -123,24 +123,61 @@ ProcessPlayer:
     jr      z,.noRight
     lb      bc,1,1
 .noRight:
-    ld      b,b
     ld      a,b
+    and     a
+    jr      z,.reset
     ld      [Player_XVelocity],a
+    xor     a
+    ld      [Player_XVelocityS],a
     ld      a,c
     or      e
     ld      [Player_MovementFlags],a
-    
-;   ld      a,[sys_btnHold]
-;   bit     btnStart,a
-;   jr      z,:+
-;   push    af
-;   call    PalFadeInBlack
-;   pop     af
-;:
-;   bit     btnSelect,a
-;   jr      z,:+
-;   call    PalFadeOutBlack
-;:
+    jr      :+
+.reset
+    ld      a,[Player_MovementFlags]
+    res     0,a
+    ld      [Player_MovementFlags],a
+
+:   ; Player deceleration
+    ld      a,[Player_MovementFlags]
+    bit     0,a
+    jr      nz,.nodecel
+    bit     7,a
+    jr      z,.right
+.left
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    ld      bc,Player_Decel
+    add     hl,bc
+    bit     7,h
+    jr      nz,:+    ; reset X speed to zero on overflow
+    ld      hl,0
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocity+1],a
+    jr      .nodecel
+.right
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    ; sub hl,r16 doesn't exist so...
+    ld      bc,-Player_Decel
+    add     hl,bc
+    bit     7,h
+    jr      z,:+    ; reset X speed to zero on overflow
+    ld      hl,0
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocity+1],a
+    jr      .nodecel
+
+    ; fall through
+.nodecel
 
     ; Horizontal Movement
     ; Movement
