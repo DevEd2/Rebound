@@ -124,6 +124,7 @@ endm
     
 resbank:                macro
     ldh     a,[sys_LastBank]
+    ldh     [sys_CurrentBank],a
     ld      [rROMB0],a
 endm
     

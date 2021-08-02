@@ -51,7 +51,7 @@ TitleLoop:
     bit     0,a
     jr      nz,:-
     call    AllPalsWhite
-    call	UpdatePalettes
+    call    UpdatePalettes
     
     ; wait for SFX to finish
 :   halt

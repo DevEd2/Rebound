@@ -32,39 +32,9 @@ GM_Level:
     ld      [Engine_LastRow],a
     ; initialize player object
     call    InitPlayer
-
-    ; TODO: Load palettes from level header
-    ldfar   hl,Pal_TestMap
-    ld      b,(Pal_TestMap_End-Pal_TestMap) / 8
-    xor     a
-.loop
-    push    af
-    push    bc
-    call    LoadPal
-    pop     bc
-    pop     af
-    inc     a
-    dec     b
-    jr      nz,.loop
-
-    call    ConvertPals
-    call    PalFadeInWhite
-
-    ; TODO: Load "background" graphics from map header
-    ldfar   hl,ParallaxTiles
-    ld      de,Engine_ParallaxBuffer
-    ld      b,0
-    call    _CopyRAMSmall
     
-    ; TODO: Load tileset from level header
-    ld      a,low(ParallaxTileset)
-    ld      [Engine_TilesetPointer],a
-    ld      a,high(ParallaxTileset)
-    ld      [Engine_TilesetPointer+1],a
-
-    ; TODO: Load level graphics from level header
-    CopyTileset TestMapTiles,0,(TestMapTiles_End-TestMapTiles)/16
-    ld      hl,Map_TestMap
+	; TODO: Load the actual map data
+	ldfar   hl,Map_TestMap
     call    LoadMap
     
     ld      a,$80
@@ -334,18 +304,102 @@ LoadMap:
     ld      a,[hl+]
     ld      [Engine_CurrentScreen],a ; no need to convert to different format here
     
-    
-    ; TODO: load tileset
-    inc     hl
-    
     ; load music
     ld      a,[hl+]
     push    hl
     farcall DevSound_Init
     pop     hl
     resbank
+        
+	; get tileset pointer
+    ld		a,[hl+]
+	ld		[Engine_TilesetBank],a
+	ld		b,a
+	ld		a,[hl+]
+	ld		[Engine_TilesetPointer],a
+	ld		a,[hl+]
+	ld		[Engine_TilesetPointer+1],a
+	
+	; get collision pointer
+	push	hl
+	ld		hl,Engine_TilesetPointer
+	ld		a,[hl+]
+	ld		h,[hl]
+	ld		l,a
+	; b = tileset bank
+    push    bc
+	call    _Bankswitch
+	ld		a,[hl+]
+	ld		[Engine_CollisionPointer],a
+	ld		a,[hl+]
+	ld		[Engine_CollisionPointer+1],a
+    resbank
+    ; load level graphics
+    ld      a,[hl+]
+    ld      b,a
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    call    _Bankswitch
+    ld      de,$8000
+    call    DecodeWLE
+    resbank
+    ; copy first 16 tiles to parallax buffer
+    ld      hl,$8000
+    ld      de,Engine_ParallaxBuffer
+    ld      b,0
+:   ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    dec     b
+    jr      nz,:-
+    pop     bc
+    call    _Bankswitch
+    pop		hl
     
+    ; load palette
+    ld      a,[hl+]
+    ld      b,a
+    call    _Bankswitch
+    push    hl
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    ld      b,8
+    xor     a
+:   push    af
+    push    bc
+    call    LoadPal
+    pop     bc
+    pop     af
+    inc     a
+    dec     b
+    jr      nz,:-
+    call    ConvertPals
+    call    PalFadeInWhite
+    pop     hl
+    inc     hl
+    inc     hl
+    resbank
     
+    ; load background
+    ld      a,[hl+]
+    ld      b,a
+    call    _Bankswitch
+    push    hl
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    ld      de,Engine_BackgroundBuffer
+:   ld      a,[hl+]
+    ld      [de],a
+    inc     e
+    jr      nz,:-
+    pop     hl
+    inc     hl
+    inc     hl
+    resbank
+	
     ; load map into mem
     lb      bc,4,0
 .loop
@@ -469,3 +523,16 @@ Level_LoadMapRow:
     jr      nz,.loop
 
     ret
+
+; ================================================================
+; Tileset data
+; ================================================================
+
+include "Data/Tilesets.asm"
+
+; ================================================================
+; Backgrounds
+; ================================================================
+
+include "Data/Backgrounds.asm"
+

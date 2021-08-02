@@ -1,6 +1,7 @@
 section "Metatile RAM defines",wram0,align[8]
 
-Engine_TilesetPointer:  ds  2
+Engine_TilesetPointer:  dw
+Engine_TilesetBank:     db
 
 section "Metatile routines",rom0
 
@@ -79,14 +80,6 @@ GetTileR:
 DrawMetatile:
     push    af
     ld      e,a
-;   ; get tile ID
-;   ld      hl,Engine_ScreenMap
-;   add     l
-;   ld      l,a
-;   ld      a,[hl]
-;   ld      b,a
-;   ; get VRAM coordinates
-;   ld      a,e
     and     $0f
     rla
     ld      l,a
@@ -110,10 +103,20 @@ DrawMetatile:
     ld      d,h
     ld      e,l
     ; get tile data pointer
+    push    bc
+    ld      a,[Engine_TilesetBank]
+    ld      b,a
+    call    _Bankswitch
+    pop     bc
     ld      hl,Engine_TilesetPointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    ; skip collision pointer + gfx bank & pointer
+    push    de
+    ld      de,5
+    add     hl,de
+    pop     de
     ld      c,b
     ld      b,0
     add     hl,bc
