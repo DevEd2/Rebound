@@ -50,7 +50,14 @@ TitleLoop:
     ld      a,[sys_FadeState]
     bit     0,a
     jr      nz,:-
+    call    AllPalsWhite
+    call	UpdatePalettes
     
+    ; wait for SFX to finish
+:   halt
+    ld      a,[VGMSFX_Flags]
+    and     a
+    jr      nz,:-
     xor     a
     ldh     [rLCDC],a
     jp      GM_Level
