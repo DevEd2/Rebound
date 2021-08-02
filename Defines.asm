@@ -41,11 +41,8 @@ _Down           equ 128
 ; Project-specific constants
 ; ==========================
 
+; TODO: Remove this
 TILESET_TEST    equ 0
-
-; TODO: Remove these
-MUSIC_TEST1     equ 0
-MUSIC_TEST2     equ 1
 
 ; ======
 ; Macros
