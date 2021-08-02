@@ -59,11 +59,10 @@ GM_Level:
     ldh     [rIE],a
 
     ; wait for VBlank to avoid VRAM access violations during palette copy
-.w  ldh     a,[rLY]
-    cp      144
-    jr      nz,.w
-
-
+    ld      hl,rLY
+    ld      a,SCRN_Y
+:   cp      [hl]
+    jr      nz,:-
     ei
     
 LevelLoop::

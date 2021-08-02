@@ -40,4 +40,3 @@ Tileset_Test:
     ; topsolid tile (background 4)
     db  $14,%00000001,$15,%00000001
     db  $0e,%00000000,$0f,%00000000
-	

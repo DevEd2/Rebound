@@ -181,4 +181,3 @@ DrawMetatile:
     ld      [de],a
     pop     af
     ret
-
