@@ -5,81 +5,87 @@
 section "Player RAM",wram0
 PlayerRAM:
 
-Player_MovementFlags::  db  ; bit 0 = moving, bit 7 = dir (0 = left, 1 = right)
-Player_XPos::           db  ; current X position
-Player_XSubpixel::      db  ; current X subpixel
-Player_YPos::           db  ; current Y position
-Player_YSubpixel::      db  ; current Y subpixel
-Player_XVelocity::      db  ; current X velocity
-Player_XVelocityS::     db  ; current X fractional velocity
-Player_YVelocity::      db  ; current Y velocity
-Player_YVelocityS::     db  ; current Y fractional velocity
-Player_LastBounceY::    db  ; last bounce Y position (absolute)
-Player_AnimPointer::    dw  ; pointer to current animation sequence
-Player_AnimTimer::      db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
-Player_CurrentFrame::   db  ; current animation frame being displayed
+Player_MovementFlags::      db  ; bit 0 = moving, bit 7 = dir (0 = left, 1 = right)
+Player_XPos::               db  ; current X position
+Player_XSubpixel::          db  ; current X subpixel
+Player_YPos::               db  ; current Y position
+Player_YSubpixel::          db  ; current Y subpixel
+Player_XVelocity::          db  ; current X velocity
+Player_XVelocityS::         db  ; current X fractional velocity
+Player_YVelocity::          db  ; current Y velocity
+Player_YVelocityS::         db  ; current Y fractional velocity
+Player_LastBounceY::        db  ; last bounce Y position (absolute)
+Player_AnimPointer::        dw  ; pointer to current animation sequence
+Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
+Player_CurrentFrame::       db  ; current animation frame being displayed
 
 ; the following are used for collision checks
-Player_TopLeftTile:     db
-Player_TopRightTile:    db
-Player_BottomLeftTile:  db
-Player_BottomRightTile: db
-Player_CenterTile:      db
+Player_TopLeftTile:         db
+Player_TopRightTile:        db
+Player_BottomLeftTile:      db
+Player_BottomRightTile:     db
+Player_CenterTile:          db
 
 PlayerRAM_End:
 
-Player_MaxSpeed         equ $140
-Player_Accel            equ 24
-Player_Decel            equ 12
-Player_Gravity          equ $25
-Player_BounceHeight     equ -$340
-Player_HighBounceHeight equ -$480
-Player_LowBounceHeight  equ -$1c0
-Player_TerminalVelocity equ $600
-Player_HitboxSize       equ 6
+Player_MaxSpeed             equ $140
+Player_Accel                equ 24
+Player_Decel                equ 12
+Player_Gravity              equ $25
+
+Player_BounceHeight         equ -$340
+Player_HighBounceHeight     equ -$480
+Player_LowBounceHeight      equ -$1c0
+
+Player_WallBounceHeight     equ -$280
+Player_HighWallBounceHeight equ -$400
+Player_LowWallBounceHeight  equ -$100
+
+Player_TerminalVelocity     equ $600
+Player_HitboxSize           equ 6
 
 ; ========================
 ; Player animation defines
 ; ========================
 
-F_Player_Idle           equ 0
-F_Player_Idle_Blink1    equ 1
-F_Player_Idle_Blink2    equ 2
-F_Player_Idle_Blink3    equ 3
-F_Player_Idle_Blink4    equ 4
+F_Player_Idle               equ 0
+F_Player_Idle_Blink1        equ 1
+F_Player_Idle_Blink2        equ 2
+F_Player_Idle_Blink3        equ 3
+F_Player_Idle_Blink4        equ 4
 
-F_Player_Left1          equ 8
-F_Player_Left1_Blink1   equ 9
-F_Player_Left1_Blink2   equ 10
-F_Player_Left1_Blink3   equ 11
-F_Player_Left1_Blink4   equ 12
+F_Player_Left1              equ 8
+F_Player_Left1_Blink1       equ 9
+F_Player_Left1_Blink2       equ 10
+F_Player_Left1_Blink3       equ 11
+F_Player_Left1_Blink4       equ 12
 
-F_Player_Left2          equ 16
-F_Player_Left2_Blink1   equ 17
-F_Player_Left2_Blink2   equ 18
-F_Player_Left2_Blink3   equ 19
-F_Player_Left2_Blink4   equ 20
+F_Player_Left2              equ 16
+F_Player_Left2_Blink1       equ 17
+F_Player_Left2_Blink2       equ 18
+F_Player_Left2_Blink3       equ 19
+F_Player_Left2_Blink4       equ 20
 
-F_Player_Right1         equ 24
-F_Player_Right1_Blink1  equ 25
-F_Player_Right1_Blink2  equ 26
-F_Player_Right1_Blink3  equ 27
-F_Player_Right1_Blink4  equ 28
+F_Player_Right1             equ 24
+F_Player_Right1_Blink1      equ 25
+F_Player_Right1_Blink2      equ 26
+F_Player_Right1_Blink3      equ 27
+F_Player_Right1_Blink4      equ 28
 
-F_Player_Right2         equ 32
-F_Player_Right2_Blink1  equ 33
-F_Player_Right2_Blink2  equ 34
-F_Player_Right2_Blink3  equ 35
-F_Player_Right2_Blink4  equ 36
+F_Player_Right2             equ 32
+F_Player_Right2_Blink1      equ 33
+F_Player_Right2_Blink2      equ 34
+F_Player_Right2_Blink3      equ 35
+F_Player_Right2_Blink4      equ 36
 
-F_Player_Win            equ 5
-F_Player_Hurt1          equ 6
-F_Player_Hurt2          equ 7
-F_Player_Angry          equ 13
-F_Player_Sad            equ 14
-F_Player_Surprise       equ 15
-F_Player_LookUp         equ 21
-F_Player_LookDown       equ 22
+F_Player_Win                equ 5
+F_Player_Hurt1              equ 6
+F_Player_Hurt2              equ 7
+F_Player_Angry              equ 13
+F_Player_Sad                equ 14
+F_Player_Surprise           equ 15
+F_Player_LookUp             equ 21
+F_Player_LookDown           equ 22
 
 ; ===============
 ; Player routines
@@ -123,7 +129,6 @@ ProcessPlayer:
     ld      [Player_MovementFlags],a
     jr      .noaccel
 .accelLeft
-    ld      b,b
     push    bc
     ld      bc,-Player_Accel
     ld      hl,Player_XVelocity
@@ -135,22 +140,20 @@ ProcessPlayer:
     ld      c,l
     ld      de,-Player_MaxSpeed
     call    Compare16
-    jr      c,.capLeft
-    jr      .noCapLeft
-.capLeft
-    ld      b,b
+    jr      nc,:+
+    ld      de,$8000
+    call    Compare16
+    jr      c,:+
     ld      hl,-Player_MaxSpeed
-.noCapLeft
-    ld      a,h
+:   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
     ld      [Player_XVelocityS],a
     pop     bc
-
+   
     ld      e,%10000000
     jr      .continue
 .accelRight
-    ld      b,b
     push    bc
     ld      bc,Player_Accel
     ld      hl,Player_XVelocity
@@ -162,13 +165,12 @@ ProcessPlayer:
     ld      e,l
     ld      bc,Player_MaxSpeed
     call    Compare16
-    jr      c,.capRight
-    jr      .noCapRight
-.capRight
-    ld      b,b
+    jr      nc,:+
+    ld      bc,$8000
+    call    Compare16
+    jr      c,:+
     ld      hl,Player_MaxSpeed
-.noCapRight
-    ld      a,h
+:   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
     ld      [Player_XVelocityS],a
@@ -308,11 +310,15 @@ ProcessPlayer:
     jp      nz,.xCollideEnd
 :
     ; Collision with left wall
-    ; Clear Velocity
-    xor     a
+    ; Negate velocity
+    ld      a,[sys_btnHold]
+    bit     btnB,a
+    jr      nz,:+       ; don't bounce off walls if B is held
+    ld      a,high(Player_MaxSpeed)
     ld      [Player_XVelocity],a
+    ld      a,low(Player_MaxSpeed)
     ld      [Player_XVelocityS],a
-    ; Calculate penetration depth
+:   ; Calculate penetration depth
     ld      a,[Player_XPos]
     ld      c,a
     sub     Player_HitboxSize
@@ -323,8 +329,15 @@ ProcessPlayer:
     ; Push player out of tile
     add     c
     ld      [Player_XPos],a
+    ; Make player bounce vertically
+    push    af
+    ld      a,[sys_btnHold]
+    bit     btnB,a
+    jr      nz,:+       ; don't bounce off walls if B is held
+    call    Player_WallBounce
+:   pop     af
     ; Check Screen Crossing
-    jr      nc,.xCollideEnd
+    jp      nc,.xCollideEnd
     ; Right edge crosses, increment current screen
     ld      a,[Engine_CurrentScreen]
     and     $30
@@ -373,11 +386,15 @@ ProcessPlayer:
     jr      nz,.xCollideEnd
 :
     ; Collision with right wall
-    ; Clear Velocity
-    xor     a
+    ; Bounce off of walls
+    ld      a,[sys_btnHold]
+    bit     btnB,a
+    jr      nz,:+       ; don't bounce off walls if B is held
+    ld      a,high(-Player_MaxSpeed)
     ld      [Player_XVelocity],a
-    ld      [Player_XVelocityS],a
-    ; Calculate penetration depth
+    ld      a,low(-Player_MaxSpeed)
+    ld      [Player_XVelocityS],a 
+:   ; Calculate penetration depth
     ld      a,[Player_XPos]
     push    af
     add     Player_HitboxSize
@@ -388,6 +405,13 @@ ProcessPlayer:
     ; Push player out of tile
     sub     b
     ld      [Player_XPos],a
+    ; Make player bounce vertically
+    push    af
+    ld      a,[sys_btnHold]
+    bit     btnB,a
+    jr      nz,:+       ; don't bounce off walls if B is held
+    call    Player_WallBounce
+:   pop     af
     ; Check Screen Crossing
     jr      nc,.xCollideEnd
     ; Left edge crossed, decrement current screen
@@ -596,8 +620,6 @@ Player_UpdateCollision::
     ret
     
 Player_Bounce:
-    xor     a
-    ld      [Player_YSubpixel],a    ; reset subpixel
     ld      a,[Player_LastBounceY]
     add     7
     ld      b,a
@@ -645,6 +667,57 @@ Player_Bounce:
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighBounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+    
+Player_WallBounce:
+    ld      a,[Player_LastBounceY]
+    add     7
+    ld      b,a
+    ld      a,[Player_YPos]
+    add     7
+    ld      [Player_LastBounceY],a
+    push    af
+    cp      b                       ; compare previous bounce Y with current bounce Y
+    jr      nc,.skipcamtrack        ; if old Y < new Y, skip tracking
+    ld      a,1
+    ld      [Engine_CameraIsTracking],a
+.skipcamtrack
+    pop     af
+.checkup
+    sub     SCRN_Y / 2
+    jr      nc,.checkdown
+    xor     a
+    jr      .setcamy
+.checkdown
+    cp      256 - SCRN_Y
+    jr      c,.setcamy
+    ld      a,256 - SCRN_Y
+.setcamy
+    and     %11110000
+    ld      [Engine_BounceCamTarget],a
+
+    ld      a,[sys_btnHold]
+    bit     btnA,a
+    jr      nz,.highbounce
+    bit     btnB,a
+    ret     nz
+.normalbounce
+    ld      a,high(Player_WallBounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_WallBounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+.lowbounce
+    ld      a,high(Player_LowWallBounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_LowWallBounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+.highbounce
+    ld      a,high(Player_HighWallBounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_HighWallBounceHeight)
     ld      [Player_YVelocityS],a
     ret
     
