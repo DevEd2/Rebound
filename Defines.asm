@@ -43,6 +43,7 @@ _Down           equ 128
 
 TILESET_TEST    equ 0
 
+; TODO: Remove these
 MUSIC_TEST1     equ 0
 MUSIC_TEST2     equ 1
 

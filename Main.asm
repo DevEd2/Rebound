@@ -376,9 +376,7 @@ include "Engine/SplashScreens.asm"
 
 ; ================================
 
-GM_TitleAndMenus:
-    ; TODO
-    ret
+include "Engine/TitleAndMenus.asm"
 
 ; ================================
 
@@ -636,7 +634,7 @@ _WaitJoypad:
 ; Graphics routines
 ; =================
 
-include "Engine/GBCPal.asm"
+include "Engine/PerFade.asm"
 
 ; =========
 

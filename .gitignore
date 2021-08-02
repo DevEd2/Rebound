@@ -85,4 +85,8 @@ Temporary Items
 Levels/*.bin
 Levels/*.bin.wle
 Levels/*.inc
+
+*.png
+!*Tileset.png
+
 Archived builds/
