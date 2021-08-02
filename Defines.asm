@@ -127,6 +127,11 @@ resbank:                macro
     ldh     [sys_CurrentBank],a
     ld      [rROMB0],a
 endm
+
+bankptr:				macro
+	db		bank(\1)
+	dw		\1
+	endm
     
 djnz:                   macro
     dec     b
