@@ -3,6 +3,7 @@ section "Sound test RAM",wram0
 SoundTest_SongID:           db
 SoundTest_MarqueeScroll:    db
 SoundTest_MarqueePos:       db
+SoundTest_DoFade:           db
 
 ; ================
 
@@ -83,9 +84,6 @@ SoundTestLoop:
     ld      a,[sys_btnPress]
     bit     btnB,a
     jp      nz,.exit
-    bit     btnA,a
-    jr      nz,.playsong
-
     ld      e,a
     ld      a,[SoundTest_MarqueeScroll]
     and     a
@@ -97,6 +95,10 @@ SoundTestLoop:
     jr      nz,.nextsong
     jr      .continue
 .prevsong
+    ld      a,1
+    ld      [SoundTest_DoFade],a
+    inc     a
+    farcall DS_Fade
     ld      a,%10000001
     ld      [SoundTest_MarqueeScroll],a
     ld      a,[SoundTest_SongID]
@@ -108,6 +110,10 @@ SoundTestLoop:
     ld      [SoundTest_SongID],a
     jr      .continue
 .nextsong
+    ld      a,1
+    ld      [SoundTest_DoFade],a
+    inc     a
+    farcall DS_Fade
     ld      a,%00000001
     ld      [SoundTest_MarqueeScroll],a
     ld      a,[SoundTest_SongID]
@@ -118,10 +124,7 @@ SoundTestLoop:
     xor     a
     ld      [SoundTest_SongID],a
     jr      .continue
-.playsong
-    ld      a,[SoundTest_SongID]
-    farcall DS_Init
-    jr      .continue
+    
 .exit
     call    DS_Stop
     halt
@@ -173,37 +176,35 @@ SoundTestLoop:
     rst     WaitLCDC
     call    SoundTest_RunMarquee
     
-    rst     WaitVBlank
+:   rst     WaitVBlank
     xor     a
     ldh     [rSCX],a
     jp      SoundTestLoop
 
 SoundTest_CursorOscillationTable:
-    db       0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1
-    db       0, 0,-1,-1,-1,-2,-2,-2,-2,-2,-2,-2,-2,-1,-1,-1
+    db       0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0
+    db       0, 0, 0, 0,-1,-1,-1,-1,-1,-1,-1,-1, 0, 0, 0, 0
 
 ; ================
 
 ; a = song ID
 ; b = offset
-SoundTest_DrawSongNameChar:  
-    ld      hl,SoundTest_SongNames
-    add     a   ; x2
-    add     a   ; x4
-    add     a   ; x8
-    add     a   ; x16
-    add     a   ; x32
-    add     l
+SoundTest_DrawSongNameChar:
+    ld      de,SoundTest_SongNames
     ld      l,a
-    jr      nc,.nocarry1
-    inc     h
-.nocarry1
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    add     hl,hl   ; x16
+    add     hl,hl   ; x32
+    add     hl,de
+    ld      a,l
     add     b
     ld      l,a
-    jr      nc,.nocarry2
+    jr      nc,:+
     inc     h
-.nocarry2
-    ld      d,$9a
+:   ld      d,$9a
     ld      e,b
     xor     a
     ldh     [rVBK],a
@@ -270,6 +271,9 @@ SoundTest_RunMarquee:
     xor     a
     ld      [SoundTest_MarqueePos],a
     ld      [SoundTest_MarqueeScroll],a
+    ; play new song
+    ld      a,[SoundTest_SongID]
+    farcall DS_Init
     ret
 .noreset
     ld      [SoundTest_MarqueePos],a
@@ -297,6 +301,9 @@ SoundTest_RunMarquee:
     xor     a
     ld      [SoundTest_MarqueePos],a
     ld      [SoundTest_MarqueeScroll],a
+    ; play new song
+    ld      a,[SoundTest_SongID]
+    farcall DS_Init
     ret
 .noreset2
     ld      [SoundTest_MarqueePos],a
@@ -315,23 +322,26 @@ SoundTest_RunMarquee:
     ld      a,[SoundTest_SongID]
     jp      SoundTest_DrawSongNameChar
 
-
 SoundTest_SongNames:
 ;        -##################-------------
     db  "     Main Theme                 "
     db  " Humble  Beginnings             "
-;   db  "   Rock the Block               "
+    db  "   Rock the Block               "
+    db  "   Mystic  Medley               "
     db  "    Pyramid Jams                "
-;   db  "   Mystic  Medley               "
-;   db  "   Cave Cacophony               "
-;   db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune
+    db  "   Cave Cacophony               "
+    db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune
     db  "  Plains Perfected              "
-;   db  "   City Completed               "
-;   db  "   Pyramid Passed               "
-;   db  "  Forest  Flourish              "
-;   db  "   Temple Triumph               "
-;   db  "    Bonus  Time!                "
-;   db  "     Staff Roll                 "
+    db  "   City Conquered               "
+    db  "  Forest  Flourish              "
+    db  "   Pyramid Passed               "
+    db  "    Cave Cleared                "
+    db  "   Temple Triumph               "
+    db  "   Down 'n  Dirty               "
+    db  "    Try Again...                "
+    db  "    Bonus  Time!                "
+    db  "     Staff Roll                 "
+;        -##################-------------
 .end
 
 ; ================

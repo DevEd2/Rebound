@@ -9,20 +9,21 @@
 
     const   MUS_MENU
     const   MUS_PLAINS
-;   const   MUS_CITY
+    const   MUS_CITY
+    const   MUS_FOREST
     const   MUS_PYRAMID
-;   const   MUS_CAVE
-;   const   MUS_FOREST
-;   const   MUS_TEMPLE
+    const   MUS_CAVE
+    const   MUS_TEMPLE
     const   MUS_PLAINS_CLEAR
-;   const   MUS_CITY_CLEAR
-;   const   MUS_PYRAMID_CLEAR
-;   const   MUS_FOREST_CLEAR
-;   const   MUS_CAVE_CLEAR
-;   const   MUS_TEMPLE_CLEAR
-;   const   MUS_PLAYER_DOWN
-;   const   MUS_BONUS
-;   const   MUS_CREDITS
+    const   MUS_CITY_CLEAR
+    const   MUS_FOREST_CLEAR
+    const   MUS_PYRAMID_CLEAR
+    const   MUS_CAVE_CLEAR
+    const   MUS_TEMPLE_CLEAR
+    const   MUS_BOSS
+    const   MUS_PLAYER_DOWN
+    const   MUS_BONUS
+    const   MUS_CREDITS
 
 NUM_SONGS   equ const_value
     
@@ -33,38 +34,40 @@ NUM_SONGS   equ const_value
 SongSpeedTable:
     db  4,3 ; menu
     db  6,6 ; plains
-;   db  3,3 ; city
+    db  3,3 ; city
+    db  3,3 ; forest
     db  4,5 ; pyramid
-;   db  3,3 ; cave
-;   db  3,3 ; forest
-;   db  3,3 ; temple
+    db  3,3 ; cave
+    db  3,3 ; temple
     db  6,6 ; plains stage clear
-;   db  3,3 ; city stage clear
-;   db  3,3 ; pyramid stage clear
-;   db  3,3 ; forest stage clear
-;   db  3,3 ; cave stage clear
-;   db  3,3 ; temple stage clear
-;   db  3,3 ; player down
-;   db  3,3 ; bonus stage
-;   db  3,3 ; credits
+    db  3,3 ; city stage clear
+    db  3,3 ; forest stage clear
+    db  3,3 ; pyramid stage clear
+    db  3,3 ; cave stage clear
+    db  3,3 ; temple stage clear
+    db  3,3 ; boss battle
+    db  3,3 ; player down
+    db  3,3 ; bonus stage
+    db  3,3 ; credits
 
 SongPointerTable:
     dw  PT_Menu
     dw  PT_Plains
-;   dw  PT_City
+    dw  PT_City
+    dw  PT_Forest
     dw  PT_Pyramid
-;   dw  PT_Cave
-;   dw  PT_Forest
-;   dw  PT_Temple
+    dw  PT_Cave
+    dw  PT_Temple
     dw  PT_PlainsClear
-;   dw  PT_CityClear
-;   dw  PT_PyramidClear
-;   dw  PT_ForestClear
-;   dw  PT_CaveClear
-;   dw  PT_TempleClear
-;   dw  PT_PlayerDown
-;   dw  PT_Bonus
-;   dw  PT_Credits
+    dw  PT_CityClear
+    dw  PT_PyramidClear
+    dw  PT_ForestClear
+    dw  PT_CaveClear
+    dw  PT_TempleClear
+    dw  PT_Boss
+    dw  PT_PlayerDown
+    dw  PT_Bonus
+    dw  PT_Credits
 
 ; =================================================================
 ; Volume sequences
@@ -1466,3 +1469,59 @@ PlainsClear_CH4:
     Drum    Kick,2
     Drum    Kick,2
     db      EndChannel
+    
+; =================================================================
+
+PT_City:
+
+; =================================================================
+
+PT_Forest:
+
+; =================================================================
+
+PT_Cave:
+
+; =================================================================
+
+PT_Temple:
+
+; =================================================================
+
+PT_CityClear:
+
+; =================================================================
+
+PT_ForestClear:
+
+; =================================================================
+
+PT_PyramidClear:
+
+; =================================================================
+
+PT_CaveClear:
+
+; =================================================================
+
+PT_TempleClear:
+
+; =================================================================
+
+PT_Boss:
+
+; =================================================================
+
+PT_PlayerDown:
+
+; =================================================================
+
+PT_Bonus:
+
+; =================================================================
+
+PT_Credits:
+
+; =================================================================
+
+PT_Blank:   dw  DummyChannel,DummyChannel,DummyChannel,DummyChannel
