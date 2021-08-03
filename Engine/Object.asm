@@ -1,3 +1,14 @@
+; ==============
+; Object System
+; ==============
+
+; TODO
+; - Object Rendering
+; - Object Behaviors
+; - Particle Update
+; - Particle Rendering
+; - Off Screen Check
+
 section "Object Memory",wram0
 
 MONSTER_COUNT   equ 16
