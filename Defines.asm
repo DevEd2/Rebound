@@ -209,6 +209,8 @@ sys_TimerFlag:      db
 sys_SerialFlag:     db
 sys_JoypadFlag:     db
 
+sys_PauseGame:      db
+
 sys_EmuCheck:       db
 
 sys_EnableHDMA:     db

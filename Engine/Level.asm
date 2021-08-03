@@ -272,8 +272,36 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
-    halt
+
+    ; pause game if Start is pressed
+    ld      a,[sys_btnPress]
+    bit     btnStart,a
+    jr      z,:+
+    ld      a,1
+    ld      [sys_PauseGame],a
+    ; disable sound output to clear sustained notes
+    xor     a
+    ldh     [rNR52],a
+    ; re-enable sound output
+    set     7,a
+    ldh     [rNR52],a
+    ld      a,%11111111
+    ldh     [rNR51],a
+    ld      a,%01110111
+    ldh     [rNR50],a
+    PlaySFX pause
+    call    Level_PauseLoop
+:   halt
     jp      LevelLoop
+    
+Level_PauseLoop:
+    halt
+    ld      a,[sys_btnPress]
+    bit     btnStart,a
+    jr      z,Level_PauseLoop
+    xor     a
+    ld      [sys_PauseGame],a
+    ret
     
 ; ================================================================
 

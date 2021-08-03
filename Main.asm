@@ -206,13 +206,14 @@ ProgramStart::
     push    af
 
     ; wait for VBlank
-    ld  hl,rLY
-    ld  a,144
+    ld      hl,rLY
+    ld      a,144
 .wait
-    cp  [hl]
-    jr  nz,.wait
-    xor a
-    ldh [rLCDC],a   ; disable LCD
+    cp      [hl]
+    jr      nz,.wait
+    xor     a
+    ldh     [rLCDC],a   ; disable LCD
+    ld      [sys_PauseGame],a
 
     farcall DevSound_Stop   ; prevent glitch music from playing
     
@@ -468,9 +469,13 @@ DoVBlank::
 .continue                           ; done
 
     call    VGMSFX_Update
+    ; don't update music if game is paused
+    ld      a,[sys_PauseGame]
+    and     a
+    jr      nz,:+
     farcall DevSound_Play
 
-    call    Pal_DoFade
+:   call    Pal_DoFade
 
     pop     hl
     pop     de

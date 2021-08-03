@@ -190,8 +190,6 @@ ProcessPlayer:
     
 .noaccel
     ; check if we're underwater
-    ; TODO: This doesn't work, figure out why
-    ld      b,b
     res     1,d
     ld      a,[Player_YPos]
     ld      l,a

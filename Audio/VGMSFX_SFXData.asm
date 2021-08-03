@@ -18,3 +18,4 @@ endm
     defsfx  impact1,SFX_CH1
     defsfx  splash,SFX_CH4
     defsfx  wavetest,SFX_CH3
+    defsfx  spring,SFX_CH1
