@@ -959,6 +959,7 @@ Compare16:
 include "Engine/Metatile.asm"
 include "Engine/Parallax.asm"
 include "Engine/Player.asm"
+include "Engine/Object.asm"
 
 ; ==========
 ; Sound data
