@@ -19,10 +19,11 @@ GetTileCoordinates:
     add     b
     ret
     
-; Input:        E = Tile coordinates
-;           Carry = Subtract 1 from screen 
-; Output:       A = Tile ID
-; Destroys:    HL
+; Input:    E = Tile coordinates
+;       Carry = Subtract 1 from screen 
+; Output:   A = Collision ID, B = Tile ID
+; Destroys: B, HL, rROMB0
+
 GetTileL:
     push    af
     ldh     a,[rSVBK]
@@ -44,12 +45,26 @@ GetTileL:
 .nocarry
     ld      l,e
     ld      a,[hl]
-    ret
+	; get collision ID
+	ld		b,b
+	ld		e,a
+	ld		a,[Engine_TilesetBank]
+	ld		b,a
+	call	_Bankswitch
+	ld		hl,Engine_CollisionPointer
+    ld		a,[hl+]
+	ld		h,[hl]
+	add		e
+	ld		l,a
+	jr		nc,:+
+	inc		h
+:	ld		a,[hl]
+	ret
     
-; Input:        E = Tile coordinates
-;           Carry = Add 1 to screen 
-; Output:       A = Tile ID
-; Destroys:    HL
+; Input:    E = Tile coordinates
+;       Carry = Subtract 1 from screen 
+; Output:   A = Collision ID, B = Tile ID
+; Destroys: B, HL, rROMB0
 GetTileR:
     push    af
     ldh     a,[rSVBK]
@@ -71,6 +86,20 @@ GetTileR:
 .nocarry
     ld      l,e
     ld      a,[hl]
+	; get collision ID
+	ld		b,b
+	ld		e,a
+	ld		a,[Engine_TilesetBank]
+	ld		b,a
+	call	_Bankswitch
+	ld		hl,Engine_CollisionPointer
+    ld		a,[hl+]
+	ld		h,[hl]
+	add		e
+	ld		l,a
+	jr		nc,:+
+	inc		h
+:	ld		a,[hl]
     ret
 
 ; Input:    A = Tile coordinates

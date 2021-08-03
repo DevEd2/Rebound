@@ -292,7 +292,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      4
+    cp      1
     jr      z,:+
     ; Bottom Left
     ld      a,[Player_YPos]
@@ -306,7 +306,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      4
+    cp      1
     jp      nz,.xCollideEnd
 :
     ; Collision with left wall
@@ -368,7 +368,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      4
+    cp      1
     jr      z,:+
     ; Bottom Right
     ld      a,[Player_YPos]
@@ -382,7 +382,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      4
+    cp      1
     jr      nz,.xCollideEnd
 :
     ; Collision with right wall
@@ -473,7 +473,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      4
+    cp      1
     jr      z,:+
     ; Top Right
     ld      a,[Player_YPos]
@@ -487,7 +487,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      4
+    cp      1
     jr      nz,.yCollideEnd
 :
     ; Collision with ceiling
@@ -521,7 +521,11 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      4
+	cp		2
+	jr		nz,.nottopsolid1
+	jr		:+
+.nottopsolid1
+    cp      1
     jr      z,:+
     ld      a,[Player_YPos]
     add     Player_HitboxSize
@@ -534,7 +538,11 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      4
+	cp		2
+	jr		nz,.nottopsolid2
+	jr		:+
+.nottopsolid2
+    cp      1
     jr      nz,.yCollideEnd
 :
     ; Collision with floor
@@ -553,71 +561,6 @@ ProcessPlayer:
     call    Player_Bounce
 .yCollideEnd:
     jp    AnimatePlayer
-    
-Player_UpdateCollision::
-    ; center tile
-    ld      a,[Player_YPos]
-    ld      l,a
-    ld      a,[Player_XPos]
-    ld      h,a
-    call    GetTileCoordinates
-    ld      e,a
-    and     a   ; clear carry
-    call    GetTileL
-    ld      [Player_CenterTile],a
-    ; top left corner
-    ld      a,[Player_YPos]
-    sub     Player_HitboxSize
-    ld      l,a
-    ld      a,[Player_XPos]
-    sub     Player_HitboxSize
-    push    af
-    ld      h,a
-    call    GetTileCoordinates
-    ld      e,a
-    pop     af
-    call    GetTileL
-    ld      [Player_TopLeftTile],a
-    ; top right corner
-    ld      a,[Player_YPos]
-    sub     Player_HitboxSize
-    ld      l,a
-    ld      a,[Player_XPos]
-    add     Player_HitboxSize
-    push    af
-    ld      h,a
-    call    GetTileCoordinates
-    ld      e,a
-    pop     af
-    call    GetTileR
-    ld      [Player_TopRightTile],a
-    ; bottom left corner
-    ld      a,[Player_YPos]
-    add     Player_HitboxSize
-    ld      l,a
-    ld      a,[Player_XPos]
-    sub     Player_HitboxSize
-    push    af
-    ld      h,a
-    call    GetTileCoordinates
-    ld      e,a
-    pop     af
-    call    GetTileL
-    ld      [Player_BottomLeftTile],a
-    ; bottom right corner
-    ld      a,[Player_YPos]
-    add     Player_HitboxSize
-    ld      l,a
-    ld      a,[Player_XPos]
-    add     Player_HitboxSize
-    push    af
-    ld      h,a
-    call    GetTileCoordinates
-    ld      e,a
-    pop     af
-    call    GetTileR
-    ld      [Player_BottomRightTile],a
-    ret
     
 Player_Bounce:
     ld      a,[Player_LastBounceY]
