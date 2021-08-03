@@ -3,6 +3,13 @@ section "Metatile RAM defines",wram0,align[8]
 Engine_TilesetPointer:  dw
 Engine_TilesetBank:     db
 
+; Collision constants
+
+COLLISION_NONE          equ 0
+COLLISION_SOLID         equ 1
+COLLISION_TOPSOLID      equ 2
+COLLISION_WATER         equ 3
+
 section "Metatile routines",rom0
 
 ; Input:    H = Y pos

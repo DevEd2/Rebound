@@ -19,13 +19,6 @@ Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
 
-; the following are used for collision checks
-Player_TopLeftTile:         db
-Player_TopRightTile:        db
-Player_BottomLeftTile:      db
-Player_BottomRightTile:     db
-Player_CenterTile:          db
-
 PlayerRAM_End:
 
 Player_MaxSpeed             equ $140
@@ -43,6 +36,17 @@ Player_LowWallBounceHeight  equ -$100
 
 Player_TerminalVelocity     equ $600
 Player_HitboxSize           equ 6
+
+; Player_MovementFlags defines
+
+bPlayerIsMoving             = 0
+bPlayerIsUnderwater         = 1
+bPlayerUnused2              = 2
+bPlayerUnused3              = 3
+bPlayerUnused4              = 4
+bPlayerUnused5              = 5
+bPlayerUnused6              = 6
+bPlayerDirection            = 7
 
 ; ========================
 ; Player animation defines
@@ -127,6 +131,7 @@ ProcessPlayer:
     ld      a,[Player_MovementFlags]
     res     0,a
     ld      [Player_MovementFlags],a
+    ld      d,a
     jr      .noaccel
 .accelLeft
     push    bc
@@ -181,9 +186,25 @@ ProcessPlayer:
 .continue
     ld      a,c
     or      e
-    ld      [Player_MovementFlags],a
+    res     1,a
+    ld      d,a
     
 .noaccel
+    ; check if we're underwater
+    ; TODO: This doesn't work, figure out why
+    ld      a,[Player_XPos]
+    ld      l,a
+    ld      a,[Player_YPos]
+    ld      h,a
+    call    GetTileCoordinates
+    and     a               ; clear carry
+    call    GetTileL        ; doesn't matter if we use GetTileL or GetTileR, the result is the same
+    cp      COLLISION_WATER ; are we touching a water tile?
+    jr      nz,:+           ; if not, skip
+    set     1,d             ; set player's "is underwater" flag
+:   ld      a,d
+    ld      [Player_MovementFlags],a
+    
     ; Player deceleration
     ; a = [Player_MovementFlags]
     bit     0,a
@@ -292,7 +313,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      1
+    cp      COLLISION_SOLID
     jr      z,:+
     ; Bottom Left
     ld      a,[Player_YPos]
@@ -306,7 +327,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      1
+    cp      COLLISION_SOLID
     jp      nz,.xCollideEnd
 :
     ; Collision with left wall
@@ -368,7 +389,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      1
+    cp      COLLISION_SOLID
     jr      z,:+
     ; Bottom Right
     ld      a,[Player_YPos]
@@ -382,7 +403,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      1
+    cp      COLLISION_SOLID
     jr      nz,.xCollideEnd
 :
     ; Collision with right wall
@@ -473,7 +494,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-    cp      1
+    cp      COLLISION_SOLID
     jr      z,:+
     ; Top Right
     ld      a,[Player_YPos]
@@ -487,7 +508,7 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-    cp      1
+    cp      COLLISION_SOLID
     jr      nz,.yCollideEnd
 :
     ; Collision with ceiling
@@ -521,16 +542,16 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileL
-	cp		2
-	jr		nz,.nottopsolid1
-	ld		b,a
-	ld		a,[sys_btnHold]
-	bit		btnDown,a
-	ld		a,b
-	jr		nz,.nottopsolid1
-	jr		:+
+    cp      COLLISION_TOPSOLID
+    jr      nz,.nottopsolid1
+    ld      b,a
+    ld      a,[sys_btnHold]
+    bit     btnDown,a
+    ld      a,b
+    jr      nz,.nottopsolid1
+    jr      :+
 .nottopsolid1
-    cp      1
+    cp      COLLISION_SOLID
     jr      z,:+
     ld      a,[Player_YPos]
     add     Player_HitboxSize
@@ -543,16 +564,16 @@ ProcessPlayer:
     ld      e,a
     pop     af
     call    GetTileR
-	cp		2
-	jr		nz,.nottopsolid2
-	ld		b,a
-	ld		a,[sys_btnHold]
-	bit		btnDown,a
-	ld		a,b
-	jr		nz,.nottopsolid2
-	jr		:+
+    cp      COLLISION_TOPSOLID
+    jr      nz,.nottopsolid2
+    ld      b,a
+    ld      a,[sys_btnHold]
+    bit     btnDown,a
+    ld      a,b
+    jr      nz,.nottopsolid2
+    jr      :+
 .nottopsolid2
-    cp      1
+    cp      COLLISION_SOLID
     jr      nz,.yCollideEnd
 :
     ; Collision with floor
