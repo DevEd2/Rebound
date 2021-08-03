@@ -1043,7 +1043,6 @@ Pal_Player_End:
 
 TestMapTiles:
     incbin  "GFX/TestTiles.2bpp.wle"
-TestMapTiles_End:
 
 ; ==========
 ; Level data
