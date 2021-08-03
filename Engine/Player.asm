@@ -523,6 +523,11 @@ ProcessPlayer:
     call    GetTileL
 	cp		2
 	jr		nz,.nottopsolid1
+	ld		b,a
+	ld		a,[sys_btnHold]
+	bit		btnDown,a
+	ld		a,b
+	jr		nz,.nottopsolid1
 	jr		:+
 .nottopsolid1
     cp      1
@@ -539,6 +544,11 @@ ProcessPlayer:
     pop     af
     call    GetTileR
 	cp		2
+	jr		nz,.nottopsolid2
+	ld		b,a
+	ld		a,[sys_btnHold]
+	bit		btnDown,a
+	ld		a,b
 	jr		nz,.nottopsolid2
 	jr		:+
 .nottopsolid2
