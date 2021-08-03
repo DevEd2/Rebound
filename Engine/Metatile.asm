@@ -46,7 +46,6 @@ GetTileL:
     ld      l,e
     ld      a,[hl]
 	; get collision ID
-	ld		b,b
 	ld		e,a
 	ld		a,[Engine_TilesetBank]
 	ld		b,a
@@ -87,7 +86,6 @@ GetTileR:
     ld      l,e
     ld      a,[hl]
 	; get collision ID
-	ld		b,b
 	ld		e,a
 	ld		a,[Engine_TilesetBank]
 	ld		b,a
