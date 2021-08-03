@@ -10,7 +10,7 @@ section "Test tileset",romx
 ; 02 = Solid (top only)
 ; 03 = Water
 ColMap_Test:
-	db	0,0,0,0,1,0,2,2,2,2,3,0,0,0,0,0
+	db	0,1,0,2,3,3,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -33,15 +33,6 @@ Tileset_Test:
     ; background 1 (horizontal + vertical parallax)
     db  $00,%00000000,$01,%00000000
     db  $02,%00000000,$03,%00000000
-    ; background 2 (horizontal + vertical parallax)
-    db  $04,%00000000,$05,%00000000
-    db  $06,%00000000,$07,%00000000
-    ; background 3 (horizontal parallax)
-    db  $08,%00000000,$09,%00000000
-    db  $0a,%00000000,$0b,%00000000
-    ; background 4 (horizontal parallax)
-    db  $0c,%00000000,$0d,%00000000
-    db  $0e,%00000000,$0f,%00000000
     ; solid tile
     db  $10,%00000001,$12,%00000001
     db  $11,%00000001,$13,%00000001
@@ -51,12 +42,18 @@ Tileset_Test:
     ; topsolid tile (background 1)
     db  $14,%00000001,$15,%00000001
     db  $02,%00000000,$03,%00000000
-    ; topsolid tile (background 2)
-    db  $14,%00000001,$15,%00000001
-    db  $06,%00000000,$07,%00000000
-    ; topsolid tile (background 3)
-    db  $14,%00000001,$15,%00000001
-    db  $0a,%00000000,$0b,%00000000
-    ; topsolid tile (background 4)
-    db  $14,%00000001,$15,%00000001
-    db  $0e,%00000000,$0f,%00000000
+    ; water w/ sunbeam 1 (horizontal parallax)
+    db  $08,%00100001,$09,%00100001
+    db  $0a,%00100001,$0b,%00100001
+    ; water w/ sunbeam 2 (horizontal parallax)
+    db  $09,%00100001,$08,%00100001
+    db  $0b,%00100001,$0a,%00100001
+    ; water surface 1 (horizontal parallax
+    db  $18,%00000001,$19,%00000001
+    db  $0a,%00100001,$0b,%00100001
+    ; water surface 1 (horizontal parallax
+    db  $18,%00000001,$19,%00000001
+    db  $0b,%00100001,$0a,%00100001
+    ; water w/ no sunbeam
+    db  $16,%00000001,$16,%00000001
+    db  $16,%00000001,$16,%00000001
