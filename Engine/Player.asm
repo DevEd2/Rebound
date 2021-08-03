@@ -186,18 +186,20 @@ ProcessPlayer:
 .continue
     ld      a,c
     or      e
-    res     1,a
     ld      d,a
     
 .noaccel
     ; check if we're underwater
     ; TODO: This doesn't work, figure out why
-    ld      a,[Player_XPos]
-    ld      l,a
+    ld      b,b
+    res     1,d
     ld      a,[Player_YPos]
+    ld      l,a
+    ld      a,[Player_XPos]
     ld      h,a
     call    GetTileCoordinates
     and     a               ; clear carry
+    ld      e,a
     call    GetTileL        ; doesn't matter if we use GetTileL or GetTileR, the result is the same
     cp      COLLISION_WATER ; are we touching a water tile?
     jr      nz,:+           ; if not, skip
