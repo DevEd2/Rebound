@@ -8,10 +8,12 @@
 ; - Particle Update
 ; - Particle Rendering
 ; - Off Screen Check
+; - Object Deletion
 
 section "Object Memory",wram0
 
-MONSTER_COUNT   equ 16
+MONSTER_COUNT     equ 16
+MONSTER_WRAMSIZE  equ 16
 
 MONSTER_FLAG_HITPLAYER    equ 0
 MONSTER_FLAG_HITBYPLAYER  equ 1
@@ -30,6 +32,10 @@ Monster_XVelocity:    ds  MONSTER_COUNT
 Monster_XVelocityS:   ds  MONSTER_COUNT
 Monster_YVelocity:    ds  MONSTER_COUNT
 Monster_YVelocityS:   ds  MONSTER_COUNT
+Monster_AnimBank:     ds  MONSTER_COUNT
+Monster_AnimPtrHi:    ds  MONSTER_COUNT
+Monster_AnimPtrLo:    ds  MONSTER_COUNT
+Monster_AnimTimer:    ds  MONSTER_COUNT
 
 PARTICLE_COUNT  equ 6
 
@@ -51,7 +57,7 @@ Particle_YVelocity:   ds  PARTICLE_COUNT
 Particle_YVelocityS:  ds  PARTICLE_COUNT
 
 section "Object WRAM",wram0,align[256]
-Monster_WRAM: ds 256
+Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
 
 section "Object Routines",rom0
 
@@ -68,12 +74,13 @@ ClearMonsters:
   ret
   
 ; Get Free Monster Slot
-; OUTPUT:   c  = Monster Slot Number or -1 if no slots left
+; OUTPUT:   bc = Monster Slot Number or $00FF if no slots left
 ;           hl = Pointer to Monster ID
 ; TRASHES:  a
 GetMonsterSlot:
   ld  hl,Monster_ID+MONSTER_COUNT-1
   ld  c,MONSTER_COUNT-1
+  ld  b,0
 :
   ld  a,[hl]
   or  a
@@ -89,13 +96,22 @@ UpdateMonsters:
   xor a
   ld  b,a
   ld  c,MONSTER_COUNT-1
-MonsterUpdateLoop:
+.updateLoop:
   ld  hl,Monster_ID   ; Monster ID Pointer
   add hl,bc           ; Point to this Monster
   ld  a,[hl]          ; Get ID
   or  a
   jr  z,.nextMonster  ; 0 = No Monster
   ; Type Specific Update - TODO
+  
+  ; Check Parent
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]                ; Get Parent/Screen byte
+  swap  a                   ; Move Parent to low nibble
+  and $0f                   ; Mask out screen value
+  cp  c                     ; Compare to current slot number
+  jr  nz,.nextMonster       ; If this is a child object, don't do movement
   
   ; Horizontal Movement
   ld  hl,Monster_XVelocityS ; Monster X Velocity Sub Pointer
@@ -120,7 +136,7 @@ MonsterUpdateLoop:
   bit 7,d                   ; Check Velocity Direction
   jr  z,:+
   jr  c,.xMoveDone
-  ; Left edge crossed, decrement current screen
+  ; Left edge crossed, decrement screen
   ld  hl,Monster_ParentScreen
   add hl,bc
   ld  a,[hl]                ; Get Parent/Screen byte
@@ -135,6 +151,7 @@ MonsterUpdateLoop:
   jr  .xMoveDone
 :
   jr  nc,.xMoveDone
+  ; Right edge crossed, increment screen
   ld  hl,Monster_ParentScreen
   add hl,bc
   ld  a,[hl]
@@ -174,7 +191,53 @@ MonsterUpdateLoop:
 .nextMonster
   dec c
   bit 7,c
-  jr  z,MonsterUpdateLoop
+  jr  z,.updateLoop
+  ret
+  
+; Generate Monster sprite entries
+; TODO - Remove placeholder sprite
+RenderMonsters:
+  xor a
+  ld  b,a
+  ld  c,MONSTER_COUNT-1
+.renderLoop:
+  ld  hl,Monster_ID
+  add hl,bc
+  ld  a,[hl]
+  or  a
+  jr  z,.nextMonster
+  ld  a,[Engine_CameraY]
+  ld  d,a
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub d
+  add 8
+  ld  d,a
+  ld  a,[Engine_CameraX]
+  ld  e,a
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub e
+  ld  e,a
+  push  bc
+  ld  b,0
+  ld  c,%00001000
+  push  hl
+  call  AddSprite
+  ld  a,e
+  add 8
+  ld  e,a
+  inc b
+  inc b
+  call  AddSprite
+  pop hl
+  pop bc
+.nextMonster:
+  dec c
+  bit 7,c
+  jr  z,.renderLoop
   ret
   
 ; Clear Particle List

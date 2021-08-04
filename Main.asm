@@ -368,7 +368,8 @@ SkipGBCScreen:
         
     call    DoubleSpeed
     
-    jp      GM_DebugMenu
+;   jp      GM_DebugMenu
+    jp      GM_Level
     
 ; ================================
 
@@ -813,6 +814,8 @@ _OAM_DMA::
     jr  nz,.wait
     ret
 _OAM_DMA_End:
+
+include "Engine/Sprite.asm"
 
 ; =============
 ; Misc routines

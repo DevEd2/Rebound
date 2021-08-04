@@ -52,6 +52,22 @@ GM_Level:
     ld      a,1
     ld      [sys_EnableHDMA],a      ; enable parallax HDMA transfer
     
+    ; initialize object lists
+    call    ClearMonsters
+    call    ClearParticles
+    
+    ; Create a test object
+    call    GetMonsterSlot
+    ld      a,1
+    ld      [hl],a
+    ld      a,128
+    ld      hl,Monster_XPosition
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YPosition
+    add     hl,bc
+    ld      [hl],a
+    
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
     ldh     [rLCDC],a
@@ -208,7 +224,8 @@ LevelLoop::
 .skipY
 
 .nocamera
-
+    
+    call    BeginSprites
     ld      a,[Player_XPos]
     push    af
     call    ProcessPlayer
@@ -272,6 +289,8 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
+    call    RenderMonsters
+    call    EndSprites
 
     ; pause game if Start is pressed
     ld      a,[sys_btnPress]

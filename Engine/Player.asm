@@ -754,6 +754,9 @@ DrawPlayer:
     ld      a,%00001000
     ld      [hl],a
     
+    ld      hl,Sprite_NextSprite
+    inc     [hl]
+    inc     [hl]
     ret
 
 ; ===================
