@@ -214,6 +214,9 @@ ProgramStart::
     xor     a
     ldh     [rLCDC],a   ; disable LCD
     ld      [sys_PauseGame],a
+    ld      a,60
+    ld      [sys_SleepModeTimer],a
+    ld      [sys_SecondsUntilSleep],a
 
     farcall DevSound_Stop   ; prevent glitch music from playing
     
@@ -409,8 +412,34 @@ DoVBlank::
     inc a
     ld  [sys_CurrentFrame],a    ; increment current frame
     call    CheckInput
+    ; sleep mode check
+    ld      b,b
+    ld      a,[sys_PauseGame]
+    and     a   ; is game paused?
+    jr      z,:++
+    ld      a,[sys_btnHold]
+    and     a   ; are any buttons being pressed?
+    jr      z,:+
+    ld      a,60
+    ld      [sys_SleepModeTimer],a
+    ld      [sys_SecondsUntilSleep],a
+    jr      :++
+:   ld      a,[sys_SleepModeTimer]
+    dec     a
+    ld      [sys_SleepModeTimer],a
+    jr      nz,:+
+    ld      a,60
+    ld      [sys_SleepModeTimer],a
+    ld      a,[sys_SecondsUntilSleep]
+    dec     a
+    ld      [sys_SecondsUntilSleep],a
+    jr      nz,:+
+    call    SleepMode
+    ld      a,60
+    ld      [sys_SleepModeTimer],a
+    ld      [sys_SecondsUntilSleep],a
     
-    ; setup HDMA for parallax GFX transfer
+:   ; setup HDMA for parallax GFX transfer
     ld      a,[sys_EnableHDMA]
     and     a
     jr      z,.skiphdma

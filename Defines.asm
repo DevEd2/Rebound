@@ -197,38 +197,40 @@ section "Variables",wram0,align[8]
 OAMBuffer:          ds  40*4    ; 40 sprites, 4 bytes each
 .end
 
-sys_GBType:         db  ; 0 = DMG, 1 = GBC, 2 = GBA
-sys_ResetTimer:     db
-sys_CurrentFrame:   db  ; incremented each frame, used for timing
-sys_btnPress:       db  ; buttons pressed this frame
-sys_btnHold:        db  ; buttons held
+sys_GBType:             db  ; 0 = DMG, 1 = GBC, 2 = GBA
+sys_ResetTimer:         db
+sys_CurrentFrame:       db  ; incremented each frame, used for timing
+sys_btnPress:           db  ; buttons pressed this frame
+sys_btnHold:            db  ; buttons held
 
-sys_VBlankFlag:     db
-sys_LCDCFlag:       db
-sys_TimerFlag:      db
-sys_SerialFlag:     db
-sys_JoypadFlag:     db
+sys_VBlankFlag:         db
+sys_LCDCFlag:           db
+sys_TimerFlag:          db
+sys_SerialFlag:         db
+sys_JoypadFlag:         db
 
-sys_PauseGame:      db
+sys_PauseGame:          db
+sys_SleepModeTimer:     db
+sys_SecondsUntilSleep:  db
 
-sys_EmuCheck:       db
+sys_EmuCheck:           db
 
-sys_EnableHDMA:     db
-sys_TilemapBuffer:  ds  20*18
+sys_EnableHDMA:         db
+sys_TilemapBuffer:      ds  20*18
 
 ; project-specific
 
 section "Zeropage",hram
 
-OAM_DMA:            ds  16
-tempAF:             dw
-tempBC:             dw
-tempDE:             dw
-tempHL:             dw
-tempSP:             dw
-sys_CurrentBank:    db
-sys_LastBank:       db
-sys_TempCounter:    db
-sys_TempSVBK:       db
+OAM_DMA:                ds  16
+tempAF:                 dw
+tempBC:                 dw
+tempDE:                 dw
+tempHL:                 dw
+tempSP:                 dw
+sys_CurrentBank:        db
+sys_LastBank:           db
+sys_TempCounter:        db
+sys_TempSVBK:           db
 
 endc
