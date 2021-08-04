@@ -823,34 +823,36 @@ include "Engine/GBPrinter.asm"
 ; ================
 
 ; Enter low-power mode until the user presses A, B, Start, or Select.
+; FIXME: Doesn't work on hardware, figure out why
+; Commenting this out for now
 SleepMode:
-    di                      ; disable interrupts
-    ldh     a,[rLCDC]
-    push    af              ; store current LCD enable state
-    ; wait for VBlank
-    ld      hl,rLY
-    ld      a,SCRN_Y
-.wait
-    cp      [hl]
-    jr      nz,.wait
-    xor     a
-    ldh     [rLCDC],a       ; disable LCD
-    ld      a,P1F_GET_BTN
-    ldh     [rP1],a         ; enable high/low transition when A/B/Start/Select is pressed
-    ldh     a,[rIE]
-    ld      e,a             ; save currently enabled interrupts
-    ld      a,IEF_HILO
-    ldh     [rIE],a         ; enable joypad high/low transition interrupt
-    xor     a
-    ldh     [rNR52],a       ; disable sound
-    ei
-    stop                    ; enter low power mode until an interrupt occurs
-    ld      a,%10000000
-    ldh     [rNR52],a       ; re-enable sound
-    ld      a,e
-    ldh     [rIE],a         ; restore previously enabled interrupts
-    pop     af
-    ldh     [rLCDC],a       ; restore previous LCD enable state
+;    di                      ; disable interrupts
+;    ldh     a,[rLCDC]
+;    push    af              ; store current LCD enable state
+;    ; wait for VBlank
+;    ld      hl,rLY
+;    ld      a,SCRN_Y
+;.wait
+;    cp      [hl]
+;    jr      nz,.wait
+;    xor     a
+;    ldh     [rLCDC],a       ; disable LCD
+;    ld      a,P1F_GET_BTN
+;    ldh     [rP1],a         ; enable high/low transition when A/B/Start/Select is pressed
+;    ldh     a,[rIE]
+;    ld      e,a             ; save currently enabled interrupts
+;    ld      a,IEF_HILO
+;    ldh     [rIE],a         ; enable joypad high/low transition interrupt
+;    xor     a
+;    ldh     [rNR52],a       ; disable sound
+;    ei
+;    stop                    ; enter low power mode until an interrupt occurs
+;    ld      a,%10000000
+;    ldh     [rNR52],a       ; re-enable sound
+;    ld      a,e
+;    ldh     [rIE],a         ; restore previously enabled interrupts
+;    pop     af
+;    ldh     [rLCDC],a       ; restore previous LCD enable state
     ret
 
 ; Performs a bankswitch to bank B, preserving previous ROM bank.
