@@ -413,7 +413,6 @@ DoVBlank::
     ld  [sys_CurrentFrame],a    ; increment current frame
     call    CheckInput
     ; sleep mode check
-    ld      b,b
     ld      a,[sys_PauseGame]
     and     a   ; is game paused?
     jr      z,:++
