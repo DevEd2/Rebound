@@ -60,11 +60,58 @@ GM_Level:
     call    GetMonsterSlot
     ld      a,1
     ld      [hl],a
-    ld      a,128
+    ld      hl,Monster_ParentScreen
+    add     hl,bc
+    ld      a,c
+    swap    a
+    ld      [hl],a
+    ld      a,144
     ld      hl,Monster_XPosition
     add     hl,bc
     ld      [hl],a
     ld      hl,Monster_YPosition
+    add     hl,bc
+    ld      [hl],a
+    xor     a
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],a
+    
+    ; Create a test particle
+    call    GetParticleSlot
+    ld      a,2
+    ld      [hl],a
+    ld      a,128
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      a,120
+    ld      [hl],a
+    xor     a
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Particle_YVelocityS
     add     hl,bc
     ld      [hl],a
     
@@ -289,7 +336,10 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
+    call    UpdateMonsters
+    call    UpdateParticles
     call    RenderMonsters
+    call    RenderParticles
     call    EndSprites
 
     ; pause game if Start is pressed
