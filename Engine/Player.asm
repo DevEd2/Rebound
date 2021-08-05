@@ -357,7 +357,7 @@ ProcessPlayer:
     ; Horizontal Collision
     ld      a,[Player_XVelocity]
     bit     7,a
-    jr      z,.rightCollision
+    jp      z,.rightCollision
     ; Check Left Collision
     ; Top Left
     ld      a,[Player_YPos]
@@ -393,9 +393,19 @@ ProcessPlayer:
     ld      a,[sys_btnHold]
     bit     btnB,a
     jr      nz,:+       ; don't bounce off walls if B is held
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.waterL
+.airL
     ld      a,high(Player_MaxSpeed)
     ld      [Player_XVelocity],a
     ld      a,low(Player_MaxSpeed)
+    ld      [Player_XVelocityS],a
+    jr      :+
+.waterL
+    ld      a,high(Player_MaxSpeed/2)
+    ld      [Player_XVelocity],a
+    ld      a,low(Player_MaxSpeed/2)
     ld      [Player_XVelocityS],a
 :   ; Calculate penetration depth
     ld      a,[Player_XPos]
@@ -428,11 +438,11 @@ ProcessPlayer:
     cp      b
     ld      a,b
     pop     bc
-    jr      z,.xCollideEnd
+    jp      z,.xCollideEnd
     inc     a
     or      b
     ld      [Engine_CurrentScreen],a
-    jr      .xCollideEnd
+    jp      .xCollideEnd
 .rightCollision:
     ; Check Right Collision
     ; Top Right
@@ -469,9 +479,19 @@ ProcessPlayer:
     ld      a,[sys_btnHold]
     bit     btnB,a
     jr      nz,:+       ; don't bounce off walls if B is held
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.waterR
+.airR
     ld      a,high(-Player_MaxSpeed)
     ld      [Player_XVelocity],a
     ld      a,low(-Player_MaxSpeed)
+    ld      [Player_XVelocityS],a
+    jr      :+
+.waterR
+    ld      a,high(-Player_MaxSpeed/2)
+    ld      [Player_XVelocity],a
+    ld      a,low(-Player_MaxSpeed/2)
     ld      [Player_XVelocityS],a 
 :   ; Calculate penetration depth
     ld      a,[Player_XPos]
@@ -712,6 +732,10 @@ Player_Bounce:
     and     %11110000
     ld      [Engine_BounceCamTarget],a
 
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.water
+
     ld      a,[sys_btnHold]
     bit     btnA,a
     jr      nz,.highbounce
@@ -733,6 +757,31 @@ Player_Bounce:
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighBounceHeight)
+    ld      [Player_YVelocityS],a
+    ret
+    
+.water
+    ld      a,[sys_btnHold]
+    bit     btnA,a
+    jr      nz,.highbouncewater
+    bit     btnB,a
+    jr      nz,.lowbouncewater
+.normalbouncewater
+    ld      a,high(Player_BounceHeight/2)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_BounceHeight/2)
+    ld      [Player_YVelocityS],a
+    ret
+.lowbouncewater
+    ld      a,high(Player_LowBounceHeight/2)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_LowBounceHeight/2)
+    ld      [Player_YVelocityS],a
+    ret
+.highbouncewater
+    ld      a,high(Player_HighBounceHeight/2)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_HighBounceHeight/2)
     ld      [Player_YVelocityS],a
     ret
     
@@ -763,6 +812,10 @@ Player_WallBounce:
     and     %11110000
     ld      [Engine_BounceCamTarget],a
 
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.water
+
     ld      a,[sys_btnHold]
     bit     btnA,a
     jr      nz,.highbounce
@@ -786,7 +839,26 @@ Player_WallBounce:
     ld      a,low(Player_HighWallBounceHeight)
     ld      [Player_YVelocityS],a
     ret
-    
+
+.water
+    ld      a,[sys_btnHold]
+    bit     btnA,a
+    jr      nz,.highbouncewater
+    bit     btnB,a
+    ret     nz
+.normalbouncewater
+    ld      a,high(Player_WallBounceHeight/2)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_WallBounceHeight/2)
+    ld      [Player_YVelocityS],a
+    ret
+.highbouncewater
+    ld      a,high(Player_HighWallBounceHeight/2)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_HighWallBounceHeight/2)
+    ld      [Player_YVelocityS],a
+    ret
+
 ; ========
     
 DrawPlayer:
