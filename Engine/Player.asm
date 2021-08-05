@@ -132,8 +132,11 @@ ProcessPlayer:
     res     0,a
     ld      [Player_MovementFlags],a
     ld      d,a
-    jr      .noaccel
+    jp      .noaccel
 .accelLeft
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.accelLeftWater
     push    bc
     ld      bc,-Player_Accel
     ld      hl,Player_XVelocity
@@ -155,10 +158,36 @@ ProcessPlayer:
     ld      a,l
     ld      [Player_XVelocityS],a
     pop     bc
-   
+    ld      e,%10000000
+    jp      .continue
+.accelLeftWater
+    push    bc
+    ld      bc,-Player_Accel/2
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      b,h
+    ld      c,l
+    ld      de,-Player_MaxSpeed/2
+    call    Compare16
+    jr      nc,:+
+    ld      de,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,-Player_MaxSpeed/2
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
     ld      e,%10000000
     jr      .continue
 .accelRight
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.accelRightWater
     push    bc
     ld      bc,Player_Accel
     ld      hl,Player_XVelocity
@@ -175,6 +204,30 @@ ProcessPlayer:
     call    Compare16
     jr      c,:+
     ld      hl,Player_MaxSpeed
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%00000000
+    jr      .continue
+.accelRightWater
+    push    bc
+    ld      bc,Player_Accel/2
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      d,h
+    ld      e,l
+    ld      bc,Player_MaxSpeed/2
+    call    Compare16
+    jr      nc,:+
+    ld      bc,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,Player_MaxSpeed/2
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
@@ -200,7 +253,12 @@ ProcessPlayer:
     ld      e,a
     call    GetTileL        ; doesn't matter if we use GetTileL or GetTileR, the result is the same
     cp      COLLISION_WATER ; are we touching a water tile?
-    jr      nz,:+           ; if not, skip
+    jr      nz,:++          ; if not, skip
+    ld      a,[Player_MovementFlags]
+    bit     1,a             ; are we already underwater?
+    jr      nz,:+           ; if not, skip playing splash sound
+    PlaySFX splash          ; play splash sound
+:    
     set     1,d             ; set player's "is underwater" flag
 :   ld      a,d
     ld      [Player_MovementFlags],a
@@ -449,6 +507,10 @@ ProcessPlayer:
     
     ; Vertical Movement
     ; Gravity Acceleration
+.moveair
+    ld      a,[Player_MovementFlags]
+    bit     1,a
+    jr      nz,.movewater
     ld      a,[Player_YVelocity]
     ld      h,a
     ld      a,[Player_YVelocityS]
@@ -476,7 +538,37 @@ ProcessPlayer:
     ld      a,[Player_YPos]
     adc     h
     ld      [Player_YPos],a
-    
+    jr      .checkCollisionVertical
+.movewater
+    ld      a,[Player_YVelocity]
+    ld      h,a
+    ld      a,[Player_YVelocityS]
+    ld      l,a
+    ld      de,Player_Gravity/2
+    add     hl,de
+    ld      a,h
+    bit     7,a
+    jr      nz,:+
+    ld      b,h
+    ld      c,l
+    ld      de,Player_TerminalVelocity/4
+    call    Compare16
+    jr      c,:+
+    ld      hl,Player_TerminalVelocity/4
+:
+    ld      a,h
+    ld      [Player_YVelocity],a
+    ld      a,l
+    ld      [Player_YVelocityS],a
+    ; Velocity
+    ld      a,[Player_YSubpixel]
+    add     l
+    ld      [Player_YSubpixel],a
+    ld      a,[Player_YPos]
+    adc     h
+    ld      [Player_YPos],a
+ 
+.checkCollisionVertical   
     ; Vertical Collision
     ld      a,[Player_YVelocity]
     bit     7,a
