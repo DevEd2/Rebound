@@ -560,13 +560,13 @@ CH1_CheckByte:
     xor     a
     ld      [CH1VolPos],a
     ld      [CH1ArpPos],a
+    inc     a
+    ld      [CH1VibPos],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH1,a
     jr      nz,.noupdate
     ldh     [rNR12],a
 .noupdate
-    inc     a
-    ld      [CH1VibPos],a
     ld      hl,CH1VibPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -816,14 +816,13 @@ CH2_CheckByte:
     xor     a
     ld      [CH2VolPos],a
     ld      [CH2ArpPos],a
-    
+    inc     a
+    ld      [CH2VibPos],a    
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH2,a
     jr      nz,.noupdate
     ldh     [rNR22],a
 .noupdate
-    inc     a
-    ld      [CH2VibPos],a
     ld      hl,CH2VibPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -1073,7 +1072,7 @@ CH3_CheckByte:
     xor     a
     ld      [CH3VolPos],a
     ld      [CH3ArpPos],a
-    ld      a,1
+    inc     a
     ld      [CH3VibPos],a
     ld      hl,CH3VibPtr
     ld      a,[hl+]
