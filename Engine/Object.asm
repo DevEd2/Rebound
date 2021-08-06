@@ -6,9 +6,6 @@
 ; - Object Rendering
 ; - Object Behaviors
 ; - Particle Update
-; - Particle Rendering
-; - Off Screen Check
-; - Object Deletion
 
 section "Object Memory",wram0
 
@@ -228,7 +225,6 @@ UpdateMonsters:
 ; Generate Monster sprite entries
 ; TODO - Handle mirroring flags
 ; TODO - Remove placeholder sprite
-; TODO - Handle object parenting
 RenderMonsters:
   ld  b,0
   ld  c,MONSTER_COUNT-1
@@ -238,22 +234,38 @@ RenderMonsters:
   ld  a,[hl]
   or  a
   jr  z,.nextMonster
-  ld  a,[Engine_CameraY]
-  ld  d,a
-  ld  hl,Monster_YPosition
-  add hl,bc
-  ld  a,[hl]
-  sub d
-  add 8
-  ld  d,a
-  ld  a,[Engine_CameraX]
-  ld  e,a
+  ld  de,0
+  push  bc
+:
   ld  hl,Monster_XPosition
   add hl,bc
   ld  a,[hl]
-  sub e
+  add e
   ld  e,a
-  push  bc
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add d
+  ld  d,a
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]
+  swap  a
+  and $0f
+  cp  c
+  jr  z,:+
+  ld  c,a
+  jr  :-
+:
+  ld  hl,Engine_CameraX
+  ld  a,e
+  sub [hl]
+  ld  e,a
+  ld  hl,Engine_CameraY
+  ld  a,d
+  sub [hl]
+  add 8
+  ld  d,a
   ld  b,0
   ld  c,%00001000
   call  AddSprite
@@ -272,12 +284,33 @@ RenderMonsters:
   
 ; Delete a Monster and all children
 ; INPUT:  bc = Monster Slot Number
-; TODO - Handle child objects
 DeleteMonster:
   ld  hl,Monster_ID
   add hl,bc
   xor a
   ld  [hl],a
+  ld  de,MONSTER_COUNT-1
+.childLoop
+  ld  hl,Monster_ID
+  add hl,de
+  ld  a,[hl]
+  or  a
+  jr  z,:+
+  ld  hl,Monster_ParentScreen
+  add hl,de
+  ld  a,[hl]
+  swap  a
+  and $0f
+  cp  c
+  jr  nz,:+
+  push  bc
+  ld  c,e
+  call  DeleteMonster
+  pop bc
+:
+  dec e
+  bit 7,e
+  jr  z,.childLoop
   ret
   
 ; Clear Particle List

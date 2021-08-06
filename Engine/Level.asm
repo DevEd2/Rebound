@@ -86,6 +86,29 @@ GM_Level:
     add     hl,bc
     ld      [hl],a
     
+    ; Create child objects
+    ld      e,2
+:
+    ld      d,c
+    call    GetMonsterSlot
+    ld      a,1
+    ld      [hl],a
+    ld      hl,Monster_ParentScreen
+    add     hl,bc
+    ld      a,d
+    swap    a
+    ld      [hl],a
+    ld      hl,Monster_XPosition
+    add     hl,bc
+    xor     a
+    ld      [hl],a
+    ld      hl,Monster_YPosition
+    add     hl,bc
+    ld      a,12
+    ld      [hl],a
+    dec     e
+    jr      nz,:-
+    
     ; Create a test particle
     call    GetParticleSlot
     ld      a,2
