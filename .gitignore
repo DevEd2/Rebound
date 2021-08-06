@@ -85,6 +85,7 @@ Temporary Items
 Levels/*.bin
 Levels/*.bin.wle
 Levels/*.inc
+Levels/ObjectLayouts/*.inc
 
 *.png
 !*Tileset.png

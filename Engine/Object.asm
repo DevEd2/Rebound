@@ -20,6 +20,9 @@ MONSTER_FLAG_HITBYPLAYER  equ 1
 MONSTER_FLAG_FLIPH        equ 5
 MOSNTER_FLAG_FLIPV        equ 6
 
+; Monster IDs
+MONSTER_TEST        equ 0
+
 Monster_ID:           ds  MONSTER_COUNT
 Monster_Pointer:      ds  MONSTER_COUNT
 Monster_ParentScreen: ds  MONSTER_COUNT ; Parent Object = High Nibble, Screen Index = Low Nibble
