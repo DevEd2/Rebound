@@ -497,12 +497,13 @@ DoVBlank::
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
 
-    call    VGMSFX_Update
     ; don't update music if game is paused
     ld      a,[sys_PauseGame]
     and     a
     jr      nz,:+
     farcall DevSound_Play
+    
+    call    VGMSFX_Update
 
 :   call    Pal_DoFade
 

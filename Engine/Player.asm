@@ -22,6 +22,7 @@ Player_CurrentFrame::       db  ; current animation frame being displayed
 PlayerRAM_End:
 
 Player_MaxSpeed             equ $140
+Player_MaxSpeedWater        equ $e0
 Player_Accel                equ 24
 Player_Decel                equ 12
 Player_Gravity              equ $25
@@ -170,13 +171,13 @@ ProcessPlayer:
     add     hl,bc
     ld      b,h
     ld      c,l
-    ld      de,-Player_MaxSpeed/2
+    ld      de,-Player_MaxSpeedWater
     call    Compare16
     jr      nc,:+
     ld      de,$8000
     call    Compare16
     jr      c,:+
-    ld      hl,-Player_MaxSpeed/2
+    ld      hl,-Player_MaxSpeedWater
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
@@ -221,13 +222,13 @@ ProcessPlayer:
     add     hl,bc
     ld      d,h
     ld      e,l
-    ld      bc,Player_MaxSpeed/2
+    ld      bc,Player_MaxSpeedWater
     call    Compare16
     jr      nc,:+
     ld      bc,$8000
     call    Compare16
     jr      c,:+
-    ld      hl,Player_MaxSpeed/2
+    ld      hl,Player_MaxSpeedWater
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
@@ -403,9 +404,9 @@ ProcessPlayer:
     ld      [Player_XVelocityS],a
     jr      :+
 .waterL
-    ld      a,high(Player_MaxSpeed/2)
+    ld      a,high(Player_MaxSpeedWater)
     ld      [Player_XVelocity],a
-    ld      a,low(Player_MaxSpeed/2)
+    ld      a,low(Player_MaxSpeedWater)
     ld      [Player_XVelocityS],a
 :   ; Calculate penetration depth
     ld      a,[Player_XPos]
@@ -489,9 +490,9 @@ ProcessPlayer:
     ld      [Player_XVelocityS],a
     jr      :+
 .waterR
-    ld      a,high(-Player_MaxSpeed/2)
+    ld      a,high(-Player_MaxSpeedWater)
     ld      [Player_XVelocity],a
-    ld      a,low(-Player_MaxSpeed/2)
+    ld      a,low(-Player_MaxSpeedWater)
     ld      [Player_XVelocityS],a 
 :   ; Calculate penetration depth
     ld      a,[Player_XPos]
