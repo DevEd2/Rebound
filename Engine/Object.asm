@@ -303,10 +303,12 @@ DeleteMonster:
   and $0f
   cp  c
   jr  nz,:+
+  push  de
   push  bc
   ld  c,e
   call  DeleteMonster
   pop bc
+  pop de
 :
   dec e
   bit 7,e
