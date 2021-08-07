@@ -223,7 +223,6 @@ UpdateMonsters:
   ret
   
 ; Generate Monster sprite entries
-; TODO - Handle mirroring flags
 ; TODO - Remove placeholder sprite
 RenderMonsters:
   ld  b,0
@@ -266,14 +265,32 @@ RenderMonsters:
   sub [hl]
   add 8
   ld  d,a
+  ld  hl,Monster_Flags
+  pop bc
+  add hl,bc
+  ld  a,[hl]
+  and %01100000
+  or  %00001000
+  push  bc
+  ld  c,a
   ld  b,0
-  ld  c,%00001000
+  bit MONSTER_FLAG_FLIPH,c
+  jr  z,:+
+  ld  b,2
+:
   call  AddSprite
   ld  a,e
   add 8
   ld  e,a
+  bit MONSTER_FLAG_FLIPH,c
+  jr  nz,:+
   inc b
   inc b
+  jr  :++
+:
+  dec b
+  dec b
+:
   call  AddSprite
   pop bc
 .nextMonster:
@@ -477,6 +494,7 @@ RenderParticles:
   add hl,bc
   ld  a,[hl]
   sub e
+  add 4
   ld  e,a
   ld  hl,Particle_Sprite
   add hl,bc

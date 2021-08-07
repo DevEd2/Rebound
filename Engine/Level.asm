@@ -65,6 +65,10 @@ GM_Level:
     ld      a,c
     swap    a
     ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,%01100000
+    ld      [hl],a
     ld      a,144
     ld      hl,Monster_XPosition
     add     hl,bc
@@ -101,6 +105,9 @@ GM_Level:
     ld      hl,Monster_XPosition
     add     hl,bc
     xor     a
+    ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
     ld      [hl],a
     ld      hl,Monster_YPosition
     add     hl,bc
