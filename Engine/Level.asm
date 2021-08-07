@@ -58,7 +58,7 @@ GM_Level:
     
     ; Create a test object
     call    GetMonsterSlot
-    ld      a,1
+    ld      a,MONSTER_TEST
     ld      [hl],a
     ld      hl,Monster_ParentScreen
     add     hl,bc
@@ -95,7 +95,7 @@ GM_Level:
 :
     ld      d,c
     call    GetMonsterSlot
-    ld      a,1
+    ld      a,MONSTER_TEST
     ld      [hl],a
     ld      hl,Monster_ParentScreen
     add     hl,bc
@@ -120,16 +120,24 @@ GM_Level:
     call    GetParticleSlot
     ld      a,2
     ld      [hl],a
-    ld      a,128
     ld      hl,Particle_XPosition
     add     hl,bc
+    ld      a,120
     ld      [hl],a
     ld      hl,Particle_YPosition
     add     hl,bc
     ld      [hl],a
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      a,%00000011
+    ld      [hl],a
     ld      hl,Particle_Lifetime
     add     hl,bc
     ld      a,120
+    ld      [hl],a
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      a,1
     ld      [hl],a
     xor     a
     ld      hl,Particle_XVelocity
@@ -138,10 +146,10 @@ GM_Level:
     ld      hl,Particle_XVelocityS
     add     hl,bc
     ld      [hl],a
-    ld      hl,Particle_YVelocity
+    ld      hl,Particle_YVelocityS
     add     hl,bc
     ld      [hl],a
-    ld      hl,Particle_YVelocityS
+    ld      hl,Particle_Screen
     add     hl,bc
     ld      [hl],a
     

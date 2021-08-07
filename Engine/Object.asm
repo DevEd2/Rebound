@@ -3,9 +3,7 @@
 ; ==============
 
 ; TODO
-; - Object Rendering
 ; - Object Behaviors
-; - Particle Update
 
 section "Object Memory",wram0
 
@@ -18,7 +16,8 @@ MONSTER_FLAG_FLIPH        equ 5
 MOSNTER_FLAG_FLIPV        equ 6
 
 ; Monster IDs
-MONSTER_TEST        equ 0
+MONSTER_NULL        equ 0
+MONSTER_TEST        equ 1
 
 Monster_ID:           ds  MONSTER_COUNT
 Monster_Pointer:      ds  MONSTER_COUNT
@@ -44,6 +43,8 @@ PARTICLE_FLICKERTIME      equ 30
 PARTICLE_FLAG_DSOLID      equ 0
 PARTICLE_FLAG_DWATER      equ 1
 
+PARTICLE_COLLIDES         equ %00000011
+
 Particle_Sprite:      ds  PARTICLE_COUNT
 Particle_Attribute:   ds  PARTICLE_COUNT
 Particle_Flags:       ds  PARTICLE_COUNT
@@ -62,6 +63,10 @@ OFFSCREEN_THRESHOLD   equ 32
 
 section "Object WRAM",wram0,align[8]
 Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
+
+section "Temp Variables",hram
+Temp0:  db
+Temp1:  db
 
 section "Object Routines",rom0
 
@@ -370,7 +375,7 @@ UpdateParticles:
   ld  hl,Particle_Sprite
   add hl,bc
   ld  a,[hl]
-  jr  z,.nextParticle
+  jp  z,.nextParticle
   
   ; Lifetime Update
   ld  hl,Particle_Lifetime
@@ -386,7 +391,7 @@ UpdateParticles:
   add hl,bc
   xor a
   ld  [hl],a
-  jr  .nextParticle
+  jp  .nextParticle
 :
   
   ; Horizontal Movement
@@ -408,6 +413,32 @@ UpdateParticles:
   ld  a,d
   adc a,[hl]
   ld  [hl],a
+  ; Check Screen Crossing
+  bit 7,d                   ; Check Velocity Direction
+  jr  z,:+
+  jr  c,.xMoveDone
+  ; Left edge crossed, decrement screen
+  ld  hl,Particle_Screen
+  add hl,bc
+  ld  a,[hl]                ; Get Parent/Screen byte
+  jr  z,.xMoveDone
+  dec a
+  ld  [hl],a
+  jr  .xMoveDone
+:
+  jr  nc,.xMoveDone
+  ; Right edge crossed, increment screen
+  ld  hl,Particle_Screen
+  add hl,bc
+  ld  a,[hl]
+  ld  d,a
+  ld  a,[Engine_NumScreens]
+  cp  d
+  jr  z,.xMoveDone
+  inc d
+  ld  a,d
+  ld  [hl],a
+.xMoveDone:
   
   ; Vertical Movement
   ld  hl,Particle_YVelocityS
@@ -448,16 +479,76 @@ UpdateParticles:
   ld  a,[hl]
   sub d
   cp  SCRN_Y+OFFSCREEN_THRESHOLD
-  jr  c,.nextParticle
+  jr  c,.onScreen
   cp  -OFFSCREEN_THRESHOLD
-  jr  c,.deleteParticle
+  jp  c,.deleteParticle
+.onScreen:
 
-  ; Collision Check - TODO
+  ; Collision Check
+  ld  hl,Particle_Flags
+  add hl,bc
+  ld  a,[hl]
+  and PARTICLE_COLLIDES
+  jr  z,.nextParticle
+  ldh [Temp0],a
+  
+  ; Collision functions use Engine_CurrentScreen when indexing tiles
+  ; So this must be set to the screen the particle is in and then
+  ; restored after collision is done
+  ld  a,[Engine_CurrentScreen]
+  ldh [Temp1],a
+  and $c0
+  ld  d,a
+  ld  hl,Particle_Screen
+  add hl,bc
+  ld  a,[hl]
+  or  d
+  ld  [Engine_CurrentScreen],a
+  
+  ld  hl,Particle_XPosition
+  add hl,bc
+  ld  a,[hl]
+  ld  e,a
+  ld  hl,Particle_YPosition
+  add hl,bc
+  ld  a,[hl]
+  ld  h,e
+  ld  l,a
+  push  bc
+  call  GetTileCoordinates
+  or  a
+  ld  e,a
+  call  GetTileL
+  pop bc
+  
+  cp  COLLISION_SOLID
+  jr  nz,.checkWater
+  ldh a,[Temp0]
+  bit PARTICLE_FLAG_DSOLID,a
+  jr  z,.collideEnd
+  ld  hl,Particle_Sprite
+  add hl,bc
+  xor a
+  ld  [hl],a
+  jr  .collideEnd
+.checkWater:
+  cp  COLLISION_WATER
+  jr  nz,.collideEnd
+  ldh a,[Temp0]
+  bit PARTICLE_FLAG_DWATER,a
+  jr  z,.collideEnd
+  ld  hl,Particle_Sprite
+  add hl,bc
+  xor a
+  ld  [hl],a
+.collideEnd:
+  ldh a,[Temp1]
+  ld  [Engine_CurrentScreen],a
   
 .nextParticle:
   dec c
   bit 7,c
-  jr  z,.updateLoop
+  jp  z,.updateLoop
   ret
   
 ; Generate Particle sprite entries
