@@ -496,16 +496,15 @@ DoVBlank::
     xor     a
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
-
+    
     ; don't update music if game is paused
     ld      a,[sys_PauseGame]
     and     a
     jr      nz,:+
     farcall DevSound_Play
-    
-    call    VGMSFX_Update
-
-:   call    Pal_DoFade
+:   call    VGMSFX_Update
+   
+   call    Pal_DoFade
 
     pop     hl
     pop     de
