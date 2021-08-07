@@ -497,7 +497,7 @@ UpdateParticles:
   ; restored after collision is done
   ld  a,[Engine_CurrentScreen]
   ldh [Temp1],a
-  and $c0
+  and $f0
   ld  d,a
   ld  hl,Particle_Screen
   add hl,bc
