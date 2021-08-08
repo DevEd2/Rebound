@@ -443,8 +443,7 @@ ClearParticles:
 ; TRASHES:  a
 GetParticleSlot:
   ld  hl,Particle_Sprite+PARTICLE_COUNT-1
-  ld  c,PARTICLE_COUNT-1
-  ld  b,0
+  lb  bc,0,PARTICLE_COUNT-1
 :
   ld  a,[hl]
   or  a
