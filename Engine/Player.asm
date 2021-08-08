@@ -285,6 +285,8 @@ ProcessPlayer:
     bit     bPlayerIsUnderwater,a             ; are we already underwater?
     jr      nz,:+           ; if not, skip playing splash sound
     PlaySFX splash          ; play splash sound
+    
+    call    Player_Splash
 :    
     set     1,d             ; set player's "is underwater" flag
 :   ld      a,d
@@ -1004,6 +1006,94 @@ Player_Respawn:
     ld      [Player_YVelocityS],a
     xor     a
     ret
+    
+Player_Splash:
+    ret
+    ; TODO: Fix this
+/*
+    ; left splash particle
+    call    GetParticleSlot
+    ld      a,b
+    or      c
+    cp      $ff
+    jr      z,:+                    ; don't spawn any particles if no free slots are left
+    ld      bc,PARTICLE_COUNT
+    ld      [hl],4                  ; tile number
+    add     hl,bc
+    ld      [hl],%00000010          ; attributes
+    add     hl,bc
+    ld      [hl],0  ; collsion flags
+    add     hl,bc
+    ld      a,[Engine_CurrentScreen]
+    ld      [hl],a
+    add     hl,bc
+    ld      [hl],8                  ; time to live
+    add     hl,bc
+    ld      a,[Player_XPos]
+    sub     8
+    ld      [hl],a                  ; X position
+    add     hl,bc
+    ld      [hl],0                  ; X subpixel
+    ld      a,[Player_YPos]
+    and     $f0
+    sub     8
+    ld      [hl],a                  ; Y position
+    add     hl,bc
+    ld      [hl],0                  ; Y subpixel
+    add     hl,bc
+    ; X velocity
+    ld      [hl],high(-$0080)
+    add     hl,bc
+    ld      [hl],low(-$0080)
+    add     hl,bc
+    ; Y velocity
+    ld      [hl],high(-$0100)
+    add     hl,bc
+    ld      [hl],low(-$0100)
+    add     hl,bc
+:    
+    ; right splash particle
+    call    GetParticleSlot
+    ld      a,b
+    or      c
+    cp      $ff
+    ret     z                       ; don't spawn any particles if no free slots are left
+    ld      bc,PARTICLE_COUNT
+    ld      [hl],4                  ; tile number
+    add     hl,bc
+    ld      [hl],%01100010          ; attributes
+    add     hl,bc
+    ld      [hl],0  ; collsion flags
+    add     hl,bc
+    ld      a,[Engine_CurrentScreen]
+    ld      [hl],a
+    add     hl,bc
+    ld      [hl],8
+    add     hl,bc
+    ld      a,[Player_XPos]
+    add     8
+    ld      [hl],a                  ; X position
+    add     hl,bc
+    ld      [hl],0                  ; X subpixel
+    ld      a,[Player_YPos]
+    and     $f0
+    sub     8
+    ld      [hl],a                  ; Y position
+    add     hl,bc
+    ld      [hl],0                  ; Y subpixel
+    add     hl,bc
+    ; X velocity
+    ld      [hl],high($0080)
+    add     hl,bc
+    ld      [hl],low($0080)
+    add     hl,bc
+    ; Y velocity
+    ld      [hl],high(-$0100)
+    add     hl,bc
+    ld      [hl],low(-$0100)
+    add     hl,bc
+    ret
+ */
 
 ; ===================
 ; Animation constants

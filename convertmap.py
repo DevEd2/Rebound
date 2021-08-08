@@ -156,8 +156,6 @@ if __name__ == "__main__":
 				a4 = (int(obj[x]['y'])+8) % 256
 				a5 = obj[x]['name']
 				objlist.append([a1, a2, a3, a4, a5])
-				if ((int(obj[x]['x'])) % 256) + 8 >= 256:
-					print("Warning: Object " + a5 + " crosses a screen boundary!")
 			except KeyError:
 				print("Error: Object " + obj[x]['name'] + " is missing tags! (Enusre id, x, and y tags are present)")
 				exit(1)

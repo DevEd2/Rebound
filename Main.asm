@@ -1077,6 +1077,9 @@ Pal_Player_End:
 TestMapTiles:
     incbin  "GFX/TestTiles.2bpp.wle"
 
+ParticleTiles:
+    incbin  "GFX/Particles.2bpp.wle"
+    
 ; ==========
 ; Level data
 ; ==========

@@ -59,6 +59,13 @@ GM_Level:
     ; spawn initial objects
     call    InitSpawnMonsters
     
+    ; load particle GFX
+    ld      a,1
+    ldh     [rVBK],a
+    ldfar   hl,ParticleTiles
+    ld      de,$8040
+    call    DecodeWLE
+    
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
     ldh     [rLCDC],a
