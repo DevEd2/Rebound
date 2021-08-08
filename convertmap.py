@@ -151,9 +151,9 @@ if __name__ == "__main__":
 		else:
 			try:
 				a1 = obj[x]['id']
-				a2 = (int(obj[x]['x']) // 256) + (int(obj[x]['y']) // 256 << 4)
-				a3 = int(obj[x]['x']) % 256
-				a4 = int(obj[x]['y']) % 256
+				a2 = ((int(obj[x]['x'])+8) // 256) + (int(obj[x]['y']) // 256 << 4)
+				a3 = (int(obj[x]['x'])+8) % 256
+				a4 = (int(obj[x]['y'])+8) % 256
 				a5 = obj[x]['name']
 				objlist.append([a1, a2, a3, a4, a5])
 			except KeyError:
