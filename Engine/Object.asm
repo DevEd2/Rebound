@@ -4,6 +4,7 @@
 
 ; TODO
 ; - Object Behaviors
+; - Object Sprites
 
 section "Object Memory",wram0
 
@@ -61,6 +62,8 @@ Particle_YVelocity:   ds  PARTICLE_COUNT
 Particle_YVelocityS:  ds  PARTICLE_COUNT
 
 OFFSCREEN_THRESHOLD   equ 32
+SPAWN_THRESHOLD_LEFT  equ 8
+SPAWN_THRESHOLD_RIGHT equ 32
 
 section "Object WRAM",wram0,align[8]
 Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
@@ -127,6 +130,115 @@ InitSpawnMonsters:
   ldh [TempY],a         ; Save Y Position
   push  hl              ; Save object data pointer
   call  GetMonsterSlot  ; Get empty object
+  bit 7,c               ; Valid slot number?
+  jr  z,:+
+  pop hl
+  ret                   ; If not, can't spawn more objects
+:
+  call  InitMonster     ; Set monster fields
+  pop hl                ; Restore object data pointer
+  inc d                 ; Next object
+  jr  .spawnLoop
+.offScreen:
+  inc hl                ; Advance pointer to next object
+  inc hl
+  inc d
+  jr  .spawnLoop
+  
+; Spawn monsters from the object list that are currently on screen
+; TODO - Have object list pointer loaded from level data
+SpawnMonsters:
+  ldfar hl,Map_TestMap.objdata
+  ld  d,0                   ; Set List Index to 0
+.spawnLoop:
+  ld  a,[hl+]               ; Get Object ID
+  or  a                     ; Test for 0
+  ret z                     ; 0 = End of Object Data
+  ldh [TempID],a            ; Save Object ID
+  push  hl                  ; Save object data pointer
+  ld  bc,MONSTER_COUNT-1
+.existLoop:
+  ld  hl,Monster_ID         ; Get Monster ID
+  add hl,bc
+  ld  a,[hl]
+  or  a                     ; Is ID 0?
+  jr  z,.existNext          ; If yes, is empty object
+  ld  hl,Monster_ListIndex  ; Get List Index
+  add hl,bc
+  ld  a,[hl]
+  cp  d                     ; Compare to current list index
+  jr  z,.existFound         ; If object already exists don't spawn a copy
+.existNext:
+  dec c                     ; Next Object slot
+  bit 7,c
+  jr  z,.existLoop
+  jr  .existEnd             ; Object does not already exist
+.existFound:
+  pop hl                    ; Restore object data pointer
+  inc hl                    ; Advance to next entry
+  inc hl
+  inc hl
+  inc d
+  jr  .spawnLoop
+.existEnd:
+  pop hl                    ; Restore object data pointer
+  ld  a,[hl+]               ; Get Screen Number
+  ldh [TempS],a             ; Save Screen Number
+  ld  b,a
+  ld  a,[hl+]               ; Get X Position
+  ldh [TempX],a             ; Save X Position
+  ld  c,a
+  ld  a,[Player_XPos]       ; Calculate Player.X - Object.X
+  sub c
+  push  af
+  ld  c,a
+  ld  a,[Engine_CurrentScreen]
+  and $0f
+  ld  e,a
+  pop af
+  ld  a,e
+  sbc b
+  ld  b,a
+  bit 7,a                   ; Take absolute value if negative
+  jr  z,:+
+  ld  a,c
+  cpl
+  add 1
+  ld  c,a
+  ld  a,b
+  cpl
+  add 0
+  ld  b,a
+:
+  jr  nz,.noSpawn           ; If distance is over one screen, don't spawn
+  ld  a,c                   ; Spawn if distance is between SCRN_X/2+8 and SCRN_X/2+32
+  cp  SCRN_X/2+SPAWN_THRESHOLD_LEFT          
+  jr  c,.noSpawn
+  cp  SCRN_X/2+SPAWN_THRESHOLD_RIGHT
+  jr  nc,.noSpawn
+  ld  a,[hl+]               ; Get Y Position
+  ldh [TempY],a             ; Save Y Position
+  push  hl                  ; Save object data pointer
+  call  GetMonsterSlot      ; Get free monster slot
+  bit 7,c                   ; Slot valid?
+  jr  z,:+
+  pop hl
+  ret                       ; Slot not valid, can't spawn more objects
+:
+  call InitMonster          ; Set monster fields
+  pop hl                    ; Restore object data pointer
+  inc d
+  jr  .spawnLoop            ; Next entry
+.noSpawn:
+  inc hl                    ; Advance to next entry
+  inc d
+  jr  .spawnLoop
+  
+; Initialize a monster slot
+; INPUT:    bc    = Slot Number
+;            d    = List Index
+;           Temp* = Object ID, X, Y, Screen
+InitMonster:
   ldh a,[TempID]        ; Restore Object ID
   ld  [hl],a            ; Set Object ID
   ld  hl,Monster_ParentScreen
@@ -174,18 +286,6 @@ InitSpawnMonsters:
   ld  hl,Monster_Flags
   add hl,bc
   ld  [hl],a
-  pop hl                ; Restore object data pointer
-  inc d                 ; Next object
-  jr  .spawnLoop
-.offScreen:
-  inc hl                ; Advance pointer to next object
-  inc hl
-  inc d
-  jr  .spawnLoop
-  
-; Spawn monsters from the object list that are currently on screen
-; TODO - Have object list pointer loaded from level data
-SpawnMonsters:
   ret
   
 ; Update all Monsters
@@ -291,23 +391,11 @@ UpdateMonsters:
   ld  a,[hl]
   sub d
   cp  SCRN_X+OFFSCREEN_THRESHOLD
-  jr  c,.checkY
-  cp  -OFFSCREEN_THRESHOLD
-  jr  nc,.checkY
-  call  DeleteMonster
-  jr  .nextMonster
-.checkY:
-  ld  hl,Monster_YPosition
-  add hl,bc
-  ld  a,[Engine_CameraY]
-  ld  d,a
-  ld  a,[hl]
-  sub d
-  cp  SCRN_Y+OFFSCREEN_THRESHOLD
   jr  c,.nextMonster
   cp  -OFFSCREEN_THRESHOLD
   jr  nc,.nextMonster
   call  DeleteMonster
+  jr  .nextMonster
   
 .nextMonster
   dec c
@@ -555,20 +643,9 @@ UpdateParticles:
   ld  a,[hl]
   sub d
   cp  SCRN_X+OFFSCREEN_THRESHOLD
-  jr  c,.checkY
-  cp  -OFFSCREEN_THRESHOLD
-  jr  c,.deleteParticle
-.checkY:
-  ld  hl,Particle_YPosition
-  add hl,bc
-  ld  a,[Engine_CameraY]
-  ld  d,a
-  ld  a,[hl]
-  sub d
-  cp  SCRN_Y+OFFSCREEN_THRESHOLD
   jr  c,.onScreen
   cp  -OFFSCREEN_THRESHOLD
-  jp  c,.deleteParticle
+  jr  c,.deleteParticle
 .onScreen:
 
   ; Collision Check
