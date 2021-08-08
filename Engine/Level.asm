@@ -57,7 +57,7 @@ GM_Level:
     call    ClearParticles
     
     ; spawn initial objects
-;   call    SpawnMonsters
+    call    SpawnMonsters
     
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
@@ -280,7 +280,7 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
-;   call    SpawnMonsters
+    call    SpawnMonsters
     call    UpdateMonsters
     call    UpdateParticles
     call    RenderMonsters

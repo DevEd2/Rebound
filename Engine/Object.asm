@@ -128,11 +128,14 @@ SpawnMonsters:
   ld  d,a
   ld  hl,Engine_CameraX
   sub [hl]
+  sub OFFSCREEN_THRESHOLD
   cp  d
   jr  c,:+
   jr  z,:+
   dec e
 :
+  ld  a,e
+  ldh [Temp4],a
   ldfar  hl,Map_TestMap.objdata
 .spawnLoop:
   ; Check if this monster is already spawned
@@ -172,40 +175,47 @@ SpawnMonsters:
   ret
 :
   ldh [Temp0],a     ; Object ID
+  ldh a,[Temp4]
+  ld  e,a
   ld  a,[hl+]
   ldh [Temp1],a     ; Object Screen Number
+  cp  e
   ld  a,[hl+]
   ldh [Temp2],a     ; Object X Position
+  jr  nz,.checkRight
+  push  hl
+  ld  hl,Engine_CameraX
+  sub [hl]
+  pop hl
+  cp  -OFFSCREEN_THRESHOLD
+  jp  nc,.onScreenX
+.checkRight:
+  ld  a,[Engine_CameraX]
+  cp  256-SCRN_X-(OFFSCREEN_THRESHOLD*2)
+  jr  c,:+
+  inc e
+:
+  ldh a,[Temp1]
+  cp  e
+  jp  nz,.offScreenX
+  ldh a,[Temp2]
   push  hl
   ld  hl,Engine_CameraX
   sub [hl]
   pop hl
   cp  SCRN_X+OFFSCREEN_THRESHOLD
-  jr  nc,.offScreenRight
-  ldh [Temp4],a
-  ldh a,[Temp1]
-  cp  e
-  jr  z,.onScreenX
-  jr  nc,.onScreenX
-.offScreenRight:
-  ldh a,[Temp4]
-  cp  -OFFSCREEN_THRESHOLD
-  jp  c,.offScreenX
-  ldh a,[Temp1]
-  cp  e
-  jr  c,.onScreenX
-  jp  nz,.offScreenX
+  jp  nc,.offScreenX
 .onScreenX:
   ld  a,[hl+]
-  ldh [Temp3],a   ; Object Y Position
+  ldh [Temp3],a     ; Object Y Position
   push  hl
   ld  hl,Engine_CameraY
   sub [hl]
   pop hl
-  cp  SCRN_Y+OFFSCREEN_THRESHOLD
-  jr  c,.onScreen
   cp  -OFFSCREEN_THRESHOLD
-  jr  c,.spawnLoop
+  jr  nc,.onScreen
+  cp  SCRN_Y+OFFSCREEN_THRESHOLD
+  jr  nc,.spawnLoop
 .onScreen:
   push  de
   ld  d,h
