@@ -19,9 +19,9 @@ Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
 
-Player_CheckpointX::         db
-Player_CheckpointY::         db
-Player_CheckpointScreen::    db
+Player_CheckpointX::        db
+Player_CheckpointY::        db
+Player_CheckpointScreen::   db
 
 PlayerRAM_End:
 
@@ -145,11 +145,7 @@ ProcessPlayer:
     and     $f0
     add     SCRN_Y
     cp      b
-    ld      b,b
-    jp      nz,.moveair2
-    
-    ld      b,b
-    call    Player_Respawn
+    call    z,Player_Respawn
     jp      .moveair2
 .notdead
     lb      bc,0,1
