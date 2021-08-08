@@ -20,7 +20,7 @@ MONSTER_NULL        equ 0
 MONSTER_TEST        equ 1
 
 Monster_ID:           ds  MONSTER_COUNT
-Monster_Pointer:      ds  MONSTER_COUNT
+Monster_WRAMPointer:  ds  MONSTER_COUNT
 Monster_ParentScreen: ds  MONSTER_COUNT ; Parent Object = High Nibble, Screen Index = Low Nibble
 Monster_Flags:        ds  MONSTER_COUNT
 Monster_XPosition:    ds  MONSTER_COUNT
@@ -35,6 +35,8 @@ Monster_AnimBank:     ds  MONSTER_COUNT
 Monster_AnimPtrHi:    ds  MONSTER_COUNT
 Monster_AnimPtrLo:    ds  MONSTER_COUNT
 Monster_AnimTimer:    ds  MONSTER_COUNT
+Monster_ListHi:       ds  MONSTER_COUNT
+Monster_ListLo:       ds  MONSTER_COUNT
 
 PARTICLE_COUNT  equ 6
 
@@ -67,6 +69,9 @@ Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
 section "Temp Variables",hram
 Temp0:  db
 Temp1:  db
+Temp2:  db
+Temp3:  db
+Temp4:  db
 
 section "Object Routines",rom0
 
@@ -76,6 +81,18 @@ ClearMonsters:
   ld  hl,Monster_ID
   ld  b,MONSTER_COUNT
   xor a
+:
+  ld  [hl+],a
+  dec b
+  jr  nz,:-
+  ld  hl,Monster_ListHi
+  ld  b,MONSTER_COUNT
+:
+  ld  [hl+],a
+  dec b
+  jr  nz,:-
+  ld  hl,Monster_ListLo
+  ld  b,MONSTER_COUNT
 :
   ld  [hl+],a
   dec b
@@ -99,6 +116,167 @@ GetMonsterSlot:
   bit 7,c
   jr  z,:-
   ret
+  
+; Spawn monsters from the object list that are currently on screen
+; TODO - Have object list pointer loaded from level data
+SpawnMonsters:
+  ; Calculate the screen the camera is in
+  ld  a,[Engine_CurrentScreen]
+  and $0f
+  ld  e,a
+  ld  a,[Player_XPos]
+  ld  d,a
+  ld  hl,Engine_CameraX
+  sub [hl]
+  cp  d
+  jr  c,:+
+  jr  z,:+
+  dec e
+:
+  ldfar  hl,Map_TestMap.objdata
+.spawnLoop:
+  ; Check if this monster is already spawned
+  ld  d,h
+  ld  a,l
+  ld  bc,MONSTER_COUNT-1
+.existLoop:
+  ld  hl,Monster_ListLo
+  add hl,bc
+  cp  [hl]
+  jr  nz,.existNext
+  ld  e,a
+  ld  a,d
+  ld  hl,Monster_ListHi
+  add hl,bc
+  cp  [hl]
+  ld  a,e
+  jr  nz,.existNext
+  add 4
+  ld  l,a
+  jr  nc,:+
+  inc h
+:
+  jr  .spawnLoop
+.existNext:
+  dec c
+  bit 7,c
+  jr  z,.existLoop
+.existEnd:
+  ld  h,d
+  ld  l,a
+
+  ld  a,[hl+]
+  or  a
+  jr  nz,:+
+  resbank
+  ret
+:
+  ldh [Temp0],a     ; Object ID
+  ld  a,[hl+]
+  ldh [Temp1],a     ; Object Screen Number
+  ld  a,[hl+]
+  ldh [Temp2],a     ; Object X Position
+  push  hl
+  ld  hl,Engine_CameraX
+  sub [hl]
+  pop hl
+  cp  SCRN_X+OFFSCREEN_THRESHOLD
+  jr  nc,.offScreenRight
+  ldh [Temp4],a
+  ldh a,[Temp1]
+  cp  e
+  jr  z,.onScreenX
+  jr  nc,.onScreenX
+.offScreenRight:
+  ldh a,[Temp4]
+  cp  -OFFSCREEN_THRESHOLD
+  jp  c,.offScreenX
+  ldh a,[Temp1]
+  cp  e
+  jr  c,.onScreenX
+  jp  nz,.offScreenX
+.onScreenX:
+  ld  a,[hl+]
+  ldh [Temp3],a   ; Object Y Position
+  push  hl
+  ld  hl,Engine_CameraY
+  sub [hl]
+  pop hl
+  cp  SCRN_Y+OFFSCREEN_THRESHOLD
+  jr  c,.onScreen
+  cp  -OFFSCREEN_THRESHOLD
+  jr  c,.spawnLoop
+.onScreen:
+  push  de
+  ld  d,h
+  ld  e,l
+  call  GetMonsterSlot
+  bit 7,a
+  jr  z,:+
+  resbank
+  ret
+:
+  ldh a,[Temp0]
+  ld  [hl],a
+  ld  hl,Monster_ListLo
+  add hl,bc
+  ld  a,e
+  sub 4
+  push  af
+  ld  [hl],a
+  ld  hl,Monster_ListHi
+  add hl,bc
+  pop af
+  ld  a,d
+  sbc 0
+  ld  [hl],a
+  ld  a,c
+  swap  a
+  ld  hl,Monster_WRAMPointer
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Temp1
+  or  [hl]
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ldh a,[Temp2]
+  ld  [hl],a
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ldh a,[Temp3]
+  ld  [hl],a
+  xor a
+  ld  hl,Monster_XPositionS
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_YPositionS
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_XVelocity
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_XVelocityS
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_YVelocity
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_YVelocityS
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_Flags
+  add hl,bc
+  ld  [hl],a
+  ld  h,d
+  ld  l,e
+  pop de
+  jp  .spawnLoop
+.offScreenX:
+  inc hl
+  jp  .spawnLoop
   
 ; Update all Monsters
 UpdateMonsters:
@@ -310,6 +488,12 @@ DeleteMonster:
   ld  hl,Monster_ID
   add hl,bc
   xor a
+  ld  [hl],a
+  ld  hl,Monster_ListHi
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_ListLo
+  add hl,bc
   ld  [hl],a
   ld  de,MONSTER_COUNT-1
 .childLoop

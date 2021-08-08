@@ -56,102 +56,8 @@ GM_Level:
     call    ClearMonsters
     call    ClearParticles
     
-    ; Create a test object
-    call    GetMonsterSlot
-    ld      a,MONSTER_TEST
-    ld      [hl],a
-    ld      hl,Monster_ParentScreen
-    add     hl,bc
-    ld      a,c
-    swap    a
-    ld      [hl],a
-    ld      hl,Monster_Flags
-    add     hl,bc
-    ld      a,%01100000
-    ld      [hl],a
-    ld      a,144
-    ld      hl,Monster_XPosition
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Monster_YPosition
-    add     hl,bc
-    ld      [hl],a
-    xor     a
-    ld      hl,Monster_XVelocity
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Monster_XVelocityS
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Monster_YVelocity
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Monster_YVelocityS
-    add     hl,bc
-    ld      [hl],a
-    
-    ; Create child objects
-    ld      e,2
-:
-    ld      d,c
-    call    GetMonsterSlot
-    ld      a,MONSTER_TEST
-    ld      [hl],a
-    ld      hl,Monster_ParentScreen
-    add     hl,bc
-    ld      a,d
-    swap    a
-    ld      [hl],a
-    ld      hl,Monster_XPosition
-    add     hl,bc
-    xor     a
-    ld      [hl],a
-    ld      hl,Monster_Flags
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Monster_YPosition
-    add     hl,bc
-    ld      a,12
-    ld      [hl],a
-    dec     e
-    jr      nz,:-
-    
-    ; Create a test particle
-    call    GetParticleSlot
-    ld      a,2
-    ld      [hl],a
-    ld      hl,Particle_XPosition
-    add     hl,bc
-    ld      a,120
-    ld      [hl],a
-    ld      hl,Particle_YPosition
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Particle_Flags
-    add     hl,bc
-    ld      a,%00000011
-    ld      [hl],a
-    ld      hl,Particle_Lifetime
-    add     hl,bc
-    ld      a,120
-    ld      [hl],a
-    ld      hl,Particle_YVelocity
-    add     hl,bc
-    ld      a,1
-    ld      [hl],a
-    xor     a
-    ld      hl,Particle_XVelocity
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Particle_XVelocityS
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Particle_YVelocityS
-    add     hl,bc
-    ld      [hl],a
-    ld      hl,Particle_Screen
-    add     hl,bc
-    ld      [hl],a
+    ; spawn initial objects
+;   call    SpawnMonsters
     
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
@@ -374,6 +280,7 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
+;   call    SpawnMonsters
     call    UpdateMonsters
     call    UpdateParticles
     call    RenderMonsters
