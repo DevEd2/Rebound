@@ -19,6 +19,10 @@ Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
 
+Player_CheckpointX::         db
+Player_CheckpointY::         db
+Player_CheckpointScreen::    db
+
 PlayerRAM_End:
 
 Player_MaxSpeed             equ $140
@@ -42,7 +46,7 @@ Player_HitboxSize           equ 6
 
 bPlayerIsMoving             = 0
 bPlayerIsUnderwater         = 1
-bPlayerUnused2              = 2
+bPlayerIsDead               = 2
 bPlayerUnused3              = 3
 bPlayerUnused4              = 4
 bPlayerUnused5              = 5
@@ -122,6 +126,32 @@ InitPlayer:
 
 ProcessPlayer:
     ; Player Input
+    ld      a,[sys_btnPress]
+    bit     btnSelect,a
+    call    nz,KillPlayer
+    
+    ld      a,[Player_MovementFlags]
+    bit     bPlayerIsDead,a
+    jr      z,.notdead
+    
+    ld      a,[Player_YVelocity]
+    bit     7,a ; is player falling?
+    jp      nz,.moveair2
+    ld      a,[Player_YPos]
+    and     $f0
+    sub     16
+    ld      b,a
+    ld      a,[Engine_CameraY]
+    and     $f0
+    add     SCRN_Y
+    cp      b
+    ld      b,b
+    jp      nz,.moveair2
+    
+    ld      b,b
+    call    Player_Respawn
+    jp      .moveair2
+.notdead
     lb      bc,0,1
     ld      a,[sys_btnHold]
     bit     btnLeft,a
@@ -136,7 +166,7 @@ ProcessPlayer:
     jp      .noaccel
 .accelLeft
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.accelLeftWater
     push    bc
     ld      bc,-Player_Accel
@@ -187,7 +217,7 @@ ProcessPlayer:
     jr      .continue
 .accelRight
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.accelRightWater
     push    bc
     ld      bc,Player_Accel
@@ -256,7 +286,7 @@ ProcessPlayer:
     cp      COLLISION_WATER ; are we touching a water tile?
     jr      nz,:++          ; if not, skip
     ld      a,[Player_MovementFlags]
-    bit     1,a             ; are we already underwater?
+    bit     bPlayerIsUnderwater,a             ; are we already underwater?
     jr      nz,:+           ; if not, skip playing splash sound
     PlaySFX splash          ; play splash sound
 :    
@@ -395,7 +425,7 @@ ProcessPlayer:
     bit     btnB,a
     jr      nz,:+       ; don't bounce off walls if B is held
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.waterL
 .airL
     ld      a,high(Player_MaxSpeed)
@@ -481,7 +511,7 @@ ProcessPlayer:
     bit     btnB,a
     jr      nz,:+       ; don't bounce off walls if B is held
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.waterR
 .airR
     ld      a,high(-Player_MaxSpeed)
@@ -530,8 +560,9 @@ ProcessPlayer:
     ; Gravity Acceleration
 .moveair
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.movewater
+.moveair2
     ld      a,[Player_YVelocity]
     ld      h,a
     ld      a,[Player_YVelocityS]
@@ -590,6 +621,9 @@ ProcessPlayer:
     ld      [Player_YPos],a
  
 .checkCollisionVertical   
+    ld      a,[Player_MovementFlags]
+    bit     bPlayerIsDead,a
+    jp      nz,.yCollideEnd
     ; Vertical Collision
     ld      a,[Player_YVelocity]
     bit     7,a
@@ -734,7 +768,7 @@ Player_Bounce:
     ld      [Engine_BounceCamTarget],a
 
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.water
 
     ld      a,[sys_btnHold]
@@ -814,7 +848,7 @@ Player_WallBounce:
     ld      [Engine_BounceCamTarget],a
 
     ld      a,[Player_MovementFlags]
-    bit     1,a
+    bit     bPlayerIsUnderwater,a
     jr      nz,.water
 
     ld      a,[sys_btnHold]
@@ -922,6 +956,57 @@ DrawPlayer:
     ld      hl,Sprite_NextSprite
     inc     [hl]
     inc     [hl]
+    ret
+
+; ====
+
+KillPlayer:
+    ld      hl,Player_MovementFlags
+    bit     bPlayerIsDead,[hl]
+    ret     nz
+    ld      a,[Player_XPos]
+    ld      [Player_CheckpointX],a
+    ld      a,[Player_YPos]
+    ld      [Player_CheckpointY],a
+    ld      a,[Engine_CurrentScreen]
+    ld      [Player_CheckpointScreen],a
+    
+    xor     a
+    ld      [Player_XVelocity],a
+    ld      [Player_XVelocityS],a
+    ld      [Player_YVelocityS],a
+    ld      a,-4
+    ld      [Player_YVelocity],a
+    set     bPlayerIsDead,[hl]
+    ld      a,1
+    ld      [Engine_LockCamera],a
+    ld      hl,Anim_Player_Hurt
+    call    Player_SetAnimation
+    PlaySFX death
+    ret
+    
+Player_Respawn:
+    xor     a
+    ld      [Engine_LockCamera],a
+    ld      hl,Player_MovementFlags
+    res     bPlayerIsDead,[hl]
+    ld      hl,Anim_Player_Idle
+    call    Player_SetAnimation
+    
+    ld      a,[Player_CheckpointX]
+    ld      [Player_XPos],a
+    ld      a,[Player_CheckpointY]
+    ld      [Player_YPos],a
+; TODO: Fix this
+;    ld      a,[Player_CheckpointScreen]
+;    ld      [Engine_CurrentScreen],a
+;    call    Level_LoadScreen
+    xor     a
+    ld      [Player_XSubpixel],a
+    ld      [Player_YSubpixel],a
+    ld      [Player_YVelocity],a
+    ld      [Player_YVelocityS],a
+    xor     a
     ret
 
 ; ===================
