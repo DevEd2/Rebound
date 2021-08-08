@@ -57,7 +57,7 @@ GM_Level:
     call    ClearParticles
     
     ; spawn initial objects
-    call    SpawnMonsters
+    call    InitSpawnMonsters
     
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
