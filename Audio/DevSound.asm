@@ -123,7 +123,9 @@ SetSpeed            equ $87
 SetInsAlternate     equ $88
 EnablePWM           equ $89
 Arp                 equ $8a
-DummyCommand        equ $8b
+LoopCount           equ $8b
+Loop                equ $8c
+DummyCommand        equ $8d
 EndChannel          equ $ff
 
 ; ================================================================
@@ -167,116 +169,121 @@ SECTION "DevSound varialbes",WRAM0
 
 DS_RAMStart:
 
-DS_GlobalVolume::      db
-DS_GlobalSpeed1::      db
-DS_GlobalSpeed2::      db
-DS_GlobalTimer::       db
-DS_TickCount::         db
-DS_SoundEnabled::      db
-DS_FadeType::          db
-DS_FadeTimer::         db
+DS_GlobalVolume::       db
+DS_GlobalSpeed1::       db
+DS_GlobalSpeed2::       db
+DS_GlobalTimer::        db
+DS_TickCount::          db
+DS_SoundEnabled::       db
+DS_FadeType::           db
+DS_FadeTimer::          db
 
-DS_CH1Enabled::        db
-DS_CH2Enabled::        db
-DS_CH3Enabled::        db
-DS_CH4Enabled::        db
+DS_CH1Enabled::         db
+DS_CH2Enabled::         db
+DS_CH3Enabled::         db
+DS_CH4Enabled::         db
 
-DS_CH1Ptr::            dw
-DS_CH1VolPtr::         dw
-DS_CH1PulsePtr::       dw
-DS_CH1ArpPtr::         dw
-DS_CH1VibPtr::         dw
-DS_CH1RetPtr::         dw
-DS_CH1VolPos::         db
-DS_CH1PulsePos::       db
-DS_CH1ArpPos::         db
-DS_CH1VibPos::         db
-DS_CH1VibDelay::       db
-DS_CH1Tick::           db
-DS_CH1Reset::          db
-DS_CH1Note::           db
-DS_CH1Transpose::      db
-DS_CH1FreqOffset::     db
-DS_CH1Pan::            db
-DS_CH1Sweep::          db
-DS_CH1NoteCount::      db
-DS_CH1InsMode::        db
-DS_CH1Ins1::           db
-DS_CH1Ins2::           db
+DS_CH1Ptr::             dw
+DS_CH1VolPtr::          dw
+DS_CH1PulsePtr::        dw
+DS_CH1ArpPtr::          dw
+DS_CH1VibPtr::          dw
+DS_CH1RetPtr::          dw
+DS_CH1VolPos::          db
+DS_CH1PulsePos::        db
+DS_CH1ArpPos::          db
+DS_CH1VibPos::          db
+DS_CH1VibDelay::        db
+DS_CH1Tick::            db
+DS_CH1Reset::           db
+DS_CH1Note::            db
+DS_CH1Transpose::       db
+DS_CH1FreqOffset::      db
+DS_CH1Pan::             db
+DS_CH1Sweep::           db
+DS_CH1NoteCount::       db
+DS_CH1InsMode::         db
+DS_CH1Ins1::            db
+DS_CH1Ins2::            db
+DS_CH1LoopCount::       db
 
-DS_CH2Ptr::            dw
-DS_CH2VolPtr::         dw
-DS_CH2PulsePtr::       dw
-DS_CH2ArpPtr::         dw
-DS_CH2VibPtr::         dw
-DS_CH2RetPtr::         dw
-DS_CH2VolPos::         db
-DS_CH2PulsePos::       db
-DS_CH2ArpPos::         db
-DS_CH2VibPos::         db
-DS_CH2VibDelay::       db
-DS_CH2Tick::           db
-DS_CH2Reset::          db
-DS_CH2Note::           db
-DS_CH2Transpose::      db
-DS_CH2FreqOffset::     db
-DS_CH2Pan::            db
-DS_CH2NoteCount::      db
-DS_CH2InsMode::        db
-DS_CH2Ins1::           db
-DS_CH2Ins2::           db
+DS_CH2Ptr::             dw
+DS_CH2VolPtr::          dw
+DS_CH2PulsePtr::        dw
+DS_CH2ArpPtr::          dw
+DS_CH2VibPtr::          dw
+DS_CH2RetPtr::          dw
+DS_CH2VolPos::          db
+DS_CH2PulsePos::        db
+DS_CH2ArpPos::          db
+DS_CH2VibPos::          db
+DS_CH2VibDelay::        db
+DS_CH2Tick::            db
+DS_CH2Reset::           db
+DS_CH2Note::            db
+DS_CH2Transpose::       db
+DS_CH2FreqOffset::      db
+DS_CH2Pan::             db
+DS_CH2NoteCount::       db
+DS_CH2InsMode::         db
+DS_CH2Ins1::            db
+DS_CH2Ins2::            db
+DS_CH2LoopCount::       db
 
-DS_CH3Ptr::            dw
-DS_CH3VolPtr::         dw
-DS_CH3WavePtr::        dw
-DS_CH3ArpPtr::         dw
-DS_CH3VibPtr::         dw
-DS_CH3RetPtr::         dw
-DS_CH3VolPos::         db
-DS_CH3WavePos::        db
-DS_CH3ArpPos::         db
-DS_CH3VibPos::         db
-DS_CH3VibDelay::       db
-DS_CH3Tick::           db
-DS_CH3Reset::          db
-DS_CH3Note::           db
-DS_CH3Transpose::      db
-DS_CH3FreqOffset::     db
-DS_CH3Vol::            db
-DS_CH3Wave::           db
-DS_CH3Pan::            db
-DS_CH3NoteCount::      db
-DS_CH3InsMode::        db
-DS_CH3Ins1::           db
-DS_CH3Ins2::           db
+DS_CH3Ptr::             dw
+DS_CH3VolPtr::          dw
+DS_CH3WavePtr::         dw
+DS_CH3ArpPtr::          dw
+DS_CH3VibPtr::          dw
+DS_CH3RetPtr::          dw
+DS_CH3VolPos::          db
+DS_CH3WavePos::         db
+DS_CH3ArpPos::          db
+DS_CH3VibPos::          db
+DS_CH3VibDelay::        db
+DS_CH3Tick::            db
+DS_CH3Reset::           db
+DS_CH3Note::            db
+DS_CH3Transpose::       db
+DS_CH3FreqOffset::      db
+DS_CH3Vol::             db
+DS_CH3Wave::            db
+DS_CH3Pan::             db
+DS_CH3NoteCount::       db
+DS_CH3InsMode::         db
+DS_CH3Ins1::            db
+DS_CH3Ins2::            db
+DS_CH3LoopCount::       db
 
-DS_CH4Ptr::            dw
-DS_CH4VolPtr::         dw
-DS_CH4NoisePtr::       dw
-DS_CH4RetPtr::         dw
-DS_CH4VolPos::         db
-DS_CH4NoisePos::       db
-DS_CH4Mode::           db
-DS_CH4Tick::           db
-DS_CH4Reset::          db
-DS_CH4Transpose::      db
-DS_CH4Pan::            db
-DS_CH4NoteCount::      db
-DS_CH4InsMode::        db
-DS_CH4Ins1::           db
-DS_CH4Ins2::           db
+DS_CH4Ptr::             dw
+DS_CH4VolPtr::          dw
+DS_CH4NoisePtr::        dw
+DS_CH4RetPtr::          dw
+DS_CH4VolPos::          db
+DS_CH4NoisePos::        db
+DS_CH4Mode::            db
+DS_CH4Tick::            db
+DS_CH4Reset::           db
+DS_CH4Transpose::       db
+DS_CH4Pan::             db
+DS_CH4NoteCount::       db
+DS_CH4InsMode::         db
+DS_CH4Ins1::            db
+DS_CH4Ins2::            db
+DS_CH4LoopCount::
+
+DS_WaveBuffer::         ds  16
+DS_WavePos::            db
+DS_WaveUpdateFlag::     db
+DS_PWMEnabled::         db
+DS_PWMVol::             db
+DS_PWMSpeed::           db
+DS_PWMTimer::           db
+DS_PWMDir::             db
+
 DSVarsEnd:
 
-WaveBuffer::        ds  16
-WavePos::           db
-WaveBufUpdateFlag:: db
-PWMEnabled::        db
-PWMVol::            db
-PWMSpeed::          db
-PWMTimer::          db
-PWMDir::            db
-
-arp_Buffer::        ds  8
+arp_Buffer::            ds  8
 
 DS_RAMEnd:
 
@@ -308,8 +315,8 @@ DevSound_Init:
     
     xor     a
     ldh     [rNR52],a   ; disable sound
-    ld      [PWMEnabled],a
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_PWMEnabled],a
+    ld      [DS_WaveUpdateFlag],a
 
     ; init sound RAM area
     ld      hl,DS_RAMStart
@@ -640,7 +647,7 @@ DS_CH1_DoneUpdating:
 DS_CH1_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -649,6 +656,8 @@ DS_CH1_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
@@ -678,7 +687,7 @@ DS_CH1_CommandTable:
     ld      [DS_CH1RetPtr+1],a
     jp      DS_UpdateCH1   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
     ld      [DS_CH1Ptr],a
@@ -737,7 +746,30 @@ DS_CH1_CommandTable:
     pop     hl
     call    DoArp
     jp      DS_CH1_CheckByte
-    
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH1LoopCount],a
+    jp      DS_CH1_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH1LoopCount]
+    dec     a
+    ld      [DS_CH1LoopCount],a
+    and     a
+    jp      z,DS_CH1_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH1Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH1Ptr+1],a
+    jp      DS_UpdateCH1
+
 DS_CH1_SetInstrument:
     ld      hl,InstrumentTable
     add     a
@@ -896,7 +928,7 @@ DS_CH2_DoneUpdating:
 DS_CH2_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -905,6 +937,8 @@ DS_CH2_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
@@ -934,7 +968,7 @@ DS_CH2_CommandTable:
     ld      [DS_CH2RetPtr+1],a
     jp      DS_UpdateCH2   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
     ld      [DS_CH2Ptr],a
@@ -993,6 +1027,29 @@ DS_CH2_CommandTable:
     pop     hl
     call    DoArp
     jp      DS_CH2_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH2LoopCount],a
+    jp      DS_CH2_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH2LoopCount]
+    dec     a
+    ld      [DS_CH2LoopCount],a
+    and     a
+    jp      z,DS_CH2_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH2Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH2Ptr+1],a
+    jp      DS_UpdateCH2
     
 DS_CH2_SetInstrument:
     ld      hl,InstrumentTable
@@ -1153,7 +1210,7 @@ DS_CH3_DoneUpdating:
 DS_CH3_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -1162,6 +1219,8 @@ DS_CH3_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
@@ -1191,7 +1250,7 @@ DS_CH3_CommandTable:
     ld      [DS_CH3RetPtr+1],a
     jp      DS_UpdateCH3   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
     ld      [DS_CH3Ptr],a
@@ -1243,16 +1302,16 @@ DS_CH3_CommandTable:
     call    ClearWaveBuffer
     pop     hl
     ld      a,[hl+]
-    ld      [PWMVol],a
+    ld      [DS_PWMVol],a
     ld      a,[hl+]
-    ld      [PWMSpeed],a
+    ld      [DS_PWMSpeed],a
     ld      a,$ff
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     xor     a
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     inc     a
-    ld      [PWMEnabled],a
-    ld      [PWMTimer],a
+    ld      [DS_PWMEnabled],a
+    ld      [DS_PWMTimer],a
     jp      DS_CH3_CheckByte
     
 .arp
@@ -1262,6 +1321,29 @@ DS_CH3_CommandTable:
     add     2
     ld      c,a
     jp      DS_CH3_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH3LoopCount],a
+    jp      DS_CH3_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH3LoopCount]
+    dec     a
+    ld      [DS_CH3LoopCount],a
+    and     a
+    jp      z,DS_CH3_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH3Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH3Ptr+1],a
+    jp      DS_UpdateCH3
     
 DS_CH3_SetInstrument:
     ld      hl,InstrumentTable
@@ -1410,7 +1492,7 @@ DS_CH4_DoneUpdating:
 DS_CH4_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -1419,6 +1501,8 @@ DS_CH4_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
@@ -1448,7 +1532,7 @@ DS_CH4_CommandTable:
     ld      [DS_CH4RetPtr+1],a
     jp      DS_UpdateCH4   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
     ld      [DS_CH4Ptr],a
@@ -1496,7 +1580,6 @@ DS_CH4_CommandTable:
     ld      a,1
     ld      [DS_CH4InsMode],a
     jp      DS_CH4_CheckByte
-    
 
 .enablePWM
     pop     hl
@@ -1509,6 +1592,29 @@ DS_CH4_CommandTable:
     inc     hl
     inc     hl
     jp      DS_CH4_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH4LoopCount],a
+    jp      DS_CH4_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH4LoopCount]
+    dec     a
+    ld      [DS_CH4LoopCount],a
+    and     a
+    jp      z,DS_CH4_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH4Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH4Ptr+1],a
+    jp      DS_UpdateCH4
 
 DS_CH4_SetInstrument:
     ld      hl,InstrumentTable
@@ -2176,7 +2282,7 @@ DS_CH3_UpdateRegisters:
     ld      [DS_CH3Wave],a
     cp      $fd                 ; if value = $fd, use wave buffer
     jr      nz,.notwavebuf
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
     jr      .loadwave
 .notwavebuf
     add     a
@@ -2252,13 +2358,13 @@ DS_CH3_UpdateRegisters:
     ld      a,[DS_CH3Wave]
     cp      $fd
     jr      nz,.noupdate
-    ld      a,[WaveBufUpdateFlag]
+    ld      a,[DS_WaveUpdateFlag]
     and     a
     jr      z,.noupdate
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
     call    LoadWave
     xor     a
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_WaveUpdateFlag],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
     jr      nz,.noupdate
@@ -2409,7 +2515,7 @@ ClearWaveBuffer:
     ld      a,$10
     ld      b,a
     xor     a
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
 .loop
     ld      [hl+],a     ; copy to wave ram
     dec     b
@@ -2419,42 +2525,42 @@ ClearWaveBuffer:
 ; Do PWM
 ; TODO: Optimize
 DoPWM:
-    ld      a,[PWMEnabled]
+    ld      a,[DS_PWMEnabled]
     and     a
     ret     z   ; if PWM is not enabled, return
-    ld      a,[PWMTimer]
+    ld      a,[DS_PWMTimer]
     dec     a
-    ld      [PWMTimer],a
+    ld      [DS_PWMTimer],a
     and     a
     ret     nz
-    ld      a,[PWMSpeed]
-    ld      [PWMTimer],a
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMSpeed]
+    ld      [DS_PWMTimer],a
+    ld      a,[DS_PWMDir]
     and     a
     jr      nz,.decPos
 .incPos 
-    ld      a,[WavePos]
+    ld      a,[DS_WavePos]
     inc     a
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     cp      $1e
     jr      nz,.continue
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMDir]
     xor     1
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     jr      .continue
 .decPos
-    ld      a,[WavePos]
+    ld      a,[DS_WavePos]
     dec     a
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     and     a
     jr      nz,.continue2
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMDir]
     xor     1
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     jr      .continue2
 .continue
-    ld      hl,WaveBuffer
-    ld      a,[WavePos]
+    ld      hl,DS_WaveBuffer
+    ld      a,[DS_WavePos]
     rra
     push    af
     and     $f
@@ -2466,21 +2572,21 @@ DoPWM:
     pop     af
     jr      c,.odd
 .even
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     swap    a
     ld      [hl],a
     jr      .done
 .odd
     ld      a,[hl]
     ld      b,a
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     or      b
     ld      [hl],a
     jr      .done
     
 .continue2
-    ld      hl,WaveBuffer
-    ld      a,[WavePos]
+    ld      hl,DS_WaveBuffer
+    ld      a,[DS_WavePos]
     inc     a
     rra
     push    af
@@ -2493,7 +2599,7 @@ DoPWM:
     pop     af
     jr      nc,.odd2
 .even2
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     swap    a
     ld      [hl],a
     jr      .done
@@ -2502,7 +2608,7 @@ DoPWM:
     ld      [hl],a
 .done
     ld      a,1
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_WaveUpdateFlag],a
     ret
 
 ; ================================================================
@@ -2526,7 +2632,6 @@ ClearArpBuffer:
     
 ; TODO: Rewrite
 DoArp:
-    ld      b,b
     ld      de,arp_Buffer
     ld      a,[hl+]
     and     a

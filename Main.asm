@@ -368,8 +368,8 @@ SkipGBCScreen:
         
     call    DoubleSpeed
     
-;   jp      GM_DebugMenu
-    jp      GM_Level
+    jp      GM_DebugMenu
+;   jp      GM_Level
     
 ; ================================
 

@@ -637,10 +637,10 @@ Menu_CH1:
     db      G_2,2
     db      A_2,4
     db      B_2,4
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1 
+    dbw     Loop,:-
     dbw     Goto,.loop
 .block0
     db      C_3,8
@@ -688,14 +688,12 @@ Menu_CH1:
 
 Menu_CH2:
 .loop
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
     dbw     CallSection,.block0
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block2
+    dbw     Loop,:-
     dbw     CallSection,.block3
     db      SetInstrument,_MenuArp047
     db      F_4,4
@@ -718,10 +716,10 @@ Menu_CH2:
     dbw     CallSection,.block1
     dbw     CallSection,.block0
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
+    dbw     Loop,:-
     dbw     Goto,.loop
 .block0
     db      rest,4
@@ -881,8 +879,48 @@ Menu_CH3:
     dbw     CallSection,.block3
     db      rest,10
     db      SetInstrument,_MenuOctave
-    dbw     CallSection,.block5
-    dbw     CallSection,.block5 
+    db      LoopCount,2
+:   db      C_5,2,E_5,2,G_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      G_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,G_5,2,E_5,2
+    db      C_5,2,E_5,2,G_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      G_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,G_5,2,E_5,2
+    db      A_4,2,C_5,2,E_5,2,A_5,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      E_5,2
+    db      SetInstrument,_MenuOctave
+    db      A_5,2,E_5,2,C_5,2
+    db      A_4,2,C_5,2,E_5,2,A_5,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      E_5,2
+    db      SetInstrument,_MenuOctave
+    db      A_5,2,E_5,2,C_5,2
+    db      C_5,2,F_5,2,A_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      A_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,A_5,2,F_5,2
+    db      C_5,2,F_5,2,A_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      A_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,A_5,2,F_5,2
+    db      D_5,2,G_5,2,B_5,2,D_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      B_5,2
+    db      SetInstrument,_MenuOctave
+    db      D_6,2,B_5,2,G_5,2
+    db      D_5,2,G_5,2,B_5,2,D_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      B_5,2
+    db      SetInstrument,_MenuOctave
+    db      D_6,2,B_5,2,G_5,2
+    dbw     Loop,:-
     dbw     Goto,Menu_CH3
 .block0
     db      C_6,4
@@ -951,76 +989,20 @@ Menu_CH3:
     db      B_5,4
     db      B_5,6
     ret
-.block5 
-    db      C_5,2,E_5,2,G_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      G_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,G_5,2,E_5,2
-    db      C_5,2,E_5,2,G_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      G_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,G_5,2,E_5,2
-    db      A_4,2,C_5,2,E_5,2,A_5,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      E_5,2
-    db      SetInstrument,_MenuOctave
-    db      A_5,2,E_5,2,C_5,2
-    db      A_4,2,C_5,2,E_5,2,A_5,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      E_5,2
-    db      SetInstrument,_MenuOctave
-    db      A_5,2,E_5,2,C_5,2
-    db      C_5,2,F_5,2,A_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      A_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,A_5,2,F_5,2
-    db      C_5,2,F_5,2,A_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      A_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,A_5,2,F_5,2
-    db      D_5,2,G_5,2,B_5,2,D_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      B_5,2
-    db      SetInstrument,_MenuOctave
-    db      D_6,2,B_5,2,G_5,2
-    db      D_5,2,G_5,2,B_5,2,D_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      B_5,2
-    db      SetInstrument,_MenuOctave
-    db      D_6,2,B_5,2,G_5,2
-    ret
     
 ; ========
     
 Menu_CH4:
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
+    db      LoopCount,4
+:   dbw     CallSection,.block0
     dbw     CallSection,.block0
     dbw     CallSection,.block0
     dbw     CallSection,.block1
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
+    dbw     Loop,:-
+    db      LoopCount,4
+:   dbw     CallSection,.block0
+    dbw     Loop,:-
     dbw     Goto,Menu_CH4
 .block0
     Drum    Kick,2
@@ -1323,15 +1305,12 @@ Plains_CH2:
 Plains_CH3:
     db      SetInstrument,_PlainsBass
 .loop
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block1
-    dbw     CallSection,.block1
+    db      LoopCount,6
+:   dbw     CallSection,.block0
+    dbw     Loop,:-
+    db      LoopCount,3
+:   dbw     CallSection,.block1
+    dbw     Loop,:-
     db      D#2,2
     db      D#3,2
     db      D#2,2
@@ -1451,22 +1430,12 @@ PlainsClear_CH3:
     db      EndChannel
 
 PlainsClear_CH4:
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
-    Drum    Kick,2
+    db      LoopCount,4
+:   Drum    Kick,2
     Drum    Kick,2
     Drum    Snare,2
     Drum    Kick,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
+    dbw     Loop,:-
     Drum    Kick,2
     db      EndChannel
     
