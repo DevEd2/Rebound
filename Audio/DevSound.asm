@@ -270,7 +270,7 @@ DS_CH4NoteCount::       db
 DS_CH4InsMode::         db
 DS_CH4Ins1::            db
 DS_CH4Ins2::            db
-DS_CH4LoopCount::
+DS_CH4LoopCount::       db
 
 DS_WaveBuffer::         ds  16
 DS_WavePos::            db
