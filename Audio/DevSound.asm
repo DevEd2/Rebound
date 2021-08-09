@@ -123,7 +123,9 @@ SetSpeed            equ $87
 SetInsAlternate     equ $88
 EnablePWM           equ $89
 Arp                 equ $8a
-DummyCommand        equ $8b
+LoopCount           equ $8b
+Loop                equ $8c
+DummyCommand        equ $8d
 EndChannel          equ $ff
 
 ; ================================================================
@@ -167,116 +169,121 @@ SECTION "DevSound varialbes",WRAM0
 
 DS_RAMStart:
 
-GlobalVolume::      db
-GlobalSpeed1::      db
-GlobalSpeed2::      db
-GlobalTimer::       db
-TickCount::         db
-SoundEnabled::      db
-FadeType::          db
-FadeTimer::         db
+DS_GlobalVolume::       db
+DS_GlobalSpeed1::       db
+DS_GlobalSpeed2::       db
+DS_GlobalTimer::        db
+DS_TickCount::          db
+DS_SoundEnabled::       db
+DS_FadeType::           db
+DS_FadeTimer::          db
 
-CH1Enabled::        db
-CH2Enabled::        db
-CH3Enabled::        db
-CH4Enabled::        db
+DS_CH1Enabled::         db
+DS_CH2Enabled::         db
+DS_CH3Enabled::         db
+DS_CH4Enabled::         db
 
-CH1Ptr::            dw
-CH1VolPtr::         dw
-CH1PulsePtr::       dw
-CH1ArpPtr::         dw
-CH1VibPtr::         dw
-CH1RetPtr::         dw
-CH1VolPos::         db
-CH1PulsePos::       db
-CH1ArpPos::         db
-CH1VibPos::         db
-CH1VibDelay::       db
-CH1Tick::           db
-CH1Reset::          db
-CH1Note::           db
-CH1Transpose::      db
-CH1FreqOffset::     db
-CH1Pan::            db
-CH1Sweep::          db
-CH1NoteCount::      db
-CH1InsMode::        db
-CH1Ins1::           db
-CH1Ins2::           db
+DS_CH1Ptr::             dw
+DS_CH1VolPtr::          dw
+DS_CH1PulsePtr::        dw
+DS_CH1ArpPtr::          dw
+DS_CH1VibPtr::          dw
+DS_CH1RetPtr::          dw
+DS_CH1VolPos::          db
+DS_CH1PulsePos::        db
+DS_CH1ArpPos::          db
+DS_CH1VibPos::          db
+DS_CH1VibDelay::        db
+DS_CH1Tick::            db
+DS_CH1Reset::           db
+DS_CH1Note::            db
+DS_CH1Transpose::       db
+DS_CH1FreqOffset::      db
+DS_CH1Pan::             db
+DS_CH1Sweep::           db
+DS_CH1NoteCount::       db
+DS_CH1InsMode::         db
+DS_CH1Ins1::            db
+DS_CH1Ins2::            db
+DS_CH1LoopCount::       db
 
-CH2Ptr::            dw
-CH2VolPtr::         dw
-CH2PulsePtr::       dw
-CH2ArpPtr::         dw
-CH2VibPtr::         dw
-CH2RetPtr::         dw
-CH2VolPos::         db
-CH2PulsePos::       db
-CH2ArpPos::         db
-CH2VibPos::         db
-CH2VibDelay::       db
-CH2Tick::           db
-CH2Reset::          db
-CH2Note::           db
-CH2Transpose::      db
-CH2FreqOffset::     db
-CH2Pan::            db
-CH2NoteCount::      db
-CH2InsMode::        db
-CH2Ins1::           db
-CH2Ins2::           db
+DS_CH2Ptr::             dw
+DS_CH2VolPtr::          dw
+DS_CH2PulsePtr::        dw
+DS_CH2ArpPtr::          dw
+DS_CH2VibPtr::          dw
+DS_CH2RetPtr::          dw
+DS_CH2VolPos::          db
+DS_CH2PulsePos::        db
+DS_CH2ArpPos::          db
+DS_CH2VibPos::          db
+DS_CH2VibDelay::        db
+DS_CH2Tick::            db
+DS_CH2Reset::           db
+DS_CH2Note::            db
+DS_CH2Transpose::       db
+DS_CH2FreqOffset::      db
+DS_CH2Pan::             db
+DS_CH2NoteCount::       db
+DS_CH2InsMode::         db
+DS_CH2Ins1::            db
+DS_CH2Ins2::            db
+DS_CH2LoopCount::       db
 
-CH3Ptr::            dw
-CH3VolPtr::         dw
-CH3WavePtr::        dw
-CH3ArpPtr::         dw
-CH3VibPtr::         dw
-CH3RetPtr::         dw
-CH3VolPos::         db
-CH3WavePos::        db
-CH3ArpPos::         db
-CH3VibPos::         db
-CH3VibDelay::       db
-CH3Tick::           db
-CH3Reset::          db
-CH3Note::           db
-CH3Transpose::      db
-CH3FreqOffset::     db
-CH3Vol::            db
-CH3Wave::           db
-CH3Pan::            db
-CH3NoteCount::      db
-CH3InsMode::        db
-CH3Ins1::           db
-CH3Ins2::           db
+DS_CH3Ptr::             dw
+DS_CH3VolPtr::          dw
+DS_CH3WavePtr::         dw
+DS_CH3ArpPtr::          dw
+DS_CH3VibPtr::          dw
+DS_CH3RetPtr::          dw
+DS_CH3VolPos::          db
+DS_CH3WavePos::         db
+DS_CH3ArpPos::          db
+DS_CH3VibPos::          db
+DS_CH3VibDelay::        db
+DS_CH3Tick::            db
+DS_CH3Reset::           db
+DS_CH3Note::            db
+DS_CH3Transpose::       db
+DS_CH3FreqOffset::      db
+DS_CH3Vol::             db
+DS_CH3Wave::            db
+DS_CH3Pan::             db
+DS_CH3NoteCount::       db
+DS_CH3InsMode::         db
+DS_CH3Ins1::            db
+DS_CH3Ins2::            db
+DS_CH3LoopCount::       db
 
-CH4Ptr::            dw
-CH4VolPtr::         dw
-CH4NoisePtr::       dw
-CH4RetPtr::         dw
-CH4VolPos::         db
-CH4NoisePos::       db
-CH4Mode::           db
-CH4Tick::           db
-CH4Reset::          db
-CH4Transpose::      db
-CH4Pan::            db
-CH4NoteCount::      db
-CH4InsMode::        db
-CH4Ins1::           db
-CH4Ins2::           db
+DS_CH4Ptr::             dw
+DS_CH4VolPtr::          dw
+DS_CH4NoisePtr::        dw
+DS_CH4RetPtr::          dw
+DS_CH4VolPos::          db
+DS_CH4NoisePos::        db
+DS_CH4Mode::            db
+DS_CH4Tick::            db
+DS_CH4Reset::           db
+DS_CH4Transpose::       db
+DS_CH4Pan::             db
+DS_CH4NoteCount::       db
+DS_CH4InsMode::         db
+DS_CH4Ins1::            db
+DS_CH4Ins2::            db
+DS_CH4LoopCount::       db
+
+DS_WaveBuffer::         ds  16
+DS_WavePos::            db
+DS_WaveUpdateFlag::     db
+DS_PWMEnabled::         db
+DS_PWMVol::             db
+DS_PWMSpeed::           db
+DS_PWMTimer::           db
+DS_PWMDir::             db
+
 DSVarsEnd:
 
-WaveBuffer::        ds  16
-WavePos::           db
-WaveBufUpdateFlag:: db
-PWMEnabled::        db
-PWMVol::            db
-PWMSpeed::          db
-PWMTimer::          db
-PWMDir::            db
-
-arp_Buffer::        ds  8
+arp_Buffer::            ds  8
 
 DS_RAMEnd:
 
@@ -308,8 +315,8 @@ DevSound_Init:
     
     xor     a
     ldh     [rNR52],a   ; disable sound
-    ld      [PWMEnabled],a
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_PWMEnabled],a
+    ld      [DS_WaveUpdateFlag],a
 
     ; init sound RAM area
     ld      hl,DS_RAMStart
@@ -322,57 +329,57 @@ DevSound_Init:
     
     ; initialize variables
     ld      a,$77
-    ld      [GlobalVolume],a
+    ld      [DS_GlobalVolume],a
     ld      a,1
-    ld      [SoundEnabled],a
-    ld      [CH1Enabled],a
-    ld      [CH2Enabled],a
-    ld      [CH3Enabled],a
-    ld      [CH4Enabled],a
+    ld      [DS_SoundEnabled],a
+    ld      [DS_CH1Enabled],a
+    ld      [DS_CH2Enabled],a
+    ld      [DS_CH3Enabled],a
+    ld      [DS_CH4Enabled],a
     
     ld      a,-1
-    ld      [CH3Wave],a
+    ld      [DS_CH3Wave],a
     
     ld      a,low(DummyTable)
-    ld      [CH1VolPtr],a
-    ld      [CH1PulsePtr],a
-    ld      [CH1ArpPtr],a
-    ld      [CH1RetPtr],a
-    ld      [CH2VolPtr],a
-    ld      [CH2PulsePtr],a
-    ld      [CH2ArpPtr],a
-    ld      [CH2RetPtr],a
-    ld      [CH3VolPtr],a
-    ld      [CH3WavePtr],a
-    ld      [CH3ArpPtr],a
-    ld      [CH3RetPtr],a
-    ld      [CH4VolPtr],a
-    ld      [CH4NoisePtr],a
-    ld      [CH4RetPtr],a
+    ld      [DS_CH1VolPtr],a
+    ld      [DS_CH1PulsePtr],a
+    ld      [DS_CH1ArpPtr],a
+    ld      [DS_CH1RetPtr],a
+    ld      [DS_CH2VolPtr],a
+    ld      [DS_CH2PulsePtr],a
+    ld      [DS_CH2ArpPtr],a
+    ld      [DS_CH2RetPtr],a
+    ld      [DS_CH3VolPtr],a
+    ld      [DS_CH3WavePtr],a
+    ld      [DS_CH3ArpPtr],a
+    ld      [DS_CH3RetPtr],a
+    ld      [DS_CH4VolPtr],a
+    ld      [DS_CH4NoisePtr],a
+    ld      [DS_CH4RetPtr],a
     ld      a,high(DummyTable)
-    ld      [CH1VolPtr+1],a
-    ld      [CH1PulsePtr+1],a
-    ld      [CH1ArpPtr+1],a
-    ld      [CH1RetPtr+1],a
-    ld      [CH2VolPtr+1],a
-    ld      [CH2PulsePtr+1],a
-    ld      [CH2ArpPtr+1],a
-    ld      [CH2RetPtr+1],a
-    ld      [CH3VolPtr+1],a
-    ld      [CH3WavePtr+1],a
-    ld      [CH3ArpPtr+1],a
-    ld      [CH3RetPtr+1],a
-    ld      [CH4VolPtr+1],a
-    ld      [CH4NoisePtr+1],a
-    ld      [CH4RetPtr+1],a
+    ld      [DS_CH1VolPtr+1],a
+    ld      [DS_CH1PulsePtr+1],a
+    ld      [DS_CH1ArpPtr+1],a
+    ld      [DS_CH1RetPtr+1],a
+    ld      [DS_CH2VolPtr+1],a
+    ld      [DS_CH2PulsePtr+1],a
+    ld      [DS_CH2ArpPtr+1],a
+    ld      [DS_CH2RetPtr+1],a
+    ld      [DS_CH3VolPtr+1],a
+    ld      [DS_CH3WavePtr+1],a
+    ld      [DS_CH3ArpPtr+1],a
+    ld      [DS_CH3RetPtr+1],a
+    ld      [DS_CH4VolPtr+1],a
+    ld      [DS_CH4NoisePtr+1],a
+    ld      [DS_CH4RetPtr+1],a
     ld      a,low(vib_Dummy)
-    ld      [CH1VibPtr],a
-    ld      [CH2VibPtr],a
-    ld      [CH3VibPtr],a
+    ld      [DS_CH1VibPtr],a
+    ld      [DS_CH2VibPtr],a
+    ld      [DS_CH3VibPtr],a
     ld      a,high(vib_Dummy)
-    ld      [CH1VibPtr+1],a
-    ld      [CH2VibPtr+1],a
-    ld      [CH3VibPtr+1],a
+    ld      [DS_CH1VibPtr+1],a
+    ld      [DS_CH2VibPtr+1],a
+    ld      [DS_CH3VibPtr+1],a
     
     ld      d,c     ; Transfer song ID
 
@@ -395,40 +402,40 @@ DevSound_Init:
     ld      h,[hl]
     ld      l,a
     ld      a,[hl+]
-    ld      [CH1Ptr],a
+    ld      [DS_CH1Ptr],a
     ld      a,[hl+]
-    ld      [CH1Ptr+1],a    
+    ld      [DS_CH1Ptr+1],a    
     ld      a,[hl+]
-    ld      [CH2Ptr],a
+    ld      [DS_CH2Ptr],a
     ld      a,[hl+]
-    ld      [CH2Ptr+1],a
+    ld      [DS_CH2Ptr+1],a
     ld      a,[hl+]
-    ld      [CH3Ptr],a
+    ld      [DS_CH3Ptr],a
     ld      a,[hl+]
-    ld      [CH3Ptr+1],a
+    ld      [DS_CH3Ptr+1],a
     ld      a,[hl+]
-    ld      [CH4Ptr],a
+    ld      [DS_CH4Ptr],a
     ld      a,[hl+]
-    ld      [CH4Ptr+1],a
+    ld      [DS_CH4Ptr+1],a
     ld      hl,DummyChannel
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl+]
-    ld      [CH1RetPtr],a
-    ld      [CH2RetPtr],a
-    ld      [CH3RetPtr],a
-    ld      [CH4RetPtr],a
+    ld      [DS_CH1RetPtr],a
+    ld      [DS_CH2RetPtr],a
+    ld      [DS_CH3RetPtr],a
+    ld      [DS_CH4RetPtr],a
     ld      a,[hl]
-    ld      [CH1RetPtr+1],a
-    ld      [CH2RetPtr+1],a
-    ld      [CH3RetPtr+1],a
-    ld      [CH4RetPtr+1],a
+    ld      [DS_CH1RetPtr+1],a
+    ld      [DS_CH2RetPtr+1],a
+    ld      [DS_CH3RetPtr+1],a
+    ld      [DS_CH4RetPtr+1],a
     ld      a,$11
-    ld      [CH1Pan],a
-    ld      [CH2Pan],a
-    ld      [CH3Pan],a
-    ld      [CH4Pan],a
+    ld      [DS_CH1Pan],a
+    ld      [DS_CH2Pan],a
+    ld      [DS_CH3Pan],a
+    ld      [DS_CH4Pan],a
     ; get tempo
     ld      hl,SongSpeedTable
     ld      a,d     ; Retrieve song ID one last time
@@ -440,10 +447,10 @@ DevSound_Init:
 .nocarry2
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed1],a
+    ld      [DS_GlobalSpeed1],a
     ld      a,[hl]
     dec     a
-    ld      [GlobalSpeed2],a
+    ld      [DS_GlobalSpeed2],a
     ld      a,%10000000
     ldh     [rNR52],a
     or      %01111111   ; a = $FF
@@ -459,11 +466,11 @@ DevSound_Init:
 DevSound_Stop:
     xor     a
     ldh     [rNR52],a
-    ld      [CH1Enabled],a
-    ld      [CH2Enabled],a
-    ld      [CH3Enabled],a
-    ld      [CH4Enabled],a
-    ld      [SoundEnabled],a
+    ld      [DS_CH1Enabled],a
+    ld      [DS_CH2Enabled],a
+    ld      [DS_CH3Enabled],a
+    ld      [DS_CH4Enabled],a
+    ld      [DS_SoundEnabled],a
     ret
 
 ; ================================================================
@@ -477,9 +484,9 @@ DevSound_Fade:
     ret     z   ; 3 is an invalid value, silently ignore it
     inc     a   ; Increment...
     set     2,a ; Mark this fade as the first
-    ld      [FadeType],a
+    ld      [DS_FadeType],a
     ld      a,7
-    ld      [FadeTimer],a
+    ld      [DS_FadeTimer],a
     ret
     
 ; ================================================================
@@ -492,9 +499,9 @@ DevSound_Play:
     ; values just to be safe.
     ; Other registers are saved at `.doUpdate`.
     push    af
-    ld      a,[SoundEnabled]
+    ld      a,[DS_SoundEnabled]
     and     a
-    jr      nz,.doUpdate    ; if sound is enabled, jump ahead
+    jr      nz,.doUpdate        ; if sound is enabled, jump ahead
     pop     af
     ret
     
@@ -503,46 +510,46 @@ DevSound_Play:
     push    de
     push    hl
     ; get song timer
-    ld      a,[GlobalTimer] ; get global timer
-    and     a               ; is GlobalTimer non-zero?
-    jr      nz,.noupdate    ; if yes, don't update
-    ld      a,[TickCount]   ; get current tick count
-    inc     a               ; add 1
-    ld      [TickCount],a   ; store it in RAM
-    rra                     ; check if A is odd
-    jr      c,.odd          ; if a is odd, jump
+    ld      a,[DS_GlobalTimer]  ; get global timer
+    and     a                   ; is DS_GlobalTimer non-zero?
+    jr      nz,.noupdate        ; if yes, don't update
+    ld      a,[DS_TickCount]    ; get current tick count
+    inc     a                   ; add 1
+    ld      [DS_TickCount],a    ; store it in RAM
+    rra                         ; check if A is odd
+    jr      c,.odd              ; if a is odd, jump
 .even
-    ld      a,[GlobalSpeed1]
+    ld      a,[DS_GlobalSpeed1]
     jr      .setTimer
 .odd
-    ld      a,[GlobalSpeed2]
+    ld      a,[DS_GlobalSpeed2]
 .setTimer
-    ld      [GlobalTimer],a ; store timer value
-    jr      UpdateCH1       ; continue ahead
+    ld      [DS_GlobalTimer],a  ; store timer value
+    jr      DS_UpdateCH1        ; continue ahead
     
 .noupdate
-    dec     a               ; subtract 1 from timer
-    ld      [GlobalTimer],a ; store timer value
-    jp      DoneUpdating    ; done
+    dec     a                   ; subtract 1 from timer
+    ld      [DS_GlobalTimer],a  ; store timer value
+    jp      DoneUpdating        ; done
 
 ; ================================================================
     
-UpdateCH1:
-    ld      a,[CH1Enabled]
+DS_UpdateCH1:
+    ld      a,[DS_CH1Enabled]
     and     a
-    jp      z,UpdateCH2
-    ld      a,[CH1Tick]
+    jp      z,DS_UpdateCH2
+    ld      a,[DS_CH1Tick]
     and     a
     jr      z,.continue
     dec     a
-    ld      [CH1Tick],a
-    jp      UpdateCH2       ; too far for jr
+    ld      [DS_CH1Tick],a
+    jp      DS_UpdateCH2       ; too far for jr
 .continue
-    ld      hl,CH1Ptr       ; get pointer
+    ld      hl,DS_CH1Ptr       ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-CH1_CheckByte:
+DS_CH1_CheckByte:
     ld      a,[hl+]         ; get byte
     cp      $ff             ; if $ff...
     jr      z,.endChannel
@@ -552,64 +559,64 @@ CH1_CheckByte:
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [CH1Note],a     ; set note
+    ld      [DS_CH1Note],a     ; set note
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [CH1Tick],a     ; set tick
+    ld      [DS_CH1Tick],a     ; set tick
     xor     a
-    ld      [CH1VolPos],a
-    ld      [CH1ArpPos],a
+    ld      [DS_CH1VolPos],a
+    ld      [DS_CH1ArpPos],a
     inc     a
-    ld      [CH1VibPos],a
+    ld      [DS_CH1VibPos],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH1,a
     jr      nz,.noupdate
     ldh     [rNR12],a
 .noupdate
-    ld      hl,CH1VibPtr
+    ld      hl,DS_CH1VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH1VibDelay],a
-    ld      a,[CH1Reset]
+    ld      [DS_CH1VibDelay],a
+    ld      a,[DS_CH1Reset]
     and     a
     jp      nz,.noreset
     xor     a
-    ld      [CH1PulsePos],a
+    ld      [DS_CH1PulsePos],a
 .noreset
-    ld      a,[CH1NoteCount]
+    ld      a,[DS_CH1NoteCount]
     inc     a
-    ld      [CH1NoteCount],a
+    ld      [DS_CH1NoteCount],a
     ld      b,a
     ; check if instrument mode is 1 (alternating)
-    ld      a,[CH1InsMode]
+    ld      a,[DS_CH1InsMode]
     and     a
     jr      z,.noInstrumentChange
     ld      a,b
     rra
     jr      nc,.notodd
-    ld      a,[CH1Ins1]
+    ld      a,[DS_CH1Ins1]
     jr      .odd
 .notodd
-    ld      a,[CH1Ins2]
+    ld      a,[DS_CH1Ins2]
 .odd
-    call    CH1_SetInstrument
+    call    DS_CH1_SetInstrument
 .noInstrumentChange 
-    jp      CH1_DoneUpdating
+    jp      DS_CH1_DoneUpdating
 .getCommand
     push    hl
     sub     $80             ; subtract 128 from command value
     cp      DummyCommand-$80
     jr      c,.nodummy
     pop     hl
-    jp      CH1_CheckByte
+    jp      DS_CH1_CheckByte
 .nodummy
     add     a               ; multiply by 2
-    add     a,CH1_CommandTable%256
+    add     a,DS_CH1_CommandTable%256
     ld      l,a
-    adc     a,CH1_CommandTable/256
+    adc     a,DS_CH1_CommandTable/256
     sub     l
     ld      h,a
     ld      a,[hl+]
@@ -619,28 +626,28 @@ CH1_CheckByte:
     
 .endChannel
     xor     a
-    ld      [CH1Enabled],a
-    jp      UpdateCH2
+    ld      [DS_CH1Enabled],a
+    jp      DS_UpdateCH2
 
 .retSection
-    ld      a,[CH1RetPtr]
-    ld      [CH1Ptr],a
-    ld      a,[CH1RetPtr+1]
-    ld      [CH1Ptr+1],a
-    jp      UpdateCH1
+    ld      a,[DS_CH1RetPtr]
+    ld      [DS_CH1Ptr],a
+    ld      a,[DS_CH1RetPtr+1]
+    ld      [DS_CH1Ptr+1],a
+    jp      DS_UpdateCH1
     
-CH1_DoneUpdating:
+DS_CH1_DoneUpdating:
     pop     hl
     ld      a,l
-    ld      [CH1Ptr],a
+    ld      [DS_CH1Ptr],a
     ld      a,h
-    ld      [CH1Ptr+1],a
-    jp      UpdateCH2   ; too far for jr
+    ld      [DS_CH1Ptr+1],a
+    jp      DS_UpdateCH2   ; too far for jr
         
-CH1_CommandTable:
+DS_CH1_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -649,16 +656,18 @@ CH1_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
     ld      a,[hl+]
     push    hl
-    call    CH1_SetInstrument
+    call    DS_CH1_SetInstrument
     xor     a
-    ld      [CH1InsMode],a
+    ld      [DS_CH1InsMode],a
     pop     hl
-    jp      CH1_CheckByte   ; too far for jr
+    jp      DS_CH1_CheckByte   ; too far for jr
     
 .callSection
     pop     hl
@@ -666,79 +675,102 @@ CH1_CommandTable:
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      [CH1Ptr],a
+    ld      [DS_CH1Ptr],a
     ld      a,h
-    ld      [CH1Ptr+1],a
+    ld      [DS_CH1Ptr+1],a
     pop     hl
     inc     hl
     inc     hl
     ld      a,l
-    ld      [CH1RetPtr],a
+    ld      [DS_CH1RetPtr],a
     ld      a,h
-    ld      [CH1RetPtr+1],a
-    jp      UpdateCH1   ; too far for jr
+    ld      [DS_CH1RetPtr+1],a
+    jp      DS_UpdateCH1   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
-    ld      [CH1Ptr],a
+    ld      [DS_CH1Ptr],a
     ld      a,[hl]
-    ld      [CH1Ptr+1],a
-    jp      UpdateCH1
+    ld      [DS_CH1Ptr+1],a
+    jp      DS_UpdateCH1
 
 .pitchBendUp    ; TODO
     pop     hl
     inc     hl
-    jp      CH1_CheckByte   ; too far for jr
+    jp      DS_CH1_CheckByte   ; too far for jr
     
 .pitchBendDown  ; TODO
     pop     hl
     inc     hl
-    jp      CH1_CheckByte   ; too far for jr
+    jp      DS_CH1_CheckByte   ; too far for jr
 
 .setSweep       ; TODO
     pop     hl
     inc     hl
-    jp      CH1_CheckByte   ; too far for jr
+    jp      DS_CH1_CheckByte   ; too far for jr
 
 .setPan
     pop     hl
     ld      a,[hl+]
-    ld      [CH1Pan],a
-    jp      CH1_CheckByte   ; too far for jr
+    ld      [DS_CH1Pan],a
+    jp      DS_CH1_CheckByte   ; too far for jr
 
 .setSpeed
     pop     hl
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed1],a
+    ld      [DS_GlobalSpeed1],a
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed2],a
-    jp      CH1_CheckByte   ; too far for jr
+    ld      [DS_GlobalSpeed2],a
+    jp      DS_CH1_CheckByte   ; too far for jr
     
 .setInsAlternate
     pop     hl
     ld      a,[hl+]
-    ld      [CH1Ins1],a
+    ld      [DS_CH1Ins1],a
     ld      a,[hl+]
-    ld      [CH1Ins2],a
+    ld      [DS_CH1Ins2],a
     ld      a,1
-    ld      [CH1InsMode],a
-    jp      CH1_CheckByte
+    ld      [DS_CH1InsMode],a
+    jp      DS_CH1_CheckByte
 
 .enablePWM
     pop     hl
     inc     hl
     inc     hl
-    jp      CH1_CheckByte
+    jp      DS_CH1_CheckByte
     
 .arp
     pop     hl
     call    DoArp
-    jp      CH1_CheckByte
-    
-CH1_SetInstrument:
+    jp      DS_CH1_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH1LoopCount],a
+    jp      DS_CH1_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH1LoopCount]
+    dec     a
+    ld      [DS_CH1LoopCount],a
+    and     a
+    jp      z,DS_CH1_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH1Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH1Ptr+1],a
+    jp      DS_UpdateCH1
+
+DS_CH1_SetInstrument:
     ld      hl,InstrumentTable
     add     a
     add     l
@@ -751,54 +783,54 @@ CH1_SetInstrument:
     ld      l,a
     ; no reset flag
     ld      a,[hl+]
-    ld      [CH1Reset],a
+    ld      [DS_CH1Reset],a
     ld      b,a
     ; vol table
     ld      a,[hl+]
-    ld      [CH1VolPtr],a
+    ld      [DS_CH1VolPtr],a
     ld      a,[hl+]
-    ld      [CH1VolPtr+1],a
+    ld      [DS_CH1VolPtr+1],a
     ; arp table
     ld      a,[hl+]
-    ld      [CH1ArpPtr],a
+    ld      [DS_CH1ArpPtr],a
     ld      a,[hl+]
-    ld      [CH1ArpPtr+1],a
+    ld      [DS_CH1ArpPtr+1],a
     ; pulse table
     ld      a,[hl+]
-    ld      [CH1PulsePtr],a
+    ld      [DS_CH1PulsePtr],a
     ld      a,[hl+]
-    ld      [CH1PulsePtr+1],a
+    ld      [DS_CH1PulsePtr+1],a
     ; vib table
     ld      a,[hl+]
-    ld      [CH1VibPtr],a
+    ld      [DS_CH1VibPtr],a
     ld      a,[hl+]
-    ld      [CH1VibPtr+1],a
-    ld      hl,CH1VibPtr
+    ld      [DS_CH1VibPtr+1],a
+    ld      hl,DS_CH1VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH1VibDelay],a
+    ld      [DS_CH1VibDelay],a
     ret
     
 ; ================================================================
     
-UpdateCH2:
-    ld      a,[CH2Enabled]
+DS_UpdateCH2:
+    ld      a,[DS_CH2Enabled]
     and     a
-    jp      z,UpdateCH3
-    ld      a,[CH2Tick]
+    jp      z,DS_UpdateCH3
+    ld      a,[DS_CH2Tick]
     and     a
     jr      z,.continue
     dec     a
-    ld      [CH2Tick],a
-    jp      UpdateCH3       ; too far for jr
+    ld      [DS_CH2Tick],a
+    jp      DS_UpdateCH3       ; too far for jr
 .continue
-    ld      hl,CH2Ptr       ; get pointer
+    ld      hl,DS_CH2Ptr       ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-CH2_CheckByte:
+DS_CH2_CheckByte:
     ld      a,[hl+]         ; get byte
     cp      $ff             ; if $ff...
     jr      z,.endChannel
@@ -808,64 +840,64 @@ CH2_CheckByte:
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [CH2Note],a     ; set note
+    ld      [DS_CH2Note],a     ; set note
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [CH2Tick],a     ; set tick
+    ld      [DS_CH2Tick],a     ; set tick
     xor     a
-    ld      [CH2VolPos],a
-    ld      [CH2ArpPos],a
+    ld      [DS_CH2VolPos],a
+    ld      [DS_CH2ArpPos],a
     inc     a
-    ld      [CH2VibPos],a    
+    ld      [DS_CH2VibPos],a    
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH2,a
     jr      nz,.noupdate
     ldh     [rNR22],a
 .noupdate
-    ld      hl,CH2VibPtr
+    ld      hl,DS_CH2VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH2VibDelay],a
-    ld      a,[CH2Reset]
+    ld      [DS_CH2VibDelay],a
+    ld      a,[DS_CH2Reset]
     and     a
     jp      nz,.noreset
     xor     a
-    ld      [CH2PulsePos],a
+    ld      [DS_CH2PulsePos],a
 .noreset
-    ld      a,[CH2NoteCount]
+    ld      a,[DS_CH2NoteCount]
     inc     a
-    ld      [CH2NoteCount],a
+    ld      [DS_CH2NoteCount],a
     ld      b,a
     ; check if instrument mode is 1 (alternating)
-    ld      a,[CH2InsMode]
+    ld      a,[DS_CH2InsMode]
     and     a
     jr      z,.noInstrumentChange
     ld      a,b
     rra
     jr      nc,.notodd
-    ld      a,[CH2Ins1]
+    ld      a,[DS_CH2Ins1]
     jr      .odd
 .notodd
-    ld      a,[CH2Ins2]
+    ld      a,[DS_CH2Ins2]
 .odd
-    call    CH2_SetInstrument
+    call    DS_CH2_SetInstrument
 .noInstrumentChange 
-    jp      CH2_DoneUpdating
+    jp      DS_CH2_DoneUpdating
 .getCommand
     push    hl
     sub     $80             ; subtract 128 from command value
     cp      DummyCommand-$80
     jr      c,.nodummy
     pop     hl
-    jp      CH2_CheckByte
+    jp      DS_CH2_CheckByte
 .nodummy
     add     a               ; multiply by 2
-    add     a,CH2_CommandTable%256
+    add     a,DS_CH2_CommandTable%256
     ld      l,a
-    adc     a,CH2_CommandTable/256
+    adc     a,DS_CH2_CommandTable/256
     sub     l
     ld      h,a
     ld      a,[hl+]
@@ -875,28 +907,28 @@ CH2_CheckByte:
     
 .endChannel
     xor     a
-    ld      [CH2Enabled],a
-    jp      UpdateCH3
+    ld      [DS_CH2Enabled],a
+    jp      DS_UpdateCH3
 
 .retSection
-    ld      a,[CH2RetPtr]
-    ld      [CH2Ptr],a
-    ld      a,[CH2RetPtr+1]
-    ld      [CH2Ptr+1],a
-    jp      UpdateCH2
+    ld      a,[DS_CH2RetPtr]
+    ld      [DS_CH2Ptr],a
+    ld      a,[DS_CH2RetPtr+1]
+    ld      [DS_CH2Ptr+1],a
+    jp      DS_UpdateCH2
     
-CH2_DoneUpdating:
+DS_CH2_DoneUpdating:
     pop     hl
     ld      a,l
-    ld      [CH2Ptr],a
+    ld      [DS_CH2Ptr],a
     ld      a,h
-    ld      [CH2Ptr+1],a
-    jp      UpdateCH3   ; too far for jr
+    ld      [DS_CH2Ptr+1],a
+    jp      DS_UpdateCH3   ; too far for jr
         
-CH2_CommandTable:
+DS_CH2_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -905,16 +937,18 @@ CH2_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
     ld      a,[hl+]
     push    hl
-    call    CH2_SetInstrument
+    call    DS_CH2_SetInstrument
     xor     a
-    ld      [CH2InsMode],a
+    ld      [DS_CH2InsMode],a
     pop     hl
-    jp      CH2_CheckByte   ; too far for jr
+    jp      DS_CH2_CheckByte   ; too far for jr
     
 .callSection
     pop     hl
@@ -922,79 +956,102 @@ CH2_CommandTable:
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      [CH2Ptr],a
+    ld      [DS_CH2Ptr],a
     ld      a,h
-    ld      [CH2Ptr+1],a
+    ld      [DS_CH2Ptr+1],a
     pop     hl
     inc     hl
     inc     hl
     ld      a,l
-    ld      [CH2RetPtr],a
+    ld      [DS_CH2RetPtr],a
     ld      a,h
-    ld      [CH2RetPtr+1],a
-    jp      UpdateCH2   ; too far for jr
+    ld      [DS_CH2RetPtr+1],a
+    jp      DS_UpdateCH2   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
-    ld      [CH2Ptr],a
+    ld      [DS_CH2Ptr],a
     ld      a,[hl]
-    ld      [CH2Ptr+1],a
-    jp      UpdateCH2
+    ld      [DS_CH2Ptr+1],a
+    jp      DS_UpdateCH2
 
 .pitchBendUp    ; TODO
     pop     hl
     inc     hl
-    jp      CH2_CheckByte   ; too far for jr
+    jp      DS_CH2_CheckByte   ; too far for jr
     
 .pitchBendDown  ; TODO
     pop     hl
     inc     hl
-    jp      CH2_CheckByte   ; too far for jr
+    jp      DS_CH2_CheckByte   ; too far for jr
 
 .setSweep       ; TODO
     pop     hl
     inc     hl
-    jp      CH2_CheckByte   ; too far for jr
+    jp      DS_CH2_CheckByte   ; too far for jr
 
 .setPan
     pop     hl
     ld      a,[hl+]
-    ld      [CH2Pan],a
-    jp      CH2_CheckByte   ; too far for jr
+    ld      [DS_CH2Pan],a
+    jp      DS_CH2_CheckByte   ; too far for jr
 
 .setSpeed
     pop     hl
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed1],a
+    ld      [DS_GlobalSpeed1],a
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed2],a
-    jp      CH2_CheckByte   ; too far for jr
+    ld      [DS_GlobalSpeed2],a
+    jp      DS_CH2_CheckByte   ; too far for jr
     
 .setInsAlternate
     pop     hl
     ld      a,[hl+]
-    ld      [CH2Ins1],a
+    ld      [DS_CH2Ins1],a
     ld      a,[hl+]
-    ld      [CH2Ins2],a
+    ld      [DS_CH2Ins2],a
     ld      a,1
-    ld      [CH2InsMode],a
-    jp      CH2_CheckByte
+    ld      [DS_CH2InsMode],a
+    jp      DS_CH2_CheckByte
 
 .enablePWM
     pop     hl
     inc     hl
     inc     hl
-    jp      CH2_CheckByte
+    jp      DS_CH2_CheckByte
     
 .arp
     pop     hl
     call    DoArp
-    jp      CH2_CheckByte
+    jp      DS_CH2_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH2LoopCount],a
+    jp      DS_CH2_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH2LoopCount]
+    dec     a
+    ld      [DS_CH2LoopCount],a
+    and     a
+    jp      z,DS_CH2_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH2Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH2Ptr+1],a
+    jp      DS_UpdateCH2
     
-CH2_SetInstrument:
+DS_CH2_SetInstrument:
     ld      hl,InstrumentTable
     add     a
     add     l
@@ -1007,54 +1064,54 @@ CH2_SetInstrument:
     ld      l,a
     ; no reset flag
     ld      a,[hl+]
-    ld      [CH2Reset],a
+    ld      [DS_CH2Reset],a
     ld      b,a
     ; vol table
     ld      a,[hl+]
-    ld      [CH2VolPtr],a
+    ld      [DS_CH2VolPtr],a
     ld      a,[hl+]
-    ld      [CH2VolPtr+1],a
+    ld      [DS_CH2VolPtr+1],a
     ; arp table
     ld      a,[hl+]
-    ld      [CH2ArpPtr],a
+    ld      [DS_CH2ArpPtr],a
     ld      a,[hl+]
-    ld      [CH2ArpPtr+1],a
+    ld      [DS_CH2ArpPtr+1],a
     ; pulse table
     ld      a,[hl+]
-    ld      [CH2PulsePtr],a
+    ld      [DS_CH2PulsePtr],a
     ld      a,[hl+]
-    ld      [CH2PulsePtr+1],a
+    ld      [DS_CH2PulsePtr+1],a
     ; vib table
     ld      a,[hl+]
-    ld      [CH2VibPtr],a
+    ld      [DS_CH2VibPtr],a
     ld      a,[hl+]
-    ld      [CH2VibPtr+1],a
-    ld      hl,CH2VibPtr
+    ld      [DS_CH2VibPtr+1],a
+    ld      hl,DS_CH2VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH2VibDelay],a
+    ld      [DS_CH2VibDelay],a
     ret
     
 ; ================================================================
     
-UpdateCH3:
-    ld      a,[CH3Enabled]
+DS_UpdateCH3:
+    ld      a,[DS_CH3Enabled]
     and     a
-    jp      z,UpdateCH4
-    ld      a,[CH3Tick]
+    jp      z,DS_UpdateCH4
+    ld      a,[DS_CH3Tick]
     and     a
     jr      z,.continue
     dec     a
-    ld      [CH3Tick],a
-    jp      UpdateCH4   ; too far for jr
+    ld      [DS_CH3Tick],a
+    jp      DS_UpdateCH4   ; too far for jr
 .continue
-    ld      hl,CH3Ptr   ; get pointer
+    ld      hl,DS_CH3Ptr   ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-CH3_CheckByte:
+DS_CH3_CheckByte:
     ld      a,[hl+]     ; get byte
     cp      $ff
     jr      z,.endChannel
@@ -1064,65 +1121,65 @@ CH3_CheckByte:
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [CH3Note],a
+    ld      [DS_CH3Note],a
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [CH3Tick],a
+    ld      [DS_CH3Tick],a
     xor     a
-    ld      [CH3VolPos],a
-    ld      [CH3ArpPos],a
+    ld      [DS_CH3VolPos],a
+    ld      [DS_CH3ArpPos],a
     inc     a
-    ld      [CH3VibPos],a
-    ld      hl,CH3VibPtr
+    ld      [DS_CH3VibPos],a
+    ld      hl,DS_CH3VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH3VibDelay],a
-    ld      a,[CH3Reset]
+    ld      [DS_CH3VibDelay],a
+    ld      a,[DS_CH3Reset]
     and     a
-    jp      nz,CH3_DoneUpdating
+    jp      nz,DS_CH3_DoneUpdating
     xor     a
-    ld      [CH3WavePos],a
-    ld      a,[CH3NoteCount]
+    ld      [DS_CH3WavePos],a
+    ld      a,[DS_CH3NoteCount]
     inc     a
-    ld      [CH3NoteCount],a
+    ld      [DS_CH3NoteCount],a
     ld      b,a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
     jr      nz,.noupdate
-    ld      a,[CH3Vol]
+    ld      a,[DS_CH3Vol]
     ldh     [rNR32],a
 .noupdate
     
     ; check if instrument mode is 1 (alternating)
-    ld      a,[CH3InsMode]
+    ld      a,[DS_CH3InsMode]
     and     a
     jr      z,.noInstrumentChange
     ld      a,b
     rra
     jr      nc,.notodd
-    ld      a,[CH3Ins1]
+    ld      a,[DS_CH3Ins1]
     jr      .odd
 .notodd
-    ld      a,[CH3Ins2]
+    ld      a,[DS_CH3Ins2]
 .odd
-    call    CH3_SetInstrument
+    call    DS_CH3_SetInstrument
 .noInstrumentChange
-    jp      CH3_DoneUpdating
+    jp      DS_CH3_DoneUpdating
 .getCommand
     push    hl
     sub     $80
     cp      DummyCommand-$80
     jr      c,.nodummy
     pop     hl
-    jp      CH3_CheckByte
+    jp      DS_CH3_CheckByte
 .nodummy
     add     a
-    add     a,CH3_CommandTable%256
+    add     a,DS_CH3_CommandTable%256
     ld      l,a
-    adc     a,CH3_CommandTable/256
+    adc     a,DS_CH3_CommandTable/256
     sub     l
     ld      h,a
     ld      a,[hl+]
@@ -1132,28 +1189,28 @@ CH3_CheckByte:
     
 .endChannel
     xor     a
-    ld      [CH3Enabled],a
-    jp      UpdateCH4
+    ld      [DS_CH3Enabled],a
+    jp      DS_UpdateCH4
     
 .retSection
-    ld      a,[CH3RetPtr]
-    ld      [CH3Ptr],a
-    ld      a,[CH3RetPtr+1]
-    ld      [CH3Ptr+1],a
-    jp      UpdateCH3
+    ld      a,[DS_CH3RetPtr]
+    ld      [DS_CH3Ptr],a
+    ld      a,[DS_CH3RetPtr+1]
+    ld      [DS_CH3Ptr+1],a
+    jp      DS_UpdateCH3
     
-CH3_DoneUpdating:
+DS_CH3_DoneUpdating:
     pop     hl
     ld      a,l
-    ld      [CH3Ptr],a
+    ld      [DS_CH3Ptr],a
     ld      a,h
-    ld      [CH3Ptr+1],a
-    jp      UpdateCH4   ; too far for jr
+    ld      [DS_CH3Ptr+1],a
+    jp      DS_UpdateCH4   ; too far for jr
         
-CH3_CommandTable:
+DS_CH3_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -1162,16 +1219,18 @@ CH3_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
     ld      a,[hl+]
     push    hl
-    call    CH3_SetInstrument
+    call    DS_CH3_SetInstrument
     pop     hl
     xor     a
-    ld      [CH3InsMode],a
-    jp      CH3_CheckByte   ; too far for jr
+    ld      [DS_CH3InsMode],a
+    jp      DS_CH3_CheckByte   ; too far for jr
     
 .callSection
     pop     hl
@@ -1179,81 +1238,81 @@ CH3_CommandTable:
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      [CH3Ptr],a
+    ld      [DS_CH3Ptr],a
     ld      a,h
-    ld      [CH3Ptr+1],a
+    ld      [DS_CH3Ptr+1],a
     pop     hl
     inc     hl
     inc     hl
     ld      a,l
-    ld      [CH3RetPtr],a
+    ld      [DS_CH3RetPtr],a
     ld      a,h
-    ld      [CH3RetPtr+1],a
-    jp      UpdateCH3   ; too far for jr
+    ld      [DS_CH3RetPtr+1],a
+    jp      DS_UpdateCH3   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
-    ld      [CH3Ptr],a
+    ld      [DS_CH3Ptr],a
     ld      a,[hl]
-    ld      [CH3Ptr+1],a
-    jp      UpdateCH3
+    ld      [DS_CH3Ptr+1],a
+    jp      DS_UpdateCH3
 
 .pitchBendUp    ; TODO
     pop     hl
     inc     hl
-    jp      CH3_CheckByte   ; too far for jr
+    jp      DS_CH3_CheckByte   ; too far for jr
     
 .pitchBendDown  ; TODO
     pop     hl
     inc     hl
-    jp      CH3_CheckByte   ; too far for jr
+    jp      DS_CH3_CheckByte   ; too far for jr
 
 .setSweep
     pop     hl
     inc     hl
-    jp      CH3_CheckByte   ; too far for jr
+    jp      DS_CH3_CheckByte   ; too far for jr
 
 .setPan
     pop     hl
     ld      a,[hl+]
-    ld      [CH3Pan],a
-    jp      CH3_CheckByte   ; too far for jr
+    ld      [DS_CH3Pan],a
+    jp      DS_CH3_CheckByte   ; too far for jr
 
 .setSpeed
     pop     hl
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed1],a
+    ld      [DS_GlobalSpeed1],a
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed2],a
-    jp      CH3_CheckByte   ; too far for jr
+    ld      [DS_GlobalSpeed2],a
+    jp      DS_CH3_CheckByte   ; too far for jr
     
 .setInsAlternate
     pop     hl
     ld      a,[hl+]
-    ld      [CH3Ins1],a
+    ld      [DS_CH3Ins1],a
     ld      a,[hl+]
-    ld      [CH3Ins2],a
+    ld      [DS_CH3Ins2],a
     ld      a,1
-    ld      [CH3InsMode],a
-    jp      CH3_CheckByte
+    ld      [DS_CH3InsMode],a
+    jp      DS_CH3_CheckByte
 .enablePWM
     call    ClearWaveBuffer
     pop     hl
     ld      a,[hl+]
-    ld      [PWMVol],a
+    ld      [DS_PWMVol],a
     ld      a,[hl+]
-    ld      [PWMSpeed],a
+    ld      [DS_PWMSpeed],a
     ld      a,$ff
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     xor     a
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     inc     a
-    ld      [PWMEnabled],a
-    ld      [PWMTimer],a
-    jp      CH3_CheckByte
+    ld      [DS_PWMEnabled],a
+    ld      [DS_PWMTimer],a
+    jp      DS_CH3_CheckByte
     
 .arp
     pop     hl
@@ -1261,9 +1320,32 @@ CH3_CommandTable:
     ld      a,c
     add     2
     ld      c,a
-    jp      CH3_CheckByte
+    jp      DS_CH3_CheckByte
+
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH3LoopCount],a
+    jp      DS_CH3_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH3LoopCount]
+    dec     a
+    ld      [DS_CH3LoopCount],a
+    and     a
+    jp      z,DS_CH3_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH3Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH3Ptr+1],a
+    jp      DS_UpdateCH3
     
-CH3_SetInstrument:
+DS_CH3_SetInstrument:
     ld      hl,InstrumentTable
     add     a
     add     l
@@ -1276,54 +1358,54 @@ CH3_SetInstrument:
     ld      l,a
     ; no reset flag
     ld      a,[hl+]
-    ld      [CH3Reset],a
+    ld      [DS_CH3Reset],a
     ld      b,a
     ; vol table
     ld      a,[hl+]
-    ld      [CH3VolPtr],a
+    ld      [DS_CH3VolPtr],a
     ld      a,[hl+]
-    ld      [CH3VolPtr+1],a
+    ld      [DS_CH3VolPtr+1],a
     ; arp table
     ld      a,[hl+]
-    ld      [CH3ArpPtr],a
+    ld      [DS_CH3ArpPtr],a
     ld      a,[hl+]
-    ld      [CH3ArpPtr+1],a
+    ld      [DS_CH3ArpPtr+1],a
     ; wave table
     ld      a,[hl+]
-    ld      [CH3WavePtr],a
+    ld      [DS_CH3WavePtr],a
     ld      a,[hl+]
-    ld      [CH3WavePtr+1],a
+    ld      [DS_CH3WavePtr+1],a
     ; vib table
     ld      a,[hl+]
-    ld      [CH3VibPtr],a
+    ld      [DS_CH3VibPtr],a
     ld      a,[hl+]
-    ld      [CH3VibPtr+1],a
-    ld      hl,CH3VibPtr
+    ld      [DS_CH3VibPtr+1],a
+    ld      hl,DS_CH3VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
     ld      a,[hl]
-    ld      [CH3VibDelay],a
+    ld      [DS_CH3VibDelay],a
     ret
 
 ; ================================================================
 
-UpdateCH4:
-    ld      a,[CH4Enabled]
+DS_UpdateCH4:
+    ld      a,[DS_CH4Enabled]
     and     a
     jp      z,DoneUpdating
-    ld      a,[CH4Tick]
+    ld      a,[DS_CH4Tick]
     and     a
     jr      z,.continue
     dec     a
-    ld      [CH4Tick],a
+    ld      [DS_CH4Tick],a
     jp      DoneUpdating    ; too far for jr
 .continue
-    ld      hl,CH4Ptr   ; get pointer
+    ld      hl,DS_CH4Ptr   ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-CH4_CheckByte:
+DS_CH4_CheckByte:
     ld      a,[hl+]     ; get byte
     inc     c           ; add 1 to offset
     cp      $ff
@@ -1334,52 +1416,52 @@ CH4_CheckByte:
     jr      nz,.getCommand  
     ; if we have a note...
 .getNote
-    ld      [CH4Mode],a
+    ld      [DS_CH4Mode],a
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [CH4Tick],a
-    ld      a,[CH4Reset]
-    jp      z,CH4_DoneUpdating
+    ld      [DS_CH4Tick],a
+    ld      a,[DS_CH4Reset]
+    jp      z,DS_CH4_DoneUpdating
     xor     a
-    ld      [CH4VolPos],a
-    ld      [CH4NoisePos],a
+    ld      [DS_CH4VolPos],a
+    ld      [DS_CH4NoisePos],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH4,a
     jr      nz,.noupdate
     ldh     [rNR42],a
 .noupdate
-    ld      a,[CH4NoteCount]
+    ld      a,[DS_CH4NoteCount]
     inc     a
-    ld      [CH4NoteCount],a
+    ld      [DS_CH4NoteCount],a
     ld      b,a
     ; check if instrument mode is 1 (alternating)
-    ld      a,[CH4InsMode]
+    ld      a,[DS_CH4InsMode]
     and     a
     jr      z,.noInstrumentChange
     ld      a,b
     rra
     jr      nc,.notodd
-    ld      a,[CH4Ins1]
+    ld      a,[DS_CH4Ins1]
     jr      .odd
 .notodd
-    ld      a,[CH4Ins2]
+    ld      a,[DS_CH4Ins2]
 .odd
-    call    CH4_SetInstrument
+    call    DS_CH4_SetInstrument
 .noInstrumentChange
-    jp      CH4_DoneUpdating
+    jp      DS_CH4_DoneUpdating
 .getCommand
     push    hl
     sub     $80
     cp      DummyCommand-$80
     jr      c,.nodummy
     pop     hl
-    jp      CH4_CheckByte
+    jp      DS_CH4_CheckByte
 .nodummy
     add     a
-    add     a,CH4_CommandTable%256
+    add     a,DS_CH4_CommandTable%256
     ld      l,a
-    adc     a,CH4_CommandTable/256
+    adc     a,DS_CH4_CommandTable/256
     sub     l
     ld      h,a
     ld      a,[hl+]
@@ -1389,28 +1471,28 @@ CH4_CheckByte:
 
 .endChannel
     xor     a
-    ld      [CH4Enabled],a
+    ld      [DS_CH4Enabled],a
     jp      DoneUpdating
     
 .retSection
-    ld      a,[CH4RetPtr]
-    ld      [CH4Ptr],a
-    ld      a,[CH4RetPtr+1]
-    ld      [CH4Ptr+1],a
-    jp      UpdateCH4
+    ld      a,[DS_CH4RetPtr]
+    ld      [DS_CH4Ptr],a
+    ld      a,[DS_CH4RetPtr+1]
+    ld      [DS_CH4Ptr+1],a
+    jp      DS_UpdateCH4
     
-CH4_DoneUpdating:
+DS_CH4_DoneUpdating:
     pop     hl
     ld      a,l
-    ld      [CH4Ptr],a
+    ld      [DS_CH4Ptr],a
     ld      a,h
-    ld      [CH4Ptr+1],a
+    ld      [DS_CH4Ptr+1],a
     jp      DoneUpdating
         
-CH4_CommandTable:
+DS_CH4_CommandTable:
     dw      .setInstrument
     dw      .callSection
-    dw      .setChannelPtr
+    dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
     dw      .setSweep
@@ -1419,16 +1501,18 @@ CH4_CommandTable:
     dw      .setInsAlternate
     dw      .enablePWM
     dw      .arp
+    dw      .setLoopCount
+    dw      .loop
 
 .setInstrument
     pop     hl
     ld      a,[hl+]
     push    hl
-    call    CH4_SetInstrument
+    call    DS_CH4_SetInstrument
     pop     hl
     xor     a
-    ld      [CH4InsMode],a
-    jp      CH4_CheckByte   ; too far for jr
+    ld      [DS_CH4InsMode],a
+    jp      DS_CH4_CheckByte   ; too far for jr
     
 .callSection
     pop     hl
@@ -1436,81 +1520,103 @@ CH4_CommandTable:
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      [CH4Ptr],a
+    ld      [DS_CH4Ptr],a
     ld      a,h
-    ld      [CH4Ptr+1],a
+    ld      [DS_CH4Ptr+1],a
     pop     hl
     inc     hl
     inc     hl
     ld      a,l
-    ld      [CH4RetPtr],a
+    ld      [DS_CH4RetPtr],a
     ld      a,h
-    ld      [CH4RetPtr+1],a
-    jp      UpdateCH4   ; too far for jr
+    ld      [DS_CH4RetPtr+1],a
+    jp      DS_UpdateCH4   ; too far for jr
     
-.setChannelPtr
+.goto
     pop     hl
     ld      a,[hl+]
-    ld      [CH4Ptr],a
+    ld      [DS_CH4Ptr],a
     ld      a,[hl]
-    ld      [CH4Ptr+1],a
-    jp      UpdateCH4
+    ld      [DS_CH4Ptr+1],a
+    jp      DS_UpdateCH4
 
 .pitchBendUp    ; unused for ch4
     pop     hl
     inc     hl
-    jp      CH4_CheckByte   ; too far for jr
+    jp      DS_CH4_CheckByte   ; too far for jr
     
 .pitchBendDown  ; unused for ch4
     pop     hl
     inc     hl
-    jp      CH4_CheckByte   ; too far for jr
+    jp      DS_CH4_CheckByte   ; too far for jr
 
 .setSweep       ; unused for ch4
     pop     hl
     inc     hl
-    jp      CH4_CheckByte   ; too far for jr
+    jp      DS_CH4_CheckByte   ; too far for jr
 
 .setPan
     pop     hl
     ld      a,[hl+]
-    ld      [CH4Pan],a
-    jp      CH4_CheckByte   ; too far for jr
+    ld      [DS_CH4Pan],a
+    jp      DS_CH4_CheckByte   ; too far for jr
 
 .setSpeed
     pop     hl
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed1],a
+    ld      [DS_GlobalSpeed1],a
     ld      a,[hl+]
     dec     a
-    ld      [GlobalSpeed2],a
-    jp      CH4_CheckByte   ; too far for jr
+    ld      [DS_GlobalSpeed2],a
+    jp      DS_CH4_CheckByte   ; too far for jr
     
 .setInsAlternate
     pop     hl
     ld      a,[hl+]
-    ld      [CH4Ins1],a
+    ld      [DS_CH4Ins1],a
     ld      a,[hl+]
-    ld      [CH4Ins2],a
+    ld      [DS_CH4Ins2],a
     ld      a,1
-    ld      [CH4InsMode],a
-    jp      CH4_CheckByte
-    
+    ld      [DS_CH4InsMode],a
+    jp      DS_CH4_CheckByte
 
 .enablePWM
     pop     hl
     inc     hl
     inc     hl
-    jp      CH4_CheckByte
+    jp      DS_CH4_CheckByte
     
 .arp
     pop     hl
     inc     hl
     inc     hl
-    jp      CH4_CheckByte
+    jp      DS_CH4_CheckByte
 
-CH4_SetInstrument:
+.setLoopCount
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH4LoopCount],a
+    jp      DS_CH4_CheckByte
+
+.loop
+    pop     hl
+    inc     hl
+    inc     hl
+    ld      a,[DS_CH4LoopCount]
+    dec     a
+    ld      [DS_CH4LoopCount],a
+    and     a
+    jp      z,DS_CH4_CheckByte
+    dec     hl
+    dec     hl
+    ld      a,[hl+]
+    ld      [DS_CH4Ptr],a
+    ld      a,[hl]
+    ld      [DS_CH4Ptr+1],a
+    jp      DS_UpdateCH4
+
+DS_CH4_SetInstrument:
     ld      hl,InstrumentTable
     add     a
     add     l
@@ -1523,18 +1629,18 @@ CH4_SetInstrument:
     ld      l,a
     ; no reset flag
     ld      a,[hl+]
-    ld      [CH4Reset],a
+    ld      [DS_CH4Reset],a
     ld      b,a
     ; vol table
     ld      a,[hl+]
-    ld      [CH4VolPtr],a
+    ld      [DS_CH4VolPtr],a
     ld      a,[hl+]
-    ld      [CH4VolPtr+1],a
+    ld      [DS_CH4VolPtr+1],a
     ; noise mode pointer
     ld      a,[hl+]
-    ld      [CH4NoisePtr],a
+    ld      [DS_CH4NoisePtr],a
     ld      a,[hl+]
-    ld      [CH4NoisePtr+1],a
+    ld      [DS_CH4NoisePtr+1],a
     ret
     
 ; ================================================================
@@ -1543,18 +1649,18 @@ DoneUpdating:
 
 UpdateRegisters:
     ; update panning
-    ld      a,[CH1Pan]
+    ld      a,[DS_CH1Pan]
     ld      b,a
-    ld      a,[CH2Pan]
+    ld      a,[DS_CH2Pan]
     rla
     add     b
     ld      b,a
-    ld      a,[CH3Pan]
+    ld      a,[DS_CH3Pan]
     rla 
     rla
     add     b
     ld      b,a
-    ld      a,[CH4Pan]
+    ld      a,[DS_CH4Pan]
     rla
     rla
     rla
@@ -1562,7 +1668,7 @@ UpdateRegisters:
     ldh     [rNR51],a
 
     ; update global volume + fade system
-    ld      a,[FadeType]
+    ld      a,[DS_FadeType]
     ld      b,a
     and     3                   ; Check if no fade
     jr      z,.updateVolume     ; Update volume
@@ -1571,47 +1677,47 @@ UpdateRegisters:
     jr      z,.notfirstfade
     res     2,b
     ld      a,b
-    ld      [FadeType],a
+    ld      [DS_FadeType],a
     dec     a
     dec     a                   ; If fading in (value 2), volume is 0 ; otherwise, it's 7
     jr      z,.gotfirstfadevolume
     ld      a,7
 .gotfirstfadevolume
-    ld      [GlobalVolume],a
+    ld      [DS_GlobalVolume],a
 .notfirstfade
 
-    ld      a,[FadeTimer]
+    ld      a,[DS_FadeTimer]
     and     a
     jr      z,.doupdate
     dec     a
-    ld      [FadeTimer],a
+    ld      [DS_FadeTimer],a
     jr      .updateVolume
 .fadeout
-    ld      a,[GlobalVolume]
+    ld      a,[DS_GlobalVolume]
     and     a
     jr      z,.fadeFinished
 .decrementVolume
     dec     a
-    ld      [GlobalVolume],a
+    ld      [DS_GlobalVolume],a
     jr      .directlyUpdateVolume
 .fadein
-    ld      a,[GlobalVolume]
+    ld      a,[DS_GlobalVolume]
     cp      7
     jr      z,.fadeFinished
     inc     a
-    ld      [GlobalVolume],a
+    ld      [DS_GlobalVolume],a
     jr      .directlyUpdateVolume
 .doupdate
     ld      a,7
-    ld      [FadeTimer],a
-    ld      a,[FadeType]
+    ld      [DS_FadeTimer],a
+    ld      a,[DS_FadeType]
     and     3
     dec     a
     jr      z,.fadeout
     dec     a
     jr      z,.fadein
     dec     a
-    ld      a,[GlobalVolume]
+    ld      a,[DS_GlobalVolume]
     jr      nz,.directlyUpdateVolume
 .fadeoutstop
     and     a
@@ -1620,9 +1726,9 @@ UpdateRegisters:
     xor a
 .fadeFinished
     ; a is zero
-    ld      [FadeType],a
+    ld      [DS_FadeType],a
 .updateVolume
-    ld      a,[GlobalVolume]
+    ld      a,[DS_GlobalVolume]
 .directlyUpdateVolume
     and     7
     ld      b,a
@@ -1630,16 +1736,16 @@ UpdateRegisters:
     or      b
     ldh     [rNR50],a
     
-CH1_UpdateRegisters:
-    ld      a,[CH1Enabled]
+DS_CH1_UpdateRegisters:
+    ld      a,[DS_CH1Enabled]
     and     a
-    jp      z,CH2_UpdateRegisters
+    jp      z,DS_CH2_UpdateRegisters
     
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH1,a
     jr      nz,.norest
 
-    ld      a,[CH1Note]
+    ld      a,[DS_CH1Note]
     cp      rest
     jr      nz,.norest
     xor     a
@@ -1652,11 +1758,11 @@ CH1_UpdateRegisters:
 
     ; update arps
 .updatearp
-    ld      hl,CH1ArpPtr
+    ld      hl,DS_CH1ArpPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH1ArpPos]
+    ld      a,[DS_CH1ArpPos]
     add     l
     ld      l,a
     jr      nc,.nocarry
@@ -1666,25 +1772,25 @@ CH1_UpdateRegisters:
     cp      $80
     jr      nz,.noloop
     ld      a,[hl]
-    ld      [CH1ArpPos],a
+    ld      [DS_CH1ArpPos],a
     jr      .updatearp
 .noloop
     cp      $ff
     jr      z,.continue
-    ld      [CH1Transpose],a
+    ld      [DS_CH1Transpose],a
 .noreset
-    ld      a,[CH1ArpPos]
+    ld      a,[DS_CH1ArpPos]
     inc     a
-    ld      [CH1ArpPos],a
+    ld      [DS_CH1ArpPos],a
 .continue
     
     
     ; update pulse
-    ld      hl,CH1PulsePtr
+    ld      hl,DS_CH1PulsePtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH1PulsePos]
+    ld      a,[DS_CH1PulsePos]
     add     l
     ld      l,a
     jr      nc,.nocarry2
@@ -1706,20 +1812,20 @@ CH1_UpdateRegisters:
     ld      a,e
     ldh     [rNR11],a   ; transfer to register
 .noreset2
-    ld      a,[CH1PulsePos]
+    ld      a,[DS_CH1PulsePos]
     inc     a
-    ld      [CH1PulsePos],a
+    ld      [DS_CH1PulsePos],a
     ld      a,[hl+]
     cp      $80
     jr      nz,.updateNote
     ld      a,[hl]
-    ld      [CH1PulsePos],a
+    ld      [DS_CH1PulsePos],a
     
 ; get note
 .updateNote
-    ld      a,[CH1Transpose]
+    ld      a,[DS_CH1Transpose]
     ld      b,a
-    ld      a,[CH1Note]
+    ld      a,[DS_CH1Note]
     add     b
     
     ld      c,a
@@ -1735,18 +1841,18 @@ CH1_UpdateRegisters:
     ld      a,[hl]
     ld      e,a
 .updateVibTable
-    ld      a,[CH1VibDelay]
+    ld      a,[DS_CH1VibDelay]
     and     a
     jr      z,.doVib
     dec     a
-    ld      [CH1VibDelay],a
+    ld      [DS_CH1VibDelay],a
     jr      .setFreq
 .doVib
-    ld      hl,CH1VibPtr
+    ld      hl,DS_CH1VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH1VibPos]
+    ld      a,[DS_CH1VibPos]
     add     l
     ld      l,a
     jr      nc,.nocarry4
@@ -1756,16 +1862,16 @@ CH1_UpdateRegisters:
     cp      $80
     jr      nz,.noloop2
     ld      a,[hl+]
-    ld      [CH1VibPos],a
+    ld      [DS_CH1VibPos],a
     jr      .doVib
 .noloop2
-    ld      [CH1FreqOffset],a
-    ld      a,[CH1VibPos]
+    ld      [DS_CH1FreqOffset],a
+    ld      a,[DS_CH1VibPos]
     inc     a
-    ld      [CH1VibPos],a
+    ld      [DS_CH1VibPos],a
     
 .getPitchOffset
-    ld      a,[CH1FreqOffset]
+    ld      a,[DS_CH1FreqOffset]
     bit     7,a
     jr      nz,.sub
     add     d
@@ -1789,11 +1895,11 @@ CH1_UpdateRegisters:
     
     ; update volume
 .updateVolume
-    ld      hl,CH1VolPtr
+    ld      hl,DS_CH1VolPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH1VolPos]
+    ld      a,[DS_CH1VolPos]
     add     l
     ld      l,a
     jr      nc,.nocarry5
@@ -1816,28 +1922,28 @@ CH1_UpdateRegisters:
     or      $80
     ldh     [rNR14],a
 .noreset3
-    ld      a,[CH1VolPos]
+    ld      a,[DS_CH1VolPos]
     inc     a
-    ld      [CH1VolPos],a
+    ld      [DS_CH1VolPos],a
     ld      a,[hl+]
     cp      $8f
     jr      nz,.done
     ld      a,[hl]
-    ld      [CH1VolPos],a
+    ld      [DS_CH1VolPos],a
 .done
 
 ; ================================================================
 
-CH2_UpdateRegisters:
-    ld      a,[CH2Enabled]
+DS_CH2_UpdateRegisters:
+    ld      a,[DS_CH2Enabled]
     and     a
-    jp      z,CH3_UpdateRegisters
+    jp      z,DS_CH3_UpdateRegisters
     
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH2,a
     jr      nz,.norest
 
-    ld      a,[CH2Note]
+    ld      a,[DS_CH2Note]
     cp      rest
     jr      nz,.norest
     xor     a
@@ -1850,11 +1956,11 @@ CH2_UpdateRegisters:
 
     ; update arps
 .updatearp
-    ld      hl,CH2ArpPtr
+    ld      hl,DS_CH2ArpPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH2ArpPos]
+    ld      a,[DS_CH2ArpPos]
     add     l
     ld      l,a
     jr      nc,.nocarry
@@ -1864,24 +1970,24 @@ CH2_UpdateRegisters:
     cp      $80
     jr      nz,.noloop
     ld      a,[hl]
-    ld      [CH2ArpPos],a
+    ld      [DS_CH2ArpPos],a
     jr      .updatearp
 .noloop
     cp      $ff
     jr      z,.continue
-    ld      [CH2Transpose],a
+    ld      [DS_CH2Transpose],a
 .noreset
-    ld      a,[CH2ArpPos]
+    ld      a,[DS_CH2ArpPos]
     inc     a
-    ld      [CH2ArpPos],a
+    ld      [DS_CH2ArpPos],a
 .continue
     
     ; update pulse
-    ld      hl,CH2PulsePtr
+    ld      hl,DS_CH2PulsePtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH2PulsePos]
+    ld      a,[DS_CH2PulsePos]
     add     l
     ld      l,a
     jr      nc,.nocarry2
@@ -1903,20 +2009,20 @@ CH2_UpdateRegisters:
     ld      a,e
     ldh     [rNR21],a   ; transfer to register
 .noreset2
-    ld      a,[CH2PulsePos]
+    ld      a,[DS_CH2PulsePos]
     inc     a
-    ld      [CH2PulsePos],a
+    ld      [DS_CH2PulsePos],a
     ld      a,[hl+]
     cp      $80
     jr      nz,.updateNote
     ld      a,[hl]
-    ld      [CH2PulsePos],a
+    ld      [DS_CH2PulsePos],a
     
 ; get note
 .updateNote
-    ld      a,[CH2Transpose]
+    ld      a,[DS_CH2Transpose]
     ld      b,a
-    ld      a,[CH2Note]
+    ld      a,[DS_CH2Note]
     add     b
     
     ld      c,a
@@ -1932,18 +2038,18 @@ CH2_UpdateRegisters:
     ld      a,[hl]
     ld      e,a
 .updateVibTable
-    ld      a,[CH2VibDelay]
+    ld      a,[DS_CH2VibDelay]
     and     a
     jr      z,.doVib
     dec     a
-    ld      [CH2VibDelay],a
+    ld      [DS_CH2VibDelay],a
     jr      .setFreq
 .doVib
-    ld      hl,CH2VibPtr
+    ld      hl,DS_CH2VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH2VibPos]
+    ld      a,[DS_CH2VibPos]
     add     l
     ld      l,a
     jr      nc,.nocarry4
@@ -1953,16 +2059,16 @@ CH2_UpdateRegisters:
     cp      $80
     jr      nz,.noloop2
     ld      a,[hl+]
-    ld      [CH2VibPos],a
+    ld      [DS_CH2VibPos],a
     jr      .doVib
 .noloop2
-    ld      [CH2FreqOffset],a
-    ld      a,[CH2VibPos]
+    ld      [DS_CH2FreqOffset],a
+    ld      a,[DS_CH2VibPos]
     inc     a
-    ld      [CH2VibPos],a
+    ld      [DS_CH2VibPos],a
     
 .getPitchOffset
-    ld      a,[CH2FreqOffset]
+    ld      a,[DS_CH2FreqOffset]
     bit     7,a
     jr      nz,.sub
     add     d
@@ -1986,11 +2092,11 @@ CH2_UpdateRegisters:
 
     ; update volume
 .updateVolume
-    ld      hl,CH2VolPtr
+    ld      hl,DS_CH2VolPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH2VolPos]
+    ld      a,[DS_CH2VolPos]
     add     l
     ld      l,a
     jr      nc,.nocarry5
@@ -2014,44 +2120,44 @@ CH2_UpdateRegisters:
     or      $80
     ldh     [rNR24],a
 .noreset3
-    ld      a,[CH2VolPos]
+    ld      a,[DS_CH2VolPos]
     inc     a
-    ld      [CH2VolPos],a
+    ld      [DS_CH2VolPos],a
     ld      a,[hl+]
     cp      $8f
     jr      nz,.done
     ld      a,[hl]
-    ld      [CH2VolPos],a
+    ld      [DS_CH2VolPos],a
 .done
 
 ; ================================================================
 
-CH3_UpdateRegisters:
-    ld      a,[CH3Enabled]
+DS_CH3_UpdateRegisters:
+    ld      a,[DS_CH3Enabled]
     and     a
-    jp      z,CH4_UpdateRegisters
+    jp      z,DS_CH4_UpdateRegisters
 
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
     jr      nz,.norest
     
-    ld      a,[CH3Note]
+    ld      a,[DS_CH3Note]
     cp      rest
     jr      nz,.norest
     xor     a
     ldh     [rNR32],a
     ldh     [rNR30],a
-    ld      [CH3Vol],a
+    ld      [DS_CH3Vol],a
     jp      .done
 .norest
 
     ; update arps
 .updatearp
-    ld      hl,CH3ArpPtr
+    ld      hl,DS_CH3ArpPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH3ArpPos]
+    ld      a,[DS_CH3ArpPos]
     add     l
     ld      l,a
     jr      nc,.nocarry
@@ -2061,16 +2167,16 @@ CH3_UpdateRegisters:
     cp      $80
     jr      nz,.noloop
     ld      a,[hl]
-    ld      [CH3ArpPos],a
+    ld      [DS_CH3ArpPos],a
     jr      .updatearp
 .noloop 
     cp      $ff
     jr      z,.continue
-    ld      [CH3Transpose],a
+    ld      [DS_CH3Transpose],a
 .noreset
-    ld      a,[CH3ArpPos]
+    ld      a,[DS_CH3ArpPos]
     inc     a
-    ld      [CH3ArpPos],a
+    ld      [DS_CH3ArpPos],a
 .continue
     
     ld      a,[VGMSFX_Flags]
@@ -2084,9 +2190,9 @@ CH3_UpdateRegisters:
     
 ; get note
 .updateNote
-    ld      a,[CH3Transpose]
+    ld      a,[DS_CH3Transpose]
     ld      b,a
-    ld      a,[CH3Note]
+    ld      a,[DS_CH3Note]
     add     b
     
     ld      c,a
@@ -2102,18 +2208,18 @@ CH3_UpdateRegisters:
     ld      a,[hl]
     ld      e,a
 .updateVibTable
-    ld      a,[CH3VibDelay]
+    ld      a,[DS_CH3VibDelay]
     and     a
     jr      z,.doVib
     dec     a
-    ld      [CH3VibDelay],a
+    ld      [DS_CH3VibDelay],a
     jr      .setFreq
 .doVib
-    ld      hl,CH3VibPtr
+    ld      hl,DS_CH3VibPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH3VibPos]
+    ld      a,[DS_CH3VibPos]
     add     l
     ld      l,a
     jr      nc,.nocarry4
@@ -2123,16 +2229,16 @@ CH3_UpdateRegisters:
     cp      $80
     jr      nz,.noloop2
     ld      a,[hl+]
-    ld      [CH3VibPos],a
+    ld      [DS_CH3VibPos],a
     jr      .doVib
 .noloop2
-    ld      [CH3FreqOffset],a
-    ld      a,[CH3VibPos]
+    ld      [DS_CH3FreqOffset],a
+    ld      a,[DS_CH3VibPos]
     inc     a
-    ld      [CH3VibPos],a
+    ld      [DS_CH3VibPos],a
     
 .getPitchOffset
-    ld      a,[CH3FreqOffset]
+    ld      a,[DS_CH3FreqOffset]
     bit     7,a
     jr      nz,.sub
     add     d
@@ -2155,11 +2261,11 @@ CH3_UpdateRegisters:
     ldh     [rNR34],a
 
 .updateWave
-    ld      hl,CH3WavePtr
+    ld      hl,DS_CH3WavePtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH3WavePos]
+    ld      a,[DS_CH3WavePos]
     add     l
     ld      l,a
     jr      nc,.nocarry2
@@ -2169,14 +2275,14 @@ CH3_UpdateRegisters:
     cp      $ff                 ; table end?
     jr      z,.updateVolume
     ld      b,a
-    ld      a,[CH3Wave]
+    ld      a,[DS_CH3Wave]
     cp      b
     jr      z,.noreset2
     ld      a,b
-    ld      [CH3Wave],a
+    ld      [DS_CH3Wave],a
     cp      $fd                 ; if value = $fd, use wave buffer
     jr      nz,.notwavebuf
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
     jr      .loadwave
 .notwavebuf
     add     a
@@ -2199,21 +2305,21 @@ CH3_UpdateRegisters:
     or      %10000000
     ldh     [rNR34],a
 .noreset2
-    ld      a,[CH3WavePos]
+    ld      a,[DS_CH3WavePos]
     inc     a
-    ld      [CH3WavePos],a
+    ld      [DS_CH3WavePos],a
     ld      a,[hl+]
     cp      $80
     jr      nz,.updateVolume
     ld      a,[hl]
-    ld      [CH3WavePos],a
+    ld      [DS_CH3WavePos],a
 
 .updateVolume
-    ld      hl,CH3VolPtr
+    ld      hl,DS_CH3VolPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH3VolPos]
+    ld      a,[DS_CH3VolPos]
     add     l
     ld      l,a
     jr      nc,.nocarry5
@@ -2227,38 +2333,38 @@ CH3_UpdateRegisters:
     bit     bSFX_CH3,a
     jr      nz,.noreset3
     
-    ld      a,[CH3Vol]
+    ld      a,[DS_CH3Vol]
     cp      b
     jr      z,.noreset3
     ld      a,$80
     ldh     [rNR30],a
     ld      a,b
     ldh     [rNR32],a
-    ld      [CH3Vol],a
+    ld      [DS_CH3Vol],a
     ld      a,e
     set     7,a
     ldh     [rNR34],a
 .noreset3
-    ld      a,[CH3VolPos]
+    ld      a,[DS_CH3VolPos]
     inc     a
-    ld      [CH3VolPos],a
+    ld      [DS_CH3VolPos],a
     ld      a,[hl+]
     cp      $80
     jr      nz,.done
     ld      a,[hl]
-    ld      [CH3VolPos],a
+    ld      [DS_CH3VolPos],a
 .done
     call    DoPWM
-    ld      a,[CH3Wave]
+    ld      a,[DS_CH3Wave]
     cp      $fd
     jr      nz,.noupdate
-    ld      a,[WaveBufUpdateFlag]
+    ld      a,[DS_WaveUpdateFlag]
     and     a
     jr      z,.noupdate
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
     call    LoadWave
     xor     a
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_WaveUpdateFlag],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
     jr      nz,.noupdate
@@ -2269,8 +2375,8 @@ CH3_UpdateRegisters:
 
 ; ================================================================
 
-CH4_UpdateRegisters:
-    ld      a,[CH4Enabled]
+DS_CH4_UpdateRegisters:
+    ld      a,[DS_CH4Enabled]
     and     a
     jp      z,DoneUpdatingRegisters
     
@@ -2278,7 +2384,7 @@ CH4_UpdateRegisters:
     bit     bSFX_CH4,a
     jr      nz,.norest
 
-    ld      a,[CH4Mode]
+    ld      a,[DS_CH4Mode]
     cp      rest
     jr      nz,.norest
     xor     a
@@ -2291,11 +2397,11 @@ CH4_UpdateRegisters:
 
     ; update arps
 .updatearp
-    ld      hl,CH4NoisePtr
+    ld      hl,DS_CH4NoisePtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH4NoisePos]
+    ld      a,[DS_CH4NoisePos]
     add     l
     ld      l,a
     jr      nc,.nocarry
@@ -2305,23 +2411,23 @@ CH4_UpdateRegisters:
     cp      $80
     jr      nz,.noloop
     ld      a,[hl]
-    ld      [CH4NoisePos],a
+    ld      [DS_CH4NoisePos],a
     jr      .updatearp
 .noloop
     cp      $ff
     jr      z,.continue
-    ld      [CH4Transpose],a
+    ld      [DS_CH4Transpose],a
 .noreset
-    ld      a,[CH4NoisePos]
+    ld      a,[DS_CH4NoisePos]
     inc     a
-    ld      [CH4NoisePos],a
+    ld      [DS_CH4NoisePos],a
 .continue
     
 ; get note
 .updateNote
-    ld      a,[CH4Transpose]
+    ld      a,[DS_CH4Transpose]
     ld      b,a
-    ld      a,[CH4Mode]
+    ld      a,[DS_CH4Mode]
     add     b
     
     ld      hl,NoiseTable
@@ -2339,11 +2445,11 @@ CH4_UpdateRegisters:
 
     ; update volume
 .updateVolume
-    ld      hl,CH4VolPtr
+    ld      hl,DS_CH4VolPtr
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
-    ld      a,[CH4VolPos]
+    ld      a,[DS_CH4VolPos]
     add     l
     ld      l,a
     jr      nc,.nocarry3
@@ -2367,14 +2473,14 @@ CH4_UpdateRegisters:
     ld      a,%10000000
     ldh     [rNR44],a
 .noreset3
-    ld      a,[CH4VolPos]
+    ld      a,[DS_CH4VolPos]
     inc     a
-    ld      [CH4VolPos],a
+    ld      [DS_CH4VolPos],a
     ld      a,[hl+]
     cp      $8f
     jr      nz,.done
     ld      a,[hl]
-    ld      [CH4VolPos],a
+    ld      [DS_CH4VolPos],a
 .done
     
 DoneUpdatingRegisters:
@@ -2393,7 +2499,7 @@ LoadWave:
     bit     bSFX_CH3,a
     ret     nz
     xor     a
-    ldh     [rNR30],a   ; disable CH3
+    ldh     [rNR30],a   ; disable DS_CH3
     ld      bc,$1030    ; b = counter, c = HRAM address
 .loop
     ld      a,[hl+]     ; get byte from hl
@@ -2402,14 +2508,14 @@ LoadWave:
     dec     b
     jr      nz,.loop    ; loop until done
     ld      a,%10000000
-    ldh     [rNR30],a   ; enable CH3
+    ldh     [rNR30],a   ; enable DS_CH3
     ret
     
 ClearWaveBuffer:
     ld      a,$10
     ld      b,a
     xor     a
-    ld      hl,WaveBuffer
+    ld      hl,DS_WaveBuffer
 .loop
     ld      [hl+],a     ; copy to wave ram
     dec     b
@@ -2419,42 +2525,42 @@ ClearWaveBuffer:
 ; Do PWM
 ; TODO: Optimize
 DoPWM:
-    ld      a,[PWMEnabled]
+    ld      a,[DS_PWMEnabled]
     and     a
     ret     z   ; if PWM is not enabled, return
-    ld      a,[PWMTimer]
+    ld      a,[DS_PWMTimer]
     dec     a
-    ld      [PWMTimer],a
+    ld      [DS_PWMTimer],a
     and     a
     ret     nz
-    ld      a,[PWMSpeed]
-    ld      [PWMTimer],a
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMSpeed]
+    ld      [DS_PWMTimer],a
+    ld      a,[DS_PWMDir]
     and     a
     jr      nz,.decPos
 .incPos 
-    ld      a,[WavePos]
+    ld      a,[DS_WavePos]
     inc     a
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     cp      $1e
     jr      nz,.continue
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMDir]
     xor     1
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     jr      .continue
 .decPos
-    ld      a,[WavePos]
+    ld      a,[DS_WavePos]
     dec     a
-    ld      [WavePos],a
+    ld      [DS_WavePos],a
     and     a
     jr      nz,.continue2
-    ld      a,[PWMDir]
+    ld      a,[DS_PWMDir]
     xor     1
-    ld      [PWMDir],a
+    ld      [DS_PWMDir],a
     jr      .continue2
 .continue
-    ld      hl,WaveBuffer
-    ld      a,[WavePos]
+    ld      hl,DS_WaveBuffer
+    ld      a,[DS_WavePos]
     rra
     push    af
     and     $f
@@ -2466,21 +2572,21 @@ DoPWM:
     pop     af
     jr      c,.odd
 .even
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     swap    a
     ld      [hl],a
     jr      .done
 .odd
     ld      a,[hl]
     ld      b,a
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     or      b
     ld      [hl],a
     jr      .done
     
 .continue2
-    ld      hl,WaveBuffer
-    ld      a,[WavePos]
+    ld      hl,DS_WaveBuffer
+    ld      a,[DS_WavePos]
     inc     a
     rra
     push    af
@@ -2493,7 +2599,7 @@ DoPWM:
     pop     af
     jr      nc,.odd2
 .even2
-    ld      a,[PWMVol]
+    ld      a,[DS_PWMVol]
     swap    a
     ld      [hl],a
     jr      .done
@@ -2502,7 +2608,7 @@ DoPWM:
     ld      [hl],a
 .done
     ld      a,1
-    ld      [WaveBufUpdateFlag],a
+    ld      [DS_WaveUpdateFlag],a
     ret
 
 ; ================================================================
@@ -2526,7 +2632,6 @@ ClearArpBuffer:
     
 ; TODO: Rewrite
 DoArp:
-    ld      b,b
     ld      de,arp_Buffer
     ld      a,[hl+]
     and     a

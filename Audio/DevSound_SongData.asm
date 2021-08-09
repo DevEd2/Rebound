@@ -98,7 +98,7 @@ vol_Kick:           db  $1c,$1c,$18,$ff
 vol_Snare:          db  $1d,$ff
 vol_CHH:            db  $18,$ff
 vol_OHH:            db  $48,$ff
-vol_Cymbal:         db  $1e,$ff
+vol_Cymbal:         db  $7e,$ff
 
 vol_Echo1:          db  8,$ff   
 vol_Echo2:          db  3,$ff
@@ -136,6 +136,13 @@ vol_PlainsEcho:     db  2,$ff
 vol_PlainsHarmony:  db  $59,$ff
 vol_PlainsHarmonyR: db  4,$ff
 
+; ========
+
+vol_CityArp:        db  $1b,$1b,$1b,$1b,$48,$ff
+vol_CityLead:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
+vol_CityLead2:      db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_CityLeadL:      db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff 
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
@@ -159,6 +166,9 @@ arp_MenuArp059: db  0,0,5,5,9,9,$80     ; last byte reads from next table
 arp_MenuArp05A: db  0,0,5,5,10,10,$80,0
 
 arp_PlainsBass: db  12,12,0,$ff
+
+arp_BassOctave: db  12,0,0,0,0,0,0,0,0,0,0,0,12,$ff
+arp_PluckDelay: db  0,12,0,$ff
 
 ; =================================================================
 ; Noise sequences
@@ -203,6 +213,9 @@ waveseq_MenuArp:
 waveseq_PlainsLead:     db  0,0,0,0,1,$ff
 waveseq_PlainsHarmony:  db  2,2,0,$ff
 
+waveseq_CityArp:
+    db  0,0,0,1,1,1,2,2,2,3,3,3,2,2,2,1,1,1,$80,0
+
 ; =================================================================
 ; Vibrato sequences
 ; Must be terminated with a loop command!
@@ -215,6 +228,7 @@ vib_PWMLead:        db  24,2,3,3,2,0,0,-2,-3,-3,-2,0,0,$80,1
 vib_PlainsLead:     db  18,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
 vib_PlainsEcho:     db  0,-2,$80,1
 vib_PlainsHarmonyR: db  0,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
+vib_CityLead:   	db	9,1,2,3,2,1,0,-1,-2,-3,-2,-1,0,$80,1
 
 ; =================================================================
 ; Wave sequences
@@ -228,24 +242,27 @@ WaveTable:
     dw      wave_MenuLead2
     dw      wave_MenuTri
     dw      wave_ForestBass
-    dw      wave_DirtyOctTri
     dw      wave_PlainsBass
+    dw      wave_CityLead
 
-wave_PyramidLead:   db      $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
-wave_PyramidSquare: db      $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
-wave_MenuLead1:     db      $cb,$ab,$11,$22,$22,$22,$22,$22,$22,$23,$33,$45,$44,$44,$32,$56
-wave_MenuLead2:     db      $9a,$cc,$cc,$cc,$cc,$c0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$13
-wave_MenuTri:       db      $68,$8c,$ef,$fd,$b9,$75,$32,$02,$68,$8c,$ef,$fd,$b9,$75,$32,$02
-wave_ForestBass:    db      $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,$44,$44,$45
-wave_DirtyOctTri:   db      $11,$36,$9b,$de,$ec,$98,$75,$53,$21,$26,$9c,$ee,$dc,$99,$85,$43 
-wave_PlainsBass:    db      $ff,$ff,$ff,$ff,$ee,$d7,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+wave_PyramidLead:       db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
+wave_PyramidSquare:     db  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
+wave_MenuLead1:         db  $cb,$ab,$11,$22,$22,$22,$22,$22,$22,$23,$33,$45,$44,$44,$32,$56
+wave_MenuLead2:         db  $9a,$cc,$cc,$cc,$cc,$c0,$00,$00,$00,$00,$00,$00,$00,$00,$00,$13
+wave_MenuTri:           db  $68,$8c,$ef,$fd,$b9,$75,$32,$02,$68,$8c,$ef,$fd,$b9,$75,$32,$02
+wave_ForestBass:        db  $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,$44,$44,$45 
+wave_PlainsBass:        db  $ff,$ff,$ff,$ff,$ee,$d7,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
+wave_CityLead:          db  $bb,$cc,$cd,$dd,$dd,$ba,$29,$54,$56,$76,$55,$43,$24,$14,$11,$00
 
 waveseq_Tri:            db  0,$ff
-waveseq_PyramidLead:     db  1,$ff
-waveseq_PyramidSquare:   db  2,$ff
+waveseq_PyramidLead:    db  1,$ff
+waveseq_PyramidSquare:  db  2,$ff
 waveseq_MenuLead:       db  3,4,$ff
 waveseq_MenuTri:        db  5,$ff
-waveseq_PlainsBass:     db  8,$ff
+waveseq_PlainsBass:     db  7,$ff
+waveseq_CityLead:       db  8,$ff
+waveseq_ForestBass:     db  6,$ff
+waveseq_WaveBuffer:     db  $fd,$ff
 
 ; =================================================================
 ; Instruments
@@ -291,9 +308,14 @@ InstrumentTable:
     dins    PlainsEcho
     dins    PlainsHarmony
     dins    PlainsHarmonyR
+    
+    dins    BassOctave
+    dins    CityArp
+    dins    CityLead
+    dins    CityLead2
+    dins    CityLeadL
 
 ; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
-; note that wave mode must be 0 for non-wave instruments
 ; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
 ins_Kick:           Instrument  0,Kick,Kick,_,_ ; pulse/waveseq and vibrato unused by noise instruments
 ins_Snare:          Instrument  0,Snare,Snare,_,_
@@ -332,6 +354,12 @@ ins_PlainsLead:     Instrument  0,PlainsLead,_,PlainsLead,PlainsLead
 ins_PlainsEcho:     Instrument  0,PlainsEcho,_,Pulse25,PlainsEcho
 ins_PlainsHarmony:  Instrument  0,PlainsHarmony,_,PlainsHarmony,PlainsLead
 ins_PlainsHarmonyR: Instrument  0,PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
+
+ins_BassOctave:     Instrument  0,MenuBass,BassOctave,Pulse25,_
+ins_CityArp:        Instrument  1,CityArp,Buffer,CityArp,_
+ins_CityLead:       Instrument  0,CityLead,PluckDelay,CityLead,CityLead
+ins_CityLead2:      Instrument  0,CityLead2,PluckDelay,CityLead,CityLead
+ins_CityLeadL:      Instrument  0,CityLeadL,_,CityLead,CityLead
 
 ; =================================================================
 
@@ -637,10 +665,10 @@ Menu_CH1:
     db      G_2,2
     db      A_2,4
     db      B_2,4
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1 
+    dbw     Loop,:-
     dbw     Goto,.loop
 .block0
     db      C_3,8
@@ -688,14 +716,12 @@ Menu_CH1:
 
 Menu_CH2:
 .loop
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
     dbw     CallSection,.block0
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block2
+    dbw     Loop,:-
     dbw     CallSection,.block3
     db      SetInstrument,_MenuArp047
     db      F_4,4
@@ -718,10 +744,10 @@ Menu_CH2:
     dbw     CallSection,.block1
     dbw     CallSection,.block0
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
+    db      LoopCount,2
+:   dbw     CallSection,.block0
     dbw     CallSection,.block1
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
+    dbw     Loop,:-
     dbw     Goto,.loop
 .block0
     db      rest,4
@@ -881,8 +907,48 @@ Menu_CH3:
     dbw     CallSection,.block3
     db      rest,10
     db      SetInstrument,_MenuOctave
-    dbw     CallSection,.block5
-    dbw     CallSection,.block5 
+    db      LoopCount,2
+:   db      C_5,2,E_5,2,G_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      G_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,G_5,2,E_5,2
+    db      C_5,2,E_5,2,G_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      G_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,G_5,2,E_5,2
+    db      A_4,2,C_5,2,E_5,2,A_5,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      E_5,2
+    db      SetInstrument,_MenuOctave
+    db      A_5,2,E_5,2,C_5,2
+    db      A_4,2,C_5,2,E_5,2,A_5,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      E_5,2
+    db      SetInstrument,_MenuOctave
+    db      A_5,2,E_5,2,C_5,2
+    db      C_5,2,F_5,2,A_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      A_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,A_5,2,F_5,2
+    db      C_5,2,F_5,2,A_5,2,C_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      A_5,2
+    db      SetInstrument,_MenuOctave
+    db      C_6,2,A_5,2,F_5,2
+    db      D_5,2,G_5,2,B_5,2,D_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      B_5,2
+    db      SetInstrument,_MenuOctave
+    db      D_6,2,B_5,2,G_5,2
+    db      D_5,2,G_5,2,B_5,2,D_6,2
+    db      SetInstrument,_MenuOctaveEcho
+    db      B_5,2
+    db      SetInstrument,_MenuOctave
+    db      D_6,2,B_5,2,G_5,2
+    dbw     Loop,:-
     dbw     Goto,Menu_CH3
 .block0
     db      C_6,4
@@ -951,76 +1017,20 @@ Menu_CH3:
     db      B_5,4
     db      B_5,6
     ret
-.block5 
-    db      C_5,2,E_5,2,G_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      G_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,G_5,2,E_5,2
-    db      C_5,2,E_5,2,G_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      G_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,G_5,2,E_5,2
-    db      A_4,2,C_5,2,E_5,2,A_5,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      E_5,2
-    db      SetInstrument,_MenuOctave
-    db      A_5,2,E_5,2,C_5,2
-    db      A_4,2,C_5,2,E_5,2,A_5,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      E_5,2
-    db      SetInstrument,_MenuOctave
-    db      A_5,2,E_5,2,C_5,2
-    db      C_5,2,F_5,2,A_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      A_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,A_5,2,F_5,2
-    db      C_5,2,F_5,2,A_5,2,C_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      A_5,2
-    db      SetInstrument,_MenuOctave
-    db      C_6,2,A_5,2,F_5,2
-    db      D_5,2,G_5,2,B_5,2,D_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      B_5,2
-    db      SetInstrument,_MenuOctave
-    db      D_6,2,B_5,2,G_5,2
-    db      D_5,2,G_5,2,B_5,2,D_6,2
-    db      SetInstrument,_MenuOctaveEcho
-    db      B_5,2
-    db      SetInstrument,_MenuOctave
-    db      D_6,2,B_5,2,G_5,2
-    ret
     
 ; ========
     
 Menu_CH4:
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
+    db      LoopCount,4
+:   dbw     CallSection,.block0
     dbw     CallSection,.block0
     dbw     CallSection,.block0
     dbw     CallSection,.block1
     dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block2
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
+    dbw     Loop,:-
+    db      LoopCount,4
+:   dbw     CallSection,.block0
+    dbw     Loop,:-
     dbw     Goto,Menu_CH4
 .block0
     Drum    Kick,2
@@ -1323,15 +1333,12 @@ Plains_CH2:
 Plains_CH3:
     db      SetInstrument,_PlainsBass
 .loop
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block0
-    dbw     CallSection,.block1
-    dbw     CallSection,.block1
-    dbw     CallSection,.block1
+    db      LoopCount,6
+:   dbw     CallSection,.block0
+    dbw     Loop,:-
+    db      LoopCount,3
+:   dbw     CallSection,.block1
+    dbw     Loop,:-
     db      D#2,2
     db      D#3,2
     db      D#2,2
@@ -1451,28 +1458,454 @@ PlainsClear_CH3:
     db      EndChannel
 
 PlainsClear_CH4:
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
-    Drum    Kick,2
+    db      LoopCount,4
+:   Drum    Kick,2
     Drum    Kick,2
     Drum    Snare,2
     Drum    Kick,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Kick,2
-    Drum    Snare,2
-    Drum    Kick,2
+    dbw     Loop,:-
     Drum    Kick,2
     db      EndChannel
     
 ; =================================================================
 
-PT_City:
+PT_City:    dw  City_CH1,City_CH2,City_CH3,City_CH4
+
+City_CH1:
+    db      rest,198
+    db      SetInstrument,_MenuArp047
+    db      LoopCount,2
+:   db      C_5,12
+    db      C_5,12
+    db      A#4,12
+    db      A#4,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    dbw     Loop,:-
+.loop
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    db      SetInstrument,_CityArp
+
+    db      LoopCount,3
+:   dbw     CallSection,.block1
+    db      Arp,2,$38
+    db      C_5,10
+    db      C_5,8
+    db      D_5,10
+    db      D_5,8
+    db      D_5,12
+    dbw     CallSection,.block1
+    db      Arp,2,$47
+    db      G#4,10
+    db      G#4,8
+    db      A#4,10
+    db      A#4,8
+    db      A#4,12
+    dbw     Loop,:-
+    
+    db      SetInstrument,_MenuArp047
+    dbw     Goto,.loop
+
+.block0
+    db      LoopCount,2
+:   db      C_5,12
+    db      C_5,12
+    db      A#4,12
+    db      A#4,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    dbw     Loop,:-
+    db      LoopCount,2
+:   db      D_5,12
+    db      D_5,12
+    db      C_5,12
+    db      C_5,12
+    db      D_5,12
+    db      D_5,12
+    db      D_5,12
+    db      D_5,12
+    dbw     Loop,:-
+    db      LoopCount,2
+:   db      C_5,12
+    db      C_5,12
+    db      A#4,12
+    db      A#4,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    db      C_5,12
+    dbw     Loop,:-
+    ret
+.block1
+    db      Arp,2,$37
+    db      C_5,10
+    db      C_5,8
+    db      C_5,10
+    db      C_5,8
+    db      C_5,12
+    db      Arp,2,$59
+    db      A#4,10
+    db      A#4,8
+    db      A#4,10
+    db      A#4,8
+    db      A#4,12
+    db      Arp,2,$38
+    db      A_4,10
+    db      A_4,8
+    db      A_4,10
+    db      A_4,8
+    db      A_4,12
+    ret
+
+; ================
+
+City_CH2:
+    dbw     CallSection,.block0
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,8
+    db      A_2,4
+    db      A#2,2
+    db      A_2,4
+    db      F_2,2
+    db      G_2,6
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,8
+    db      F_2,6
+    db      SetInstrument,_BassOctave
+    db      A#2,6
+    db      B_2,6    
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+.loop
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block1
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block1
+    dbw     CallSection,.block0
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,8
+    db      A_2,4
+    db      A#2,2
+    db      A_2,4
+    db      F_2,2
+    db      G_2,6
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,6
+    db      C_2,2
+    db      C_3,18
+    
+    db      LoopCount,3
+:   dbw     CallSection,.block2
+    db      D#2,4
+    db      F_2,2
+    db      G#2,6
+    db      G#3,4
+    db      G#2,2
+    db      G_3,4
+    db      G#3,2
+    db      G#2,4
+    db      A#2,6
+    db      A#2,2
+    db      F_2,4
+    db      D#2,2
+    db      F_2,4
+    db      D#2,2
+    db      C_2,4
+    db      D_2,2
+    dbw     CallSection,.block2
+    db      F_2,4
+    db      C_2,2
+    db      D#2,6
+    db      D#3,4
+    db      D#2,2
+    db      D_3,4
+    db      D#3,2
+    db      D#2,4
+    db      D_2,6
+    db      D_2,2
+    db      D_3,4
+    db      D_2,2
+    db      C_3,4
+    db      D_3,2
+    db      A#2,4
+    db      G_2,2
+    dbw     Loop,:-
+    dbw     Goto,.loop
+
+.block0
+    db      SetInstrument,_MenuBass
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,8
+    db      A_2,4
+    db      A#2,2
+    db      A_2,4
+    db      F_2,2
+    db      G_2,6
+    db      C_2,6
+    db      C_2,6
+    db      C_3,6
+    db      C_2,4
+    db      A#2,8
+    db      F_3,4
+    db      F_2,2
+    db      E_3,4
+    db      C_2,2
+    db      A#2,6
+    ret
+.block1
+    db      LoopCount,2
+:   db      D_2,6
+    db      D_2,6
+    db      D_3,6
+    db      D_2,4
+    db      C_3,8
+    db      B_2,4
+    db      C_3,2
+    db      B_2,4
+    db      G_2,2
+    db      A_2,6
+    db      D_2,6
+    db      D_2,6
+    db      D_3,6
+    db      D_2,4
+    db      C_3,8
+    db      D_3,4
+    db      D_2,2
+    db      G_3,4
+    db      D_2,2
+    db      F#3,6
+    dbw     Loop,:-
+    ret
+.block2
+    db      C_2,6
+    db      C_3,4
+    db      C_2,2
+    db      A#2,4
+    db      C_3,2
+    db      C_2,4
+    db      C_2,6
+    db      C_2,2
+    db      C_3,4
+    db      C_2,2
+    db      A#2,4
+    db      C_3,2
+    db      C_2,4
+    db      D_2,2
+    db      D#2,6
+    db      D#3,4
+    db      D#2,2
+    db      D_3,4
+    db      D#3,2
+    db      D_2,4
+    db      D#2,6
+    db      D#2,2
+    db      D#3,4
+    db      D#2,2
+    db      D_3,4
+    db      D#3,2
+    db      D#2,4
+    db      E_2,2
+    
+    db      F_2,6
+    db      F_3,4
+    db      F_2,2
+    db      D#3,4
+    db      F_3,2
+    db      D#2,4
+    db      F_2,6
+    db      F_2,2
+    db      F_3,4
+    db      F_2,2
+    db      D#3,4
+    db      F_3,2
+    ret
+
+; ================
+
+City_CH3:
+    db      rest,192
+    db      rest,192
+.loop
+    db      SetInstrument,_CityLead
+    db      LoopCount,2
+:   dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block1
+    db      C_6,14
+    db      C_5,6
+    db      C#5,6
+    dbw     CallSection,.block1
+    db      C_6,18
+    db      D_5,2
+    db      F#5,4
+    db      D_5,2
+    db      C_5,9
+    db      rest,183
+    dbw     Loop,:-
+    db      rest,192
+    db      rest,192
+ 
+    db      LoopCount,2
+:   dbw     CallSection,.block2
+    db      D#6,6
+    db      A#5,12
+    db      G_5,12
+    db      G_5,6
+    db      A#5,6
+    db      G_5,6
+    db      F_5,6
+    db      D#5,6
+    db      C_5,6
+    db      A#4,1
+    db      SetInstrument,_CityLeadL
+    db      B_4,1
+    db      C_5,28
+    db      rest,48
+    dbw     CallSection,.block2
+    db      F_6,1
+    db      SetInstrument,_CityLeadL
+    db      F#6,1
+    db      G_6,4
+    db      SetInstrument,_CityLead2
+    db      F_6,6
+    db      D#6,6
+    db      A#5,12
+    db      A#5,6
+    db      C_6,6
+    db      D#6,6
+    db      A#5,1
+    db      SetInstrument,_CityLeadL
+    db      B_5,1
+    db      C_6,40
+    db      SetInstrument,_CityLead2
+    db      D_6,6
+    db      D#6,6
+    db      D_6,6
+    db      C_6,6
+    db      A#5,12
+    db      G_5,6
+    db      F_5,6
+    db      G_5,6
+    dbw     Loop,:-
+    dbw     Goto,.loop
+    
+.block0
+    db      C_6,6
+    db      C_6,4
+    db      G_5,2
+    db      A#5,4
+    db      G_5,6
+    db      F_5,6
+    db      G_5,14
+    db      A#4,6
+    db      A#4,4
+    db      C_5,6
+    db      C_5,8
+    db      rest,30
+    ret
+.block1
+    db      D_6,6
+    db      D_6,4
+    db      A_5,2
+    db      C_6,4
+    db      A_5,6
+    db      G_5,6
+    db      A_5,6
+    db      C_6,2
+    db      D_6,6
+    db      F#6,6
+    db      G_6,6
+    db      F#6,4
+    db      D_6,6
+    db      A_5,6
+    ret
+.block2
+    db      SetInstrument,_CityLead2
+    db      C_6,6
+    db      A#5,6
+    db      C_6,6
+    db      D#6,12
+    db      F_6,6
+    db      D#6,6
+    db      C_6,6
+    ret
+
+; ================
+
+City_CH4:
+    db      LoopCount,15
+:   Drum    Kick,4
+    Drum    CHH,2
+    Drum    OHH,4
+    Drum    CHH,2
+    dbw     Loop,:-
+    dbw     CallSection,.block0
+    db      LoopCount,4
+:   dbw     CallSection,.block1
+    dbw     Loop,:-
+.loop
+    db      LoopCount,23
+:   dbw     CallSection,.block1
+    dbw     Loop,:-
+    Drum    Kick,4
+    Drum    CHH,2
+    Drum    Kick,4
+    Drum    CHH,2
+    Drum    Cymbal,24
+    dbw     CallSection,.block0
+    db      LoopCount,24
+:   dbw     CallSection,.block1
+    dbw     Loop,:-
+    dbw     Goto,.loop
+
+.block0
+    Drum    Snare,4
+    Drum    CHH,2
+    Drum    Snare,4
+    Drum    Snare,2
+    ret    
+.block1
+    Drum    Kick,4
+    Drum    CHH,2
+    Drum    Kick,4
+    Drum    CHH,2
+    Drum    Snare,4
+    Drum    CHH,2
+    Drum    OHH,4
+    Drum    Kick,2
+    Drum    CHH,4
+    Drum    Kick,2
+    Drum    Kick,4
+    Drum    CHH,2
+    Drum    Snare,4
+    Drum    CHH,2
+    Drum    OHH,4
+    Drum    CHH,2
+    ret
 
 ; =================================================================
 
