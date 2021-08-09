@@ -207,7 +207,7 @@ SpawnMonsters:
   ld  c,a
   ld  a,b
   cpl
-  add 0
+  adc 0
   ld  b,a
 :
   jr  nz,.noSpawn           ; If distance is over one screen, don't spawn
