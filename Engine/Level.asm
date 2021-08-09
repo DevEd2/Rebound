@@ -358,6 +358,7 @@ LoadMap:
     farcall DevSound_Init
     pop     hl
     resbank
+    ldh     [sys_TempBank],a
         
 	; get tileset pointer
     ld		a,[hl+]
@@ -374,14 +375,13 @@ LoadMap:
 	ld		a,[hl+]
 	ld		h,[hl]
 	ld		l,a
-	; b = tileset bank
-    push    bc
+    ld      a,[Engine_TilesetBank]
+    ld      b,a
 	call    _Bankswitch
 	ld		a,[hl+]
 	ld		[Engine_CollisionPointer],a
 	ld		a,[hl+]
 	ld		[Engine_CollisionPointer+1],a
-    resbank
     ; load level graphics
     ld      a,[hl+]
     ld      b,a
@@ -391,7 +391,6 @@ LoadMap:
     call    _Bankswitch
     ld      de,$8000
     call    DecodeWLE
-    resbank
     ; copy first 16 tiles to parallax buffer
     ld      hl,$8000
     ld      de,Engine_ParallaxBuffer
@@ -401,18 +400,19 @@ LoadMap:
     inc     e
     dec     b
     jr      nz,:-
-    pop     bc
+    ldh     a,[sys_TempBank]
+    ld      b,a
     call    _Bankswitch
     pop		hl
     
     ; load palette
     ld      a,[hl+]
     ld      b,a
-    call    _Bankswitch
     push    hl
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    call    _Bankswitch
     ld      b,8
     xor     a
 :   push    af

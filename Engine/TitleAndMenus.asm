@@ -4,12 +4,7 @@ section "Title screen + menu RAM",wram0
 
 section "Title screen + menu routines",rom0
 
-GM_TitleAndMenus:
-    ; we're already in VBlank, don't wait before disabling LCD
-    ; LY = 149 on entry (may change)
-    xor     a
-    ldh     [rLCDC],a
-
+GM_TitleAndMenus:    
     ldfar   hl,TitleScreenTiles
     ld      de,$8000
     call    DecodeWLE
@@ -21,7 +16,7 @@ GM_TitleAndMenus:
     ld      hl,sys_TilemapBuffer
     call    LoadTilemapScreen
 
-    ldfar   hl,Pal_TitleScreen
+    ld      hl,Pal_TitleScreen
     xor     a
     call    LoadPal
     call    ConvertPals
@@ -29,7 +24,7 @@ GM_TitleAndMenus:
     call    UpdatePalettes
 
     xor     a   ; MUS_MENU
-    call    DevSound_Init
+    farcall DevSound_Init
 
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
     ldh     [rLCDC],a

@@ -230,6 +230,7 @@ tempHL:                 dw
 tempSP:                 dw
 sys_CurrentBank:        db
 sys_LastBank:           db
+sys_TempBank:           db
 sys_TempCounter:        db
 sys_TempSVBK:           db
 
