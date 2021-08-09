@@ -69,9 +69,9 @@ section "Object WRAM",wram0,align[8]
 Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
 
 section "Temp Variables",hram
-Temp0:  db
-Temp1:  db
+Temp0:
 TempID: db
+Temp1:
 TempS:  db
 TempX:  db
 TempY:  db
@@ -210,6 +210,7 @@ SpawnMonsters:
   adc 0
   ld  b,a
 :
+  or  a
   jr  nz,.noSpawn           ; If distance is over one screen, don't spawn
   ld  a,c                   ; Spawn if distance is between SCRN_X/2+8 and SCRN_X/2+32
   cp  SCRN_X/2+SPAWN_THRESHOLD_LEFT          
