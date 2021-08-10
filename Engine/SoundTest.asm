@@ -126,7 +126,7 @@ SoundTestLoop:
     jr      .continue
     
 .exit
-    call    DS_Stop
+    farcall DS_Stop
     halt
     xor     a
     ldh     [rLCDC],a
