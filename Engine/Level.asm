@@ -297,7 +297,7 @@ LevelLoop::
     ; pause game if Start is pressed
     ld      a,[sys_btnPress]
     bit     btnStart,a
-    jr      z,:+
+    jr      z,:+   
     ld      a,1
     ld      [sys_PauseGame],a
     ; disable sound output to clear sustained notes
@@ -318,7 +318,15 @@ LevelLoop::
 Level_PauseLoop:
     halt
     ld      a,[sys_btnPress]
-    bit     btnStart,a
+    if DebugMode
+        bit     btnSelect,a
+        jr      z,:+
+        xor     a
+        ldh     [rHDMA5],a  ; cancel pending HDMA transfers
+        ldh     [rLCDC],a
+        jp      GM_DebugMenu
+    endc
+:   bit     btnStart,a
     jr      z,Level_PauseLoop
     xor     a
     ld      [sys_PauseGame],a

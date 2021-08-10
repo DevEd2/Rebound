@@ -675,6 +675,8 @@ ClearScreen:
     xor     a
     ldh     [rSCX],a
     ldh     [rSCY],a
+    ld      [sys_EnableHDMA],a
+    ldh     [rHDMA5],a  ; cancel pending HDMA transfers
     ret
 
 ; Copies a tileset to VRAM, waiting for VRAM accessibility.

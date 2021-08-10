@@ -4,7 +4,8 @@ Debug_MenuMax:  db
 
 section "Debug menu routines",rom0
 GM_DebugMenu:
-    ; TODO
+    call    ClearScreen
+
     ldfar   hl,Pal_DebugScreen
     xor     a
     call    LoadPal
@@ -23,8 +24,8 @@ GM_DebugMenu:
     ld      [Debug_MenuMax],a
     xor     a
     ld      [Debug_MenuPos],a
-    ldh     [rSCX],a
-    ldh     [rSCY],a
+    ld      [sys_PauseGame],a
+    farcall DS_Stop
 
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJON | LCDCF_BGON
     ldh     [rLCDC],a
@@ -33,6 +34,10 @@ GM_DebugMenu:
     ei
 
 DebugLoop:
+    xor     a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
+
     ld      a,[sys_btnPress]
     bit     btnUp,a
     jr      z,.checkdown
