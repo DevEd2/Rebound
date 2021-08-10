@@ -34,11 +34,6 @@ GM_DebugMenu:
 
 DebugLoop:
     ld      a,[sys_btnPress]
-    bit     btnStart,a
-    jr      nz,Debug_Exit
-    bit     btnSelect,a
-    jp      nz,GM_SoundTest
-
     bit     btnUp,a
     jr      z,.checkdown
     PlaySFX menucursor
@@ -53,7 +48,7 @@ DebugLoop:
 
 .checkdown
     bit     btnDown,a
-    jr      z,.checka
+    jr      z,.checkA
     PlaySFX menucursor
     ld      hl,Debug_MenuPos
     inc     [hl]
@@ -66,10 +61,28 @@ DebugLoop:
     ld      [hl],a
     jr      .drawcursor
 
-.checka
+.checkA
     bit     btnA,a
     jr      z,.drawcursor
-    PlaySFX menuselect
+    ld      hl,.menuitems
+    ld      a,[Debug_MenuPos]
+    add     a
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    bit     7,h ; is pointer in WRAM? (invalid)
+    jr      nz,Debug_InvalidMenu
+    jp      hl
+        
+.menuitems
+    dw      Debug_ExitToGame
+    dw      Debug_ExitToLevelSelect
+    dw      Debug_ExitToSoundTest
+    dw      Debug_ExitToSFXTest
 
 .drawcursor
     ; draw cursor
@@ -93,11 +106,28 @@ DebugLoop:
     ld      [hl],a
 
     halt
-    jr      DebugLoop
+    jp      DebugLoop
 
-Debug_Exit:
+Debug_ExitToGame:
     halt
     jp      GM_SplashScreens
+    
+Debug_ExitToLevelSelect:
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_Level
+    
+Debug_ExitToSoundTest:
+    halt
+    jp      GM_SoundTest
+
+Debug_ExitToSFXTest:
+
+Debug_InvalidMenu:
+    PlaySFX menudeny
+    halt
+    jp      DebugLoop.drawcursor   ; HACK
 
 Debug_MainMenuText:
     db  "                    "
@@ -107,7 +137,7 @@ Debug_MainMenuText:
     db  "   START GAME       "
     db  "   LEVEL SELECT     "
     db  "   SOUND TEST       "
-    db  "   GFX TEST         "
+    db  "   SFX TEST         "
     db  "                    "
     db  "                    "
     db  "                    "

@@ -19,3 +19,4 @@ endm
     defsfx  splash,SFX_CH4
     defsfx  wavetest,SFX_CH3
     defsfx  spring,SFX_CH1
+    defsfx  bosshit,SFX_CH1|SFX_CH3

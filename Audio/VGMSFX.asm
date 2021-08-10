@@ -45,6 +45,9 @@ VGMSFX_Init:
     ld      [VGMSFX_Pointer+1],a
     xor     a
     ldh     [rNR10],a           ; reset sweep (prevents glitches)
+    ldh     [rNR30],a           ; disable wave channel
+    ld      a,%10000000
+    ldh     [rNR30],a           ; re-enable wave channel (prevents hanging notes)
     ret                         ; done!
     
 ; Destroys: a, bc, hl
