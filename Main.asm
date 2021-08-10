@@ -675,6 +675,8 @@ ClearScreen:
     xor     a
     ldh     [rSCX],a
     ldh     [rSCY],a
+    ld      [Engine_CameraX],a
+    ld      [Engine_CameraY],a
     ld      [sys_EnableHDMA],a
     ldh     [rHDMA5],a  ; cancel pending HDMA transfers
     ret

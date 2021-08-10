@@ -322,7 +322,6 @@ Level_PauseLoop:
         bit     btnSelect,a
         jr      z,:+
         xor     a
-        ldh     [rHDMA5],a  ; cancel pending HDMA transfers
         ldh     [rLCDC],a
         jp      GM_DebugMenu
     endc
