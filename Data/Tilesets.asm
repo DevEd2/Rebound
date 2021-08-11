@@ -14,6 +14,10 @@ section "Test tileset - Collision map + metatiles",romx
 ; 01 = Solid (all sides)
 ; 02 = Solid (top only)
 ; 03 = Water
+; 04 = Coin
+; 05 = ???
+; 06 = ???
+; 07 = ???
 ColMap_Test:
 	db	0,1,0,2,3,3,3,3,3,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -75,8 +79,12 @@ section "Plains tileset - Collision map + metatiles",romx
 ; 01 = Solid (all sides)
 ; 02 = Solid (top only)
 ; 03 = Water
+; 04 = Coin
+; 05 = ???
+; 06 = ???
+; 07 = ???
 ColMap_Plains:
-	db	0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0
+	db	0,1,1,1,1,1,0,0,0,4,0,0,0,0,0,0
 	db	3,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0
 	db	3,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -117,8 +125,17 @@ Tileset_Plains:
     ; cave background (horizontal + vertical parallax)
     db  $04,%00000000,$05,%00000000
     db  $06,%00000000,$07,%00000000
+    ; sign (A button)
+    db  $28,%00000100,$29,%00000100
+    db  $2a,%00000100,$2b,%00000100
+    ; sign (B button)
+    db  $2c,%00000100,$2d,%00000100
+    db  $2e,%00000100,$2f,%00000100
+    ; coin
+    db  $30,%00000100,$31,%00000100
+    db  $32,%00000100,$33,%00000100
     ; reserved
-    rept 9
+    rept 6
         db  0,0,0,0
         db  0,0,0,0
     endr

@@ -9,6 +9,10 @@ COLLISION_NONE          equ 0
 COLLISION_SOLID         equ 1
 COLLISION_TOPSOLID      equ 2
 COLLISION_WATER         equ 3
+COLLISION_COIN          equ 4
+COLLISION_UNUSED5       equ 5
+COLLISION_UNUSED6       equ 6
+COLLISION_UNUSED7       equ 7
 
 section "Metatile routines",rom0
 

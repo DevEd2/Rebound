@@ -22,6 +22,7 @@ Player_CurrentFrame::       db  ; current animation frame being displayed
 Player_CheckpointX::        db
 Player_CheckpointY::        db
 Player_CheckpointScreen::   db
+Player_CoinCount::          dw
 
 PlayerRAM_End:
 
@@ -276,11 +277,11 @@ ProcessPlayer:
     ld      a,[Player_XPos]
     ld      h,a
     call    GetTileCoordinates
-    and     a               ; clear carry
     ld      e,a
+    and     a               ; clear carry
     call    GetTileL        ; doesn't matter if we use GetTileL or GetTileR, the result is the same
     cp      COLLISION_WATER ; are we touching a water tile?
-    jr      nz,:++          ; if not, skip
+    jr      nz,.checkcoin   ; if not, skip
     ld      a,[Player_MovementFlags]
     bit     bPlayerIsUnderwater,a             ; are we already underwater?
     jr      nz,:+           ; if not, skip playing splash sound
@@ -289,11 +290,59 @@ ProcessPlayer:
     call    Player_Splash
 :    
     set     1,d             ; set player's "is underwater" flag
-:   ld      a,d
-    ld      [Player_MovementFlags],a
+    jr      .decel
     
-    ; Player deceleration
-    ; a = [Player_MovementFlags]
+.checkcoin
+    cp      COLLISION_COIN  ; are we touching a coin?
+    jr      nz,.decel
+    ; replace coin tile with "blank" tile
+    ; TODO: Get tile from background
+    push    de
+    ld      a,[Player_YPos]
+    ld      l,a
+    ld      a,[Player_XPos]
+    ld      h,a
+    call    GetTileCoordinates
+    ld      e,a
+    
+    ld      hl,Engine_LevelData
+    ld      a,[Engine_CurrentScreen]
+    and     $f
+    add     h
+    ld      h,a
+    ld      a,[Engine_CurrentScreen]
+    and     $30
+    swap    a
+    add     2
+    ldh     [rSVBK],a
+    ld      l,e
+    xor     a
+    ld      [hl],a
+    ld      b,a
+    ld      a,e
+    swap    a
+    call    DrawMetatile
+    ; play sound effect
+    PlaySFX coin
+    ; increment coin count
+    pop     de
+    ld      a,[Player_CoinCount]
+    add     1   ; inc a doesn't set carry
+    ld      [Player_CoinCount],a
+    jr      nc,.decel
+    ld      b,b
+    ld      a,[Player_CoinCount+1]
+    add     1   ; inc a doesn't set carry
+    ld      [Player_CoinCount+1],a
+    jr      nc,.decel
+    ld      a,$ff
+    ld      [Player_CoinCount],a
+    ld      [Player_CoinCount+1],a
+    ; fall through
+    
+.decel
+    ld      a,d
+    ld      [Player_MovementFlags],a
     bit     0,a
     jr      nz,.nodecel
     bit     7,a
