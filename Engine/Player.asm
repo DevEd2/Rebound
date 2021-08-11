@@ -48,7 +48,7 @@ Player_HitboxSize           equ 6
 bPlayerIsMoving             = 0
 bPlayerIsUnderwater         = 1
 bPlayerIsDead               = 2
-bPlayerUnused3              = 3
+bPlayerVictory              = 3
 bPlayerUnused4              = 4
 bPlayerUnused5              = 5
 bPlayerUnused6              = 6
@@ -149,6 +149,36 @@ ProcessPlayer:
     call    z,Player_Respawn
     jp      .moveair2
 .notdead
+    bit     bPlayerVictory,a
+    jr      z,.notvictory
+    
+    call    Player_AccelerateRight
+    ld      a,[Player_XVelocity]
+    ld      h,a
+    ld      a,[Player_XVelocityS]
+    ld      l,a
+    ld      a,[Player_XPos]
+    ld      d,a
+    ld      a,[Player_XSubpixel]
+    ld      e,a
+    add     hl,de
+    ld      a,h
+    ld      [Player_XPos],a
+    ld      a,l
+    ld      [Player_XSubpixel],a
+    ld      a,h
+    cp      $80
+    jp      nc,.moveair
+    cp      32
+    jp      c,.moveair
+    
+    ld      a,MUS_PLAINS_CLEAR
+    farcall DS_Init
+    ; TODO: Advance to next level
+    ; Infinite loop here for now
+    jr      @
+    
+.notvictory
     lb      bc,0,1
     ld      a,[sys_btnHold]
     bit     btnLeft,a
@@ -162,107 +192,10 @@ ProcessPlayer:
     ld      d,a
     jp      .noaccel
 .accelLeft
-    ld      a,[Player_MovementFlags]
-    bit     bPlayerIsUnderwater,a
-    jr      nz,.accelLeftWater
-    push    bc
-    ld      bc,-Player_Accel
-    ld      hl,Player_XVelocity
-    ld      a,[hl+]
-    ld      l,[hl]
-    ld      h,a
-    add     hl,bc
-    ld      b,h
-    ld      c,l
-    ld      de,-Player_MaxSpeed
-    call    Compare16
-    jr      nc,:+
-    ld      de,$8000
-    call    Compare16
-    jr      c,:+
-    ld      hl,-Player_MaxSpeed
-:   ld      a,h
-    ld      [Player_XVelocity],a
-    ld      a,l
-    ld      [Player_XVelocityS],a
-    pop     bc
-    ld      e,%10000000
-    jp      .continue
-.accelLeftWater
-    push    bc
-    ld      bc,-Player_Accel/2
-    ld      hl,Player_XVelocity
-    ld      a,[hl+]
-    ld      l,[hl]
-    ld      h,a
-    add     hl,bc
-    ld      b,h
-    ld      c,l
-    ld      de,-Player_MaxSpeedWater
-    call    Compare16
-    jr      nc,:+
-    ld      de,$8000
-    call    Compare16
-    jr      c,:+
-    ld      hl,-Player_MaxSpeedWater
-:   ld      a,h
-    ld      [Player_XVelocity],a
-    ld      a,l
-    ld      [Player_XVelocityS],a
-    pop     bc
-    ld      e,%10000000
+    call    Player_AccelerateLeft
     jr      .continue
 .accelRight
-    ld      a,[Player_MovementFlags]
-    bit     bPlayerIsUnderwater,a
-    jr      nz,.accelRightWater
-    push    bc
-    ld      bc,Player_Accel
-    ld      hl,Player_XVelocity
-    ld      a,[hl+]
-    ld      l,[hl]
-    ld      h,a
-    add     hl,bc
-    ld      d,h
-    ld      e,l
-    ld      bc,Player_MaxSpeed
-    call    Compare16
-    jr      nc,:+
-    ld      bc,$8000
-    call    Compare16
-    jr      c,:+
-    ld      hl,Player_MaxSpeed
-:   ld      a,h
-    ld      [Player_XVelocity],a
-    ld      a,l
-    ld      [Player_XVelocityS],a
-    pop     bc
-    ld      e,%00000000
-    jr      .continue
-.accelRightWater
-    push    bc
-    ld      bc,Player_Accel/2
-    ld      hl,Player_XVelocity
-    ld      a,[hl+]
-    ld      l,[hl]
-    ld      h,a
-    add     hl,bc
-    ld      d,h
-    ld      e,l
-    ld      bc,Player_MaxSpeedWater
-    call    Compare16
-    jr      nc,:+
-    ld      bc,$8000
-    call    Compare16
-    jr      c,:+
-    ld      hl,Player_MaxSpeedWater
-:   ld      a,h
-    ld      [Player_XVelocity],a
-    ld      a,l
-    ld      [Player_XVelocityS],a
-    pop     bc
-    ld      e,%00000000
-    ; fall through
+    call    Player_AccelerateRight
     
 .continue
     ld      a,c
@@ -290,11 +223,11 @@ ProcessPlayer:
     call    Player_Splash
 :    
     set     1,d             ; set player's "is underwater" flag
-    jr      .decel
+    jp      .decel
     
 .checkcoin
     cp      COLLISION_COIN  ; are we touching a coin?
-    jr      nz,.decel
+    jr      nz,.checkgoal
     ; replace coin tile with "blank" tile
     ; TODO: Get tile from background
     push    de
@@ -330,7 +263,6 @@ ProcessPlayer:
     add     1   ; inc a doesn't set carry
     ld      [Player_CoinCount],a
     jr      nc,.decel
-    ld      b,b
     ld      a,[Player_CoinCount+1]
     add     1   ; inc a doesn't set carry
     ld      [Player_CoinCount+1],a
@@ -338,7 +270,18 @@ ProcessPlayer:
     ld      a,$ff
     ld      [Player_CoinCount],a
     ld      [Player_CoinCount+1],a
-    ; fall through
+    jr      .decel
+    
+.checkgoal
+    cp      COLLISION_GOAL
+    jr      nz,.decel
+.dogoal
+    ld      a,1
+    ld      [Engine_LockCamera],a
+    ld      a,[Player_MovementFlags]
+    set     bPlayerVictory,a
+    ld      [Player_MovementFlags],a
+    jp      .moveair
     
 .decel
     ld      a,d
@@ -381,7 +324,6 @@ ProcessPlayer:
 
     ; fall through
 .nodecel
-
     ; Horizontal Movement
     ; Movement
     ld      a,[Player_XVelocity]
@@ -703,9 +645,12 @@ ProcessPlayer:
     pop     af
     call    GetTileR
     cp      COLLISION_SOLID
-    jr      nz,.yCollideEnd
+    jp      nz,.yCollideEnd
 :
     ; Collision with ceiling
+    ld      a,[Player_MovementFlags]
+    bit     bPlayerVictory,a
+    jr      nz,.bottomCollision
     ; Clear Velocity
     xor     a
     ld      [Player_YVelocity],a
@@ -724,7 +669,6 @@ ProcessPlayer:
     jr      .yCollideEnd
 .bottomCollision:
     ; Check Bottom Collision
-    ; Bottom Left
     ld      a,[Player_YPos]
     add     Player_HitboxSize
     ld      l,a
@@ -940,6 +884,113 @@ Player_WallBounce:
     ld      a,low(Player_HighWallBounceHeight/2)
     ld      [Player_YVelocityS],a
     ret
+    
+; ========
+
+Player_AccelerateLeft:
+        ld      a,[Player_MovementFlags]
+    bit     bPlayerIsUnderwater,a
+    jr      nz,.accelLeftWater
+    push    bc
+    ld      bc,-Player_Accel
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      b,h
+    ld      c,l
+    ld      de,-Player_MaxSpeed
+    call    Compare16
+    jr      nc,:+
+    ld      de,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,-Player_MaxSpeed
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%10000000
+    ret
+.accelLeftWater
+    push    bc
+    ld      bc,-Player_Accel/2
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      b,h
+    ld      c,l
+    ld      de,-Player_MaxSpeedWater
+    call    Compare16
+    jr      nc,:+
+    ld      de,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,-Player_MaxSpeedWater
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%10000000
+    ret
+
+Player_AccelerateRight:
+    ld      a,[Player_MovementFlags]
+    bit     bPlayerIsUnderwater,a
+    jr      nz,.accelRightWater
+    push    bc
+    ld      bc,Player_Accel
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      d,h
+    ld      e,l
+    ld      bc,Player_MaxSpeed
+    call    Compare16
+    jr      nc,:+
+    ld      bc,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,Player_MaxSpeed
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%00000000
+    ret
+.accelRightWater
+    push    bc
+    ld      bc,Player_Accel/2
+    ld      hl,Player_XVelocity
+    ld      a,[hl+]
+    ld      l,[hl]
+    ld      h,a
+    add     hl,bc
+    ld      d,h
+    ld      e,l
+    ld      bc,Player_MaxSpeedWater
+    call    Compare16
+    jr      nc,:+
+    ld      bc,$8000
+    call    Compare16
+    jr      c,:+
+    ld      hl,Player_MaxSpeedWater
+:   ld      a,h
+    ld      [Player_XVelocity],a
+    ld      a,l
+    ld      [Player_XVelocityS],a
+    pop     bc
+    ld      e,%00000000
+    ret
+    
 
 ; ========
     

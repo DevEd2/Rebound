@@ -547,6 +547,10 @@ Level_LoadScreen:
 ; INPUT: d = row to load
 ;        e = screen to load from
 Level_LoadMapRow:
+    ld      a,[Player_MovementFlags]
+    bit     3,a
+    ret     nz
+
     ld      hl,Engine_LevelData
     ldh     a,[rSVBK]
     and     7
