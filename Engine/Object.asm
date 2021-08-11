@@ -114,7 +114,13 @@ InitSpawnMonsters:
   and $0f                         ; Mask out subarea
   ld  e,a                         ; Save in E
   ld  d,0                         ; Set List Index to 0
-  ldfar hl,Map_TestMap.objdata
+  ld  a,[Engine_MapBank]
+  ld  b,a
+  call  _Bankswitch
+  ld  hl,Engine_ObjPointer
+  ld  a,[hl+]
+  ld  h,[hl]
+  ld  l,a
 .spawnLoop:
   ld  a,[hl+]           ; Get Object ID
   or  a                 ; Test for 0
@@ -146,9 +152,14 @@ InitSpawnMonsters:
   jr  .spawnLoop
   
 ; Spawn monsters from the object list that are currently on screen
-; TODO - Have object list pointer loaded from level data
 SpawnMonsters:
-  ldfar hl,Map_TestMap.objdata
+  ld  a,[Engine_MapBank]
+  ld  b,a
+  call  _Bankswitch
+  ld  hl,Engine_ObjPointer
+  ld  a,[hl+]
+  ld  h,[hl]
+  ld  l,a
   ld  d,0                   ; Set List Index to 0
 .spawnLoop:
   ld  a,[hl+]               ; Get Object ID

@@ -7,7 +7,9 @@ Engine_NumScreens:          db  ; number of screens per subarea (effectively "ma
 Engine_NumSubareas:         db  ; number of subareas
 Engine_CollisionBank:       db  ; bank of current collision table
 Engine_CollisionPointer:    dw  ; pointer to current collision table
+Engine_ObjPointer:          dw  ; pointer to object layout
 Engine_LastRow:             db  ; last row drawn
+Engine_MapBank:             db  ; which ROM bank the current map is in
 
 Engine_CameraX:             db
 Engine_CameraY:             db
@@ -34,7 +36,7 @@ GM_Level:
     call    InitPlayer
     
 	; TODO: Load the actual map data
-	ldfar   hl,Map_TestMap
+	ldfar   hl,Map_Plains1
     call    LoadMap
     
     ld      a,$80
@@ -335,6 +337,8 @@ Level_PauseLoop:
 
 ; Input:    HL = Pointer to map header
 LoadMap:
+    ld      a,[sys_CurrentBank]
+    ld      [Engine_MapBank],a
     ld      a,[hl+] ; get screen count
     and     $f      ; maximum of 16 screens allowed
     ld      [Engine_NumScreens],a
@@ -478,6 +482,11 @@ LoadMap:
     inc     c
     dec     b
     jr      nz,.loop
+    
+    ld      a,[hl+]
+    ld      [Engine_ObjPointer],a
+    ld      a,[hl]
+    ld      [Engine_ObjPointer+1],a
     
     ld      a,[Engine_CurrentScreen]
     call    Level_LoadScreen

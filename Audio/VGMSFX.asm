@@ -32,6 +32,20 @@ section "VGMSFX",rom0
 ; HL = SFX pointer
 ; Destroys: a, b, hl
 VGMSFX_Init:
+    ; selectively clear sound channels
+    push    af
+    ld      a,[VGMSFX_Flags]
+    ld      b,a
+    rr      b
+    call    c,VGMSFX_ClearCH1
+    rr      b
+    call    c,VGMSFX_ClearCH2
+    rr      b
+    call    c,VGMSFX_ClearCH3
+    rr      b
+    call    c,VGMSFX_ClearCH4
+    pop     af
+
     ld      [VGMSFX_Bank],a     ; set ROM bank
     ld      b,a
     call    _Bankswitch
@@ -44,8 +58,31 @@ VGMSFX_Init:
     ld      a,h
     ld      [VGMSFX_Pointer+1],a
     xor     a
-    ldh     [rNR52],a           ; reset all sound registers
+    ldh     [rNR10],a           ; reset sweep
     ret                         ; done!
+    
+VGMSFX_ClearCH1:
+    xor     a
+    ldh     [rNR12],a   ; volume envelope
+    ld      a,%10000000
+    ldh     [rNR14],a   ; reset volume envelope
+    ret
+VGMSFX_ClearCH2:
+    xor     a
+    ldh     [rNR22],a   ; volume envelope
+    ld      a,%10000000
+    ldh     [rNR24],a   ; reset volume envelope
+    ret
+VGMSFX_ClearCH3:
+    xor     a
+    ldh     [rNR30],a   ; disable wave channel
+    ret
+VGMSFX_ClearCH4:
+    xor     a
+    ldh     [rNR42],a   ; volume envelope
+    ld      a,%10000000
+    ldh     [rNR44],a   ; reset volume envelope
+    ret
     
 ; Destroys: a, bc, hl
 VGMSFX_Update:

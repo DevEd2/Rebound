@@ -16,6 +16,7 @@ SFXPtr_\1:
     db  bank(SFX_\1)
     dw  SFX_\1
     db  strupr("\1"),0
+    assert bank(SFX_\1) != 0, "SFX \1 must be located in ROMX"
 .end
 NUM_SFX = NUM_SFX+1
 endm

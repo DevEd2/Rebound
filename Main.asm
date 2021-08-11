@@ -369,7 +369,6 @@ SkipGBCScreen:
     call    DoubleSpeed
     
     jp      GM_DebugMenu
-;   jp      GM_Level
     
 ; ================================
 
@@ -1030,83 +1029,16 @@ include "Audio/DevSound.asm"
 ; Graphics data
 ; =============
 
-section "GFX bank 1",romx
-
-Pal_Grayscale:
-    RGB 31,31,31
-    RGB 20,20,20
-    RGB 10,10,10
-    RGB  0, 0, 0
-
-Pal_GrayscaleInverted:
-    RGB  0, 0, 0
-    RGB 10,10,10
-    RGB 20,20,20
-    RGB 31,31,31
-
-Pal_DebugScreen:
-    RGB  0,15,31
-    RGB  0, 0, 0
-    RGB  0, 0, 0
-    RGB 31,31,31
-    
-Pal_TestMap:
-    RGB  0, 0, 0
-    RGB  3, 3, 3
-    RGB  7, 7, 7
-    RGB 15,15,15
-    
-    RGB  0, 0, 0
-    RGB  0,15,31
-    RGB 15,31,31
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-    
-    RGB  0, 0, 0
-    RGB 31, 0, 0
-    RGB 31,31, 0
-    RGB 31,31,31
-Pal_TestMap_End:
-
-Pal_Player:
-    RGB 31, 0,31
-    RGB  0, 0, 0
-    RGB  0,15,31
-    RGB 31,31,31
-Pal_Player_End:
-
-TestMapTiles:
-    incbin  "GFX/TestTiles.2bpp.wle"
-
+section "Particle tiles",romx
 ParticleTiles:
     incbin  "GFX/Particles.2bpp.wle"
+    
+section "Palette data",romx
+include "Data/Palettes.asm"
     
 ; ==========
 ; Level data
 ; ==========
 
 include "Levels/TestMap.inc"
+include "Levels/Plains1.inc"
