@@ -373,23 +373,31 @@ SkipGBCScreen:
     
 ; ================================
 
-include "Engine/DebugMenu.asm"
+include "Engine/GameModes/DebugMenu.asm"
 
 ; ================================
 
-include "Engine/SplashScreens.asm"
+include "Engine/GameModes/SplashScreens.asm"
 
 ; ================================
 
-include "Engine/TitleAndMenus.asm"
+include "Engine/GameModes/TitleAndMenus.asm"
 
 ; ================================
 
-include "Engine/SoundTest.asm"
+include "Engine/GameModes/SoundTest.asm"
 
 ; ================================
 
-include "Engine/Level.asm"
+include "Engine/GameModes/SFXTest.asm"
+
+; ================================
+
+include "Engine/GameModes/Level.asm"
+
+; ================================
+
+include "Engine/GameModes/Credits.asm"
 
 ; ================================
 
@@ -789,6 +797,19 @@ LoadTilemapText:
     dec b
     jr  nz,.loop
     ret
+
+; Prints a null-terminated string.
+; INPUT:   hl = source
+;          de = destination
+PrintString:
+    WaitForVRAM
+    ld      a,[hl+]
+    and     a
+    ret     z
+    sub     " "
+    ld      [de],a
+    inc     de
+    jr      PrintString    
 
 ; ============
 ; Sprite stuff
