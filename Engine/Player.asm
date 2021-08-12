@@ -18,13 +18,13 @@ Player_LastBounceY::        db  ; last bounce Y position (absolute)
 Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
-
+ 
 Player_CheckpointX::        db
 Player_CheckpointY::        db
 Player_CheckpointScreen::   db
-Player_CoinCount::          dw
 
 PlayerRAM_End:
+Player_CoinCount::          dw  ; don't reset this after each level
 
 Player_MaxSpeed             equ $140
 Player_MaxSpeedWater        equ $e0
@@ -36,7 +36,7 @@ Player_BounceHeight         equ -$340
 Player_HighBounceHeight     equ -$480
 Player_LowBounceHeight      equ -$1c0
 
-Player_WallBounceHeight     equ -$280
+Player_WallBounceHeight     equ -$180
 Player_HighWallBounceHeight equ -$400
 Player_LowWallBounceHeight  equ -$100
 
@@ -121,6 +121,7 @@ InitPlayer:
     ldfar   hl,Pal_Player
     ld      a,8
     call    LoadPal
+    resbank
     ret
 
 ; ========
@@ -1120,93 +1121,92 @@ Player_Respawn:
     ret
     
 Player_Splash:
-    ret
-    ; TODO: Fix this
-/*
     ; left splash particle
     call    GetParticleSlot
-    ld      a,b
-    or      c
-    cp      $ff
-    jr      z,:+                    ; don't spawn any particles if no free slots are left
-    ld      bc,PARTICLE_COUNT
-    ld      [hl],4                  ; tile number
-    add     hl,bc
-    ld      [hl],%00000010          ; attributes
-    add     hl,bc
-    ld      [hl],0  ; collsion flags
-    add     hl,bc
-    ld      a,[Engine_CurrentScreen]
+    ld      a,4
     ld      [hl],a
-    add     hl,bc
-    ld      [hl],8                  ; time to live
-    add     hl,bc
+    
     ld      a,[Player_XPos]
     sub     8
-    ld      [hl],a                  ; X position
+    ld      hl,Particle_XPosition
     add     hl,bc
-    ld      [hl],0                  ; X subpixel
+    ld      [hl],a
+    
     ld      a,[Player_YPos]
-    and     $f0
     sub     8
-    ld      [hl],a                  ; Y position
+    ld      hl,Particle_YPosition
     add     hl,bc
-    ld      [hl],0                  ; Y subpixel
+    ld      [hl],a
+    
+    ld      a,16
+    ld      hl,Particle_Lifetime
     add     hl,bc
-    ; X velocity
-    ld      [hl],high(-$0080)
+    ld      [hl],a
+    
+    ld      a,high(-$0020)
+    ld      hl,Particle_XVelocity
     add     hl,bc
-    ld      [hl],low(-$0080)
+    ld      [hl],a
+    
+    ld      a,low(-$0020)
+    ld      hl,Particle_XVelocityS
     add     hl,bc
-    ; Y velocity
-    ld      [hl],high(-$0100)
+    ld      [hl],a
+    
+    ld      a,high(-$0040)
+    ld      hl,Particle_YVelocity
     add     hl,bc
-    ld      [hl],low(-$0100)
+    ld      [hl],a
+    
+    ld      a,low(-$0040)
+    ld      hl,Particle_YVelocityS
     add     hl,bc
-:    
+    ld      [hl],a
+
     ; right splash particle
     call    GetParticleSlot
-    ld      a,b
-    or      c
-    cp      $ff
-    ret     z                       ; don't spawn any particles if no free slots are left
-    ld      bc,PARTICLE_COUNT
-    ld      [hl],4                  ; tile number
-    add     hl,bc
-    ld      [hl],%01100010          ; attributes
-    add     hl,bc
-    ld      [hl],0  ; collsion flags
-    add     hl,bc
-    ld      a,[Engine_CurrentScreen]
+    ld      a,4
     ld      [hl],a
-    add     hl,bc
-    ld      [hl],8
-    add     hl,bc
+    
     ld      a,[Player_XPos]
     add     8
-    ld      [hl],a                  ; X position
+    ld      hl,Particle_XPosition
     add     hl,bc
-    ld      [hl],0                  ; X subpixel
+    ld      [hl],a
+    
     ld      a,[Player_YPos]
-    and     $f0
     sub     8
-    ld      [hl],a                  ; Y position
+    ld      hl,Particle_YPosition
     add     hl,bc
-    ld      [hl],0                  ; Y subpixel
+    ld      [hl],a
+    
+    ld      a,16
+    ld      hl,Particle_Lifetime
     add     hl,bc
-    ; X velocity
-    ld      [hl],high($0080)
+    ld      [hl],a
+    
+    ld      a,high($0020)
+    ld      hl,Particle_XVelocity
     add     hl,bc
-    ld      [hl],low($0080)
+    ld      [hl],a
+    
+    ld      a,low($0020)
+    ld      hl,Particle_XVelocityS
     add     hl,bc
-    ; Y velocity
-    ld      [hl],high(-$0100)
+    ld      [hl],a
+    
+    ld      a,high($0040)
+    ld      hl,Particle_YVelocity
     add     hl,bc
-    ld      [hl],low(-$0100)
+    ld      [hl],a
+    
+    ld      a,low($0040)
+    ld      hl,Particle_YVelocityS
     add     hl,bc
+    ld      [hl],a
+    
     ret
- */
-
+    
 ; ===================
 ; Animation constants
 ; ===================

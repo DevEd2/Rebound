@@ -129,9 +129,11 @@ Debug_ExitToGame:
     jp      GM_SplashScreens
     
 Debug_ExitToLevelSelect:
+    ; TODO: Actual level select menu
     halt
     xor     a
     ldh     [rLCDC],a
+    ld      a,MapID_TestMap
     jp      GM_Level
     
 Debug_ExitToSoundTest:
@@ -169,24 +171,3 @@ Debug_MainMenuText:
     db  " "
     dbp strupr(__TIME__),19," "
     db  "                    "
-
-Debug_LevelSelectMenuText:
-    db  "                    "
-    db  "  PLAIN PLAINS      "
-    db  "   1  2  3  4  5    "
-    db  "  CENTRAL CITY      "
-    db  "   1  2  3  4  5    "
-    db  "  PYRAMID POWER     "
-    db  "   1  2  3  4  5    "
-    db  "  FORGOTTEN FOREST  "
-    db  "   1  2  3  4  5    "
-    db  "  GREAT GROTTO      "
-    db  "   1  2  3  4  5    "
-    db  "  TRAP TEMPLE       "
-    db  "   1  2  3  4  5    "
-    db  "  BONUS ROUND       "
-    db  "   1  2  3  4  5  6 "
-    db  "  BACK              "
-    db  "                    "
-    db  "                    "
-    

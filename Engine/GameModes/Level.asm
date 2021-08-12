@@ -10,6 +10,8 @@ Engine_CollisionPointer:    dw  ; pointer to current collision table
 Engine_ObjPointer:          dw  ; pointer to object layout
 Engine_LastRow:             db  ; last row drawn
 Engine_MapBank:             db  ; which ROM bank the current map is in
+Engine_LevelID:             db  ; currently loaded level
+Engine_LevelMusic:          db  ; music for current map
 
 Engine_CameraX:             db
 Engine_CameraY:             db
@@ -27,7 +29,10 @@ Engine_LevelData:       ds  256*16
 
 section "Level routines",rom0
 
+; INPUT: A = Map ID
 GM_Level:
+    call    GetLevel
+    push    hl
     ; initialize variables
     xor     a
     ld      [Engine_CurrentScreen],a
@@ -36,7 +41,7 @@ GM_Level:
     call    InitPlayer
     
 	; TODO: Load the actual map data
-	ldfar   hl,Map_Plains1
+    pop     hl
     call    LoadMap
     
     ld      a,$80
@@ -333,6 +338,32 @@ Level_PauseLoop:
     ld      [sys_PauseGame],a
     ret
     
+; ================================================================
+
+; Input:     A = Level ID
+; Output:   HL = Pointer to level header, ROMB0 = ROM bank containing level header
+; Destroys: BC
+
+GetLevel:
+    cp      NUM_LEVELS  ; is level ID valid?
+    jr      c,:+        ; if yes, skip
+    xor     a           ; load default level (MapID_Plains1)
+:   ld      [Engine_LevelID],a
+    ld      c,a
+    ld      b,0
+    ld      hl,LevelPointers
+    add     hl,bc   ; x1
+    add     hl,bc   ; x2
+    add     hl,bc   ; x3
+    ld      a,[hl+]
+    ld      b,a
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    jp      _Bankswitch
+    
+include "Data/LevelPointers.asm"
+
 ; ================================================================
 
 ; Input:    HL = Pointer to map header
