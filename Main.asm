@@ -365,7 +365,9 @@ SkipGBCScreen:
     ld      [Engine_CameraX],a
     ld      [Engine_CameraY],a
     ld      [sys_EnableHDMA],a
-        
+    ld      [Player_CoinCount],a
+    ld      [Player_CoinCount+1],a
+    
     call    DoubleSpeed
     
     jp      GM_DebugMenu

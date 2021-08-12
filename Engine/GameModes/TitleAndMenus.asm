@@ -55,6 +55,7 @@ TitleLoop:
     jr      nz,:-
     xor     a
     ldh     [rLCDC],a
+    ld      a,MapID_Plains1
     jp      GM_Level
 
 .skip
