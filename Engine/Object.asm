@@ -49,6 +49,8 @@ PARTICLE_FLAG_GRAVITY     equ 2
 
 PARTICLE_COLLIDES         equ %00000011
 
+PARTICLE_GRAVITY          equ $25
+
 Particle_Sprite:      ds  PARTICLE_COUNT
 Particle_Attribute:   ds  PARTICLE_COUNT
 Particle_Flags:       ds  PARTICLE_COUNT
@@ -645,10 +647,25 @@ UpdateParticles:
 .xMoveDone:
   
   ; Vertical Movement
+  ld  hl,Particle_Flags
+  add hl,bc
+  ld  a,[hl]
+  bit PARTICLE_FLAG_GRAVITY,a
+  jr  z,:+
   ld  hl,Particle_YVelocityS
   add hl,bc
   ld  a,[hl]
-  ld  hl,Particle_YPosition
+  add PARTICLE_GRAVITY
+  ld  [hl],a
+  jr  nc,:+
+  ld  hl,Particle_YVelocity
+  add hl,bc
+  inc [hl]
+:
+  ld  hl,Particle_YVelocityS
+  add hl,bc
+  ld  a,[hl]
+  ld  hl,Particle_YPositionS
   add hl,bc
   add a,[hl]
   ld  [hl],a
@@ -674,7 +691,7 @@ UpdateParticles:
   cp  SCRN_X+OFFSCREEN_THRESHOLD
   jr  c,.onScreen
   cp  -OFFSCREEN_THRESHOLD
-  jr  c,.deleteParticle
+  jp  c,.deleteParticle
 .onScreen:
 
   ; Collision Check
@@ -790,7 +807,6 @@ RenderParticles:
   push  bc
   ld  b,a
   ldh a,[Temp0]
-  or  %00001000
   ld  c,a
   call  AddSprite
   pop bc

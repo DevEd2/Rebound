@@ -1166,6 +1166,10 @@ Player_Splash:
     ld      hl,Particle_Attribute
     add     hl,bc
     ld      [hl],%00001000
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],%00000100
 
     ; right splash particle
     call    GetParticleSlot
@@ -1212,6 +1216,10 @@ Player_Splash:
     ld      hl,Particle_Attribute
     add     hl,bc
     ld      [hl],%00001000
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],%00000100
     
     ret
     
