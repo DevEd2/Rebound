@@ -88,6 +88,8 @@ BehaviorTable:
   dw  Monster_NoBehavior  ; MONSTER_TEST
 
 BehaviorDispatch:
+  bit 7,h
+  ret nz  ; return if pointer is outside ROM
   jp  hl
   
 Monster_NoBehavior:
