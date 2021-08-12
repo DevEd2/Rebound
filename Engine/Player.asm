@@ -1123,104 +1123,91 @@ Player_Respawn:
 Player_Splash:
     ; left splash particle
     call    GetParticleSlot
-    ld      a,4
-    ld      [hl],a
+    ld      [hl],4
     
-    ld      a,[Player_XPos]
-    sub     8
     ld      hl,Particle_XPosition
     add     hl,bc
+    ld      a,[Player_XPos]
+    sub     4
     ld      [hl],a
     
-    ld      a,[Player_YPos]
-    sub     8
     ld      hl,Particle_YPosition
     add     hl,bc
+    ld      a,[Player_YPos]
     ld      [hl],a
     
-    ld      a,16
     ld      hl,Particle_Lifetime
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],32
     
-    ld      a,high(-$0020)
     ld      hl,Particle_XVelocity
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],high(-$0020)
     
     ld      a,low(-$0020)
     ld      hl,Particle_XVelocityS
     add     hl,bc
     ld      [hl],a
     
-    ld      a,high(-$0040)
     ld      hl,Particle_YVelocity
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],high(-$0240)
     
-    ld      a,low(-$0040)
     ld      hl,Particle_YVelocityS
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],low(-$0240)
     
     ld      hl,Particle_Attribute
     add     hl,bc
-    ld      [hl],%00001000
+    ld      [hl],OAMF_BANK1
     
     ld      hl,Particle_Flags
     add     hl,bc
-    ld      [hl],%00000100
-
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    
     ; right splash particle
     call    GetParticleSlot
-    ld      a,4
-    ld      [hl],a
+    ld      [hl],4
     
-    ld      a,[Player_XPos]
-    add     8
     ld      hl,Particle_XPosition
     add     hl,bc
+    ld      a,[Player_XPos]
+    add     4
     ld      [hl],a
     
-    ld      a,[Player_YPos]
-    sub     8
     ld      hl,Particle_YPosition
     add     hl,bc
+    ld      a,[Player_YPos]
     ld      [hl],a
     
-    ld      a,16
     ld      hl,Particle_Lifetime
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],32
     
-    ld      a,high($0020)
     ld      hl,Particle_XVelocity
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],high($0020)
     
-    ld      a,low($0020)
     ld      hl,Particle_XVelocityS
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],low($0020)
     
-    ld      a,high($0040)
     ld      hl,Particle_YVelocity
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],high(-$0240)
     
-    ld      a,low($0040)
     ld      hl,Particle_YVelocityS
     add     hl,bc
-    ld      [hl],a
+    ld      [hl],low(-$0240)
     
     ld      hl,Particle_Attribute
     add     hl,bc
-    ld      [hl],%00001000
+    ld      [hl],OAMF_BANK1 | OAMF_XFLIP | OAMF_YFLIP
     
     ld      hl,Particle_Flags
     add     hl,bc
-    ld      [hl],%00000100
-    
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+
     ret
     
 ; ===================
