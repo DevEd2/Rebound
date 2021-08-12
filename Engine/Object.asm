@@ -329,6 +329,21 @@ UpdateMonsters:
   jp  z,.nextMonster  ; 0 = No Monster
   
   ; Type Specific Update
+  ldfar hl,BehaviorTable
+  ld  b,0
+  ld  d,0
+  sla a
+  ld  e,a
+  jr  nc,:+
+  inc d
+:
+  add hl,de
+  ld  a,[hl+]
+  ld  e,a
+  ld  d,[hl]
+  ld  h,d
+  ld  l,e
+  call  BehaviorDispatch
   
   ; Check Parent
   ld  hl,Monster_ParentScreen
