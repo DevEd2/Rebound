@@ -538,7 +538,7 @@ ClearParticles:
   ret
   
 ; Get Free Particle Slot
-; OUTPUT:   bc  = Particle Slot Number or -1 if no slots left
+; OUTPUT:   bc  = Particle Slot Number or $00FF if no slots left
 ;           hl = Pointer to Particle ID
 ; TRASHES:  a
 GetParticleSlot:
