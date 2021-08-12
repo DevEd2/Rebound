@@ -1162,6 +1162,10 @@ Player_Splash:
     ld      hl,Particle_YVelocityS
     add     hl,bc
     ld      [hl],a
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],%00001000
 
     ; right splash particle
     call    GetParticleSlot
@@ -1204,6 +1208,10 @@ Player_Splash:
     ld      hl,Particle_YVelocityS
     add     hl,bc
     ld      [hl],a
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],%00001000
     
     ret
     

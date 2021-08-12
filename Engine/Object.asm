@@ -5,6 +5,7 @@
 ; TODO
 ; - Object Behaviors
 ; - Object Sprites
+; - Particle Gravity
 
 section "Object Memory",wram0
 
@@ -44,6 +45,7 @@ PARTICLE_FLICKERTIME      equ 30
 
 PARTICLE_FLAG_DSOLID      equ 0
 PARTICLE_FLAG_DWATER      equ 1
+PARTICLE_FLAG_GRAVITY     equ 2
 
 PARTICLE_COLLIDES         equ %00000011
 
@@ -576,6 +578,7 @@ UpdateParticles:
   ld  hl,Particle_Sprite
   add hl,bc
   ld  a,[hl]
+  or  a
   jp  z,.nextParticle
   
   ; Lifetime Update
@@ -777,12 +780,18 @@ RenderParticles:
   sub e
   add 4
   ld  e,a
+  ld  hl,Particle_Attribute
+  add hl,bc
+  ld  a,[hl]
+  ldh [Temp0],a
   ld  hl,Particle_Sprite
   add hl,bc
   ld  a,[hl]
   push  bc
   ld  b,a
-  ld  c,%00001000
+  ldh a,[Temp0]
+  or  %00001000
+  ld  c,a
   call  AddSprite
   pop bc
   
