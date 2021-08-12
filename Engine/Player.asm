@@ -175,8 +175,20 @@ ProcessPlayer:
     ld      a,MUS_PLAINS_CLEAR
     farcall DS_Init
     ; TODO: Advance to next level
-    ; Infinite loop here for now
-    jr      @
+    ; Exit to debug menu for now
+    ld      b,0
+:   halt
+    dec     b
+    jr      nz,:-
+    call	PalFadeOutWhite
+    ; wait for fade to finish
+:   halt
+	ld		a,[sys_FadeState]
+	bit		0,a
+    jr      nz,:-
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_DebugMenu
     
 .notvictory
     lb      bc,0,1
