@@ -76,7 +76,20 @@ TempS:  db
 TempX:  db
 TempY:  db
 
-section "Object Routines",rom0
+; Monster Behavior functions and behavior jump table
+; All behavior functions must preserve bc
+section "Object Behvaiors",romx
+BehaviorTable:
+  dw  Monster_NoBehavior  ; MONSTER_NULL
+  dw  Monster_NoBehavior  ; MONSTER_TEST
+
+BehaviorDispatch:
+  jp  hl
+  
+Monster_NoBehavior:
+  ret
+
+section "Object System Routines",rom0
 
 ; Clear Monster List
 ; TRASHES:  a,b,hl
@@ -310,7 +323,8 @@ UpdateMonsters:
   ld  a,[hl]          ; Get ID
   or  a
   jp  z,.nextMonster  ; 0 = No Monster
-  ; Type Specific Update - TODO
+  
+  ; Type Specific Update
   
   ; Check Parent
   ld  hl,Monster_ParentScreen
