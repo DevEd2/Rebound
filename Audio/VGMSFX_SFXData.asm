@@ -42,4 +42,6 @@ endm
     defsfx  evillaugh,SFX_CH1
     defsfx  shot,SFX_CH1
     defsfx  magicshot,SFX_CH1
+    defsfx  1up,SFX_CH1
+    defsfx  1up_nointro,SFX_CH1
     endsfx
