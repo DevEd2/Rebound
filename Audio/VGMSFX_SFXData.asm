@@ -38,4 +38,8 @@ endm
     defsfx  splash,SFX_CH4
     defsfx  spring,SFX_CH1
     defsfx  bosshit,SFX_CH1|SFX_CH3
+    defsfx  disappear,SFX_CH1
+    defsfx  evillaugh,SFX_CH1
+    defsfx  shot,SFX_CH1
+    defsfx  magicshot,SFX_CH1
     endsfx
