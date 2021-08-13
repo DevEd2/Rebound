@@ -133,6 +133,9 @@ Debug_ExitToLevelSelect:
     halt
     xor     a
     ldh     [rLCDC],a
+    
+    ld      a,PLAYER_LIVES
+    ld      [Player_LifeCount],a
     ld      a,MapID_TestMap
     jp      GM_Level
     

@@ -18,14 +18,16 @@ Player_LastBounceY::        db  ; last bounce Y position (absolute)
 Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
- 
-Player_CheckpointX::        db
-Player_CheckpointY::        db
-Player_CheckpointScreen::   db
 
 PlayerRAM_End:
-Player_CoinCount::          dw  ; don't reset this after each level
+; the following are part of the player RAM but are not to be cleared after each level
+Player_CoinCount::          dw
+Player_LifeCount::          db
 
+; initial player life count
+PLAYER_LIVES                equ 5
+
+; player movement constants
 Player_MaxSpeed             equ $140
 Player_MaxSpeedWater        equ $e0
 Player_Accel                equ 24
@@ -147,7 +149,7 @@ ProcessPlayer:
     and     $f0
     add     SCRN_Y
     cp      b
-    call    z,Player_Respawn
+    jp      z,Player_Respawn
     jp      .moveair2
 .notdead
     bit     bPlayerVictory,a
@@ -175,8 +177,6 @@ ProcessPlayer:
     
     ld      a,MUS_PLAINS_CLEAR
     farcall DS_Init
-    ; TODO: Advance to next level
-    ; Exit to debug menu for now
     ld      b,0
 :   halt
     dec     b
@@ -189,7 +189,10 @@ ProcessPlayer:
     jr      nz,:-
     xor     a
     ldh     [rLCDC],a
-    jp      GM_DebugMenu
+    ld      a,[Engine_LevelID]
+    inc     a
+    ld      [Engine_LevelID],a
+    jp      GM_Level
     
 .notvictory
     lb      bc,0,1
@@ -1075,13 +1078,6 @@ KillPlayer:
     ld      hl,Player_MovementFlags
     bit     bPlayerIsDead,[hl]
     ret     nz
-    ld      a,[Player_XPos]
-    ld      [Player_CheckpointX],a
-    ld      a,[Player_YPos]
-    ld      [Player_CheckpointY],a
-    ld      a,[Engine_CurrentScreen]
-    ld      [Player_CheckpointScreen],a
-    
     xor     a
     ld      [Player_XVelocity],a
     ld      [Player_XVelocityS],a
@@ -1097,28 +1093,30 @@ KillPlayer:
     ret
     
 Player_Respawn:
+    call    PalFadeOutWhite
+    ld      a,2
+    farcall DS_Fade
+:   halt
+	ld		a,[sys_FadeState]
+    and     a
+    jr      nz,:-
+    call    AllPalsWhite
+    call    UpdatePalettes
+:   halt
+	ld		a,[DS_FadeType]
+    and     a
+    jr      nz,:-
+    halt
     xor     a
-    ld      [Engine_LockCamera],a
-    ld      hl,Player_MovementFlags
-    res     bPlayerIsDead,[hl]
-    ld      hl,Anim_Player_Idle
-    call    Player_SetAnimation
-    
-    ld      a,[Player_CheckpointX]
-    ld      [Player_XPos],a
-    ld      a,[Player_CheckpointY]
-    ld      [Player_YPos],a
-; TODO: Fix this
-;    ld      a,[Player_CheckpointScreen]
-;    ld      [Engine_CurrentScreen],a
-;    call    Level_LoadScreen
-    xor     a
-    ld      [Player_XSubpixel],a
-    ld      [Player_YSubpixel],a
-    ld      [Player_YVelocity],a
-    ld      [Player_YVelocityS],a
-    xor     a
-    ret
+    ldh     [rLCDC],a
+    ld      a,[Player_LifeCount]
+    and     a
+    jr      nz,:+
+    jp      GM_TitleAndMenus
+:   dec     a
+    ld      [Player_LifeCount],a
+    ld      a,[Engine_LevelID]
+    jp      GM_Level
     
 Player_Splash:
     ; left splash particle

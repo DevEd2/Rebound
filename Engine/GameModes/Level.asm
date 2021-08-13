@@ -396,12 +396,13 @@ LoadMap:
     
     ; load music
     ld      a,[hl+]
+    ld      [Engine_LevelMusic],a
     push    hl
     farcall DevSound_Init
     pop     hl
     resbank
     ldh     [sys_TempBank],a
-        
+
 	; get tileset pointer
     ld		a,[hl+]
 	ld		[Engine_TilesetBank],a

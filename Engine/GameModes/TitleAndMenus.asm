@@ -4,7 +4,8 @@ section "Title screen + menu RAM",wram0
 
 section "Title screen + menu routines",rom0
 
-GM_TitleAndMenus:    
+GM_TitleAndMenus:
+    call    ClearScreen
     ldfar   hl,TitleScreenTiles
     ld      de,$8000
     call    DecodeWLE
@@ -55,6 +56,10 @@ TitleLoop:
     jr      nz,:-
     xor     a
     ldh     [rLCDC],a
+    
+    ld      a,PLAYER_LIVES
+    ld      [Player_LifeCount],a
+    
     ld      a,MapID_Plains1
     jp      GM_Level
 
