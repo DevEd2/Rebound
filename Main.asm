@@ -1037,10 +1037,3 @@ ParticleTiles:
     
 section "Palette data",romx
 include "Data/Palettes.asm"
-    
-; ==========
-; Level data
-; ==========
-
-include "Levels/TestMap.inc"
-include "Levels/Plains1.inc"

@@ -233,19 +233,31 @@ if __name__ == "__main__":
 	if sa > 0:
 		for y in range(0, map['w']):
 			for c in range(0, 16):
-				mapfile1.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				try:
+					mapfile1.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				except ValueError:
+					mapfile1.write(bytes([0]))
 	if sa > 1:
 		for y in range(0, map['w']):
 			for c in range(16, 32):
-				mapfile2.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				try:
+					mapfile2.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				except ValueError:
+					mapfile2.write(bytes([0]))
 	if sa > 2:
 		for y in range(0, map['w']):
 			for c in range(32, 48):
-				mapfile3.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				try:
+					mapfile3.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				except ValueError:
+					mapfile3.write(bytes([0]))
 	if sa > 3:
 		for y in range(0, map['w']):
 			for c in range(48, 64):
-				mapfile4.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				try:
+					mapfile4.write(bytes([(map['data'][c * (map['w']) + y] - 1)]))
+				except ValueError:
+					mapfile4.write(bytes([0]))
 	
 	mapfile1.close()
 	mapfile2.close()
