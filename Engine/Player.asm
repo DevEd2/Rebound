@@ -191,6 +191,8 @@ ProcessPlayer:
     ldh     [rLCDC],a
     ld      a,[Engine_LevelID]
     inc     a
+    cp      NUM_LEVELS-1
+    jp      nz,GM_EndScreen
     ld      [Engine_LevelID],a
     jp      GM_Level
     
@@ -904,7 +906,7 @@ Player_WallBounce:
 ; ========
 
 Player_AccelerateLeft:
-        ld      a,[Player_MovementFlags]
+    ld      a,[Player_MovementFlags]
     bit     bPlayerIsUnderwater,a
     jr      nz,.accelLeftWater
     push    bc

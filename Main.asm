@@ -166,9 +166,7 @@ DrawBin:
 _CallHL:
     ld      a,h
     bit     7,a
-    jr      z,.skip
-    ld      b,b
-    jp      @
+    ret     nz
 .skip
     jp      hl
 
@@ -402,6 +400,10 @@ include "Engine/GameModes/Credits.asm"
 
 ; ================================
 
+include "Engine/GameModes/EndScreen.asm"
+
+; ================================
+
 ; ==================
 ; Interrupt handlers
 ; ==================
@@ -513,7 +515,7 @@ DoVBlank::
     farcall DevSound_Play
 :   call    VGMSFX_Update
    
-   call    Pal_DoFade
+    call    Pal_DoFade
 
     pop     hl
     pop     de
