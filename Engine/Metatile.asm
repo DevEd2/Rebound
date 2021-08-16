@@ -11,7 +11,7 @@ COLLISION_TOPSOLID      equ 2
 COLLISION_WATER         equ 3
 COLLISION_COIN          equ 4
 COLLISION_GOAL          equ 5
-COLLISION_UNUSED6       equ 6
+COLLISION_KILL          equ 6
 COLLISION_UNUSED7       equ 7
 
 section "Metatile routines",rom0

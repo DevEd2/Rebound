@@ -292,7 +292,7 @@ ProcessPlayer:
     
 .checkgoal
     cp      COLLISION_GOAL
-    jr      nz,.decel
+    jr      nz,.checkkill
 .dogoal
     ld      a,1
     ld      [Engine_LockCamera],a
@@ -301,6 +301,14 @@ ProcessPlayer:
     ld      [Player_MovementFlags],a
     jp      .moveair
     
+.checkkill
+    cp      COLLISION_KILL
+    jr      nz,.donecollide
+    call    KillPlayer
+    jp      .moveair
+    
+    
+.donecollide
 .decel
     ld      a,d
     ld      [Player_MovementFlags],a
