@@ -368,7 +368,7 @@ SkipGBCScreen:
     
     call    DoubleSpeed
     
-    jp      GM_DebugMenu
+    jp      GM_SplashScreens
     
 ; ================================
 
@@ -690,64 +690,6 @@ ClearScreen:
     ld      [Engine_CameraY],a
     ld      [sys_EnableHDMA],a
     ldh     [rHDMA5],a  ; cancel pending HDMA transfers
-    ret
-
-; Copies a tileset to VRAM, waiting for VRAM accessibility.
-; INPUT:   hl = source
-;          de = destination
-;          bc = size
-; TRASHES: a, bc, de, hl
-_CopyTilesetSafe::
-    ldh a,[rSTAT]
-    and 2                           ; check if VRAM is accessible
-    jr  nz,_CopyTilesetSafe         ; if it isn't, loop until it is
-    ld  a,[hl+]                     ; get byte
-    ld  [de],a                      ; write byte
-    inc de
-    dec bc
-    ld  a,b                         ; check if bc = 0
-    or  c
-    jr  nz,_CopyTilesetSafe         ; if bc != 0, loop
-    ret
-
-; Copies a 1BPP tileset to VRAM.
-; INPUT:   hl = source
-;          de = destination
-;          bc = size
-; TRASHES: a, bc, de, hl
-; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
-_CopyTileset1BPP::
-    ld  a,[hl+]                     ; get byte
-    ld  [de],a                      ; write byte
-    inc de                          ; increment destination address
-    ld  [de],a                      ; write byte again
-    inc de                          ; increment destination address again
-    dec bc
-    dec bc                          ; since we're copying two bytes, we need to dec bc twice
-    ld  a,b                         ; check if bc = 0
-    or  c
-    jr  nz,_CopyTileset1BPP         ; if bc != 0, loop
-    ret
-
-; Copies a 1BPP tileset to VRAM, waiting for VRAM accessibility.
-; INPUT:   hl = source
-;          de = destination
-;          bc = size
-; TRASHES: a, bc, de, hl
-_CopyTileset1BPPSafe::
-    ldh a,[rSTAT]
-    and 2                           ; check if VRAM is accessible
-    jr  nz,_CopyTileset1BPPSafe     ; if it isn't, loop until it is
-    ld  a,[hl+]                     ; get byte
-    ld  [de],a                      ; write byte
-    inc de                          ; increment destination address
-    ld  [de],a                      ; write byte again
-    inc de                          ; increment destination address again
-    dec bc
-    dec bc                          ; since we're copying two bytes, we need to dec bc twice
-    ld  a,b                         ; check if bc = 0
-    or  c
-    jr  nz,_CopyTileset1BPP         ; if bc != 0, loop
     ret
 
 ; Loads a 20x18 tilemap to VRAM.

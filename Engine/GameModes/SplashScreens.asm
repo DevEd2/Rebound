@@ -89,7 +89,7 @@ GM_SplashScreens:
 	ld		hl,sys_TilemapBuffer
 	call	LoadTilemapScreen
 
-	ldfar	hl,Pal_GrayscaleInverted
+	ldfar	hl,Pal_TitleScreen
 	xor		a
 	call	LoadPal
     call    ConvertPals
