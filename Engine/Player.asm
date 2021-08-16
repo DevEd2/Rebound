@@ -194,6 +194,9 @@ ProcessPlayer:
     cp      NUM_LEVELS-1
     jp      nz,GM_EndScreen
     ld      [Engine_LevelID],a
+    ; restore stack pointer
+    pop     hl
+    pop     hl
     jp      GM_Level
     
 .notvictory
@@ -1125,6 +1128,9 @@ Player_Respawn:
     jp      GM_TitleAndMenus
 :   dec     a
     ld      [Player_LifeCount],a
+    ; restore stack
+    pop     hl
+    pop     hl
     ld      a,[Engine_LevelID]
     jp      GM_Level
     
