@@ -12,10 +12,18 @@ section "Object Memory",wram0
 MONSTER_COUNT     equ 16
 MONSTER_WRAMSIZE  equ 16
 
-MONSTER_FLAG_HITPLAYER    equ 0
-MONSTER_FLAG_HITBYPLAYER  equ 1
+MONSTER_FLAG_CPLAYER      equ 0 ; Collides with player
+MONSTER_FLAG_CWORLD       equ 1 ; Collides with world
 MONSTER_FLAG_FLIPH        equ 5
 MOSNTER_FLAG_FLIPV        equ 6
+
+MONSTER_HITBOXSIZE        equ 6
+
+MONSTER_COLLISION_LEFT    equ 0
+MONSTER_COLLISION_RIGHT   equ 1
+MONSTER_COLLISION_UP      equ 2
+MONSTER_COLLISION_DOWN    equ 3
+MONSTER_COLLISION_PLAYER  equ 4
 
 ; Monster IDs
 MONSTER_NULL        equ 0
@@ -25,6 +33,7 @@ Monster_ID:           ds  MONSTER_COUNT
 Monster_WRAMPointer:  ds  MONSTER_COUNT
 Monster_ParentScreen: ds  MONSTER_COUNT ; Parent Object = High Nibble, Screen Index = Low Nibble
 Monster_Flags:        ds  MONSTER_COUNT
+Monster_Collision:    ds  MONSTER_COUNT
 Monster_XPosition:    ds  MONSTER_COUNT
 Monster_XPositionS:   ds  MONSTER_COUNT
 Monster_YPosition:    ds  MONSTER_COUNT
@@ -321,6 +330,10 @@ InitMonster:
   
 ; Update all Monsters
 UpdateMonsters:
+  ; Save current screen
+  ld  a,[Engine_CurrentScreen]
+  ldh [Temp0],a
+
   ld  b,0
   ld  c,MONSTER_COUNT-1
 .updateLoop:
@@ -346,6 +359,20 @@ UpdateMonsters:
   ld  h,d
   ld  l,e
   call  BehaviorDispatch
+  
+  ; Clear Collision Flags
+  ld  hl,Monster_Collision
+  add hl,bc
+  ld  [hl],0
+  
+  ; Set current screen for this monster
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ldh a,[Temp0]
+  xor [hl]
+  and $f0
+  xor [hl]
+  ld  [Engine_CurrentScreen],a
   
   ; Check Parent
   ld  hl,Monster_ParentScreen
@@ -409,6 +436,183 @@ UpdateMonsters:
   or  d
   ld  [hl],a
 .xMoveDone:
+
+  ; Horizontal Collision
+  ld  hl,Monster_Flags
+  add hl,bc
+  bit MONSTER_FLAG_CWORLD,[hl]
+  jp  z,.xCollideEnd
+  
+  ld  hl,Monster_XVelocity
+  add hl,bc
+  bit 7,[hl]
+  jr  z,.checkRight
+  ; Check Left Collision
+  ; Top Left
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileL
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  z,:+
+  ; Bottom Left
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileL
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jp  nz,.xCollideEnd
+:
+  ; Collision with left wall
+  ; Set collision flag
+  ld  hl,Monster_Collision
+  add hl,bc
+  set MONSTER_COLLISION_LEFT,[hl]
+  ; Calculate penetration depth
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  and $0f
+  ld  e,a
+  ld  a,16
+  sub e
+  ; Push out of tile
+  add [hl]
+  ld  [hl],a
+  ; Check screen crossing
+  jp  nc,.xCollideEnd
+  ; Right edge crossed
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]
+  and $0f
+  ld  e,a
+  ld  a,[Engine_NumScreens]
+  cp  e
+  jr  z,.xCollideEnd
+  inc [hl]
+  jr  .xCollideEnd
+.checkRight:
+  ; Check Right Collision
+  ; Top Right
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileR
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  z,:+
+  ; Bottom Right
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileR
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  nz,.xCollideEnd
+:
+  ; Collision with right wall
+  ; Set collision flag
+  ld  hl,Monster_Collision
+  add hl,bc
+  set MONSTER_COLLISION_RIGHT,[hl]
+  ; Calculate penetration depth
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  and $0f
+  inc a
+  ld  e,a
+  ld  a,[hl]
+  ; Push out of tile
+  sub e
+  ld  [hl],a
+  ; Check screen crossing
+  jr  nc,.xCollideEnd
+  ; Left edge crossed
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]
+  and $0f
+  jr  z,.xCollideEnd
+  dec [hl]
+.xCollideEnd:
   
   ; Vertical Movement
   ld  hl,Monster_YVelocityS ; Monster Y Velocity Sub Pointer
@@ -430,6 +634,166 @@ UpdateMonsters:
   adc a,[hl]                ; Add Y Position + Carry
   ld  [hl],a                ; Store new Y Position
   
+  ; Vertical Collision
+  ld  hl,Monster_Flags
+  add hl,bc
+  bit MONSTER_FLAG_CWORLD,[hl]
+  jp  z,.yCollideEnd
+  
+  ld  hl,Monster_YVelocity
+  add hl,bc
+  bit 7,[hl]
+  jr  z,.checkDown
+  ; Check Top Collision
+  ; Top Left
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileL
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  z,:+
+  ; Top Right
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileR
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jp  nz,.yCollideEnd
+:
+  ; Collision with ceiling
+  ; Set collision flag
+  ld  hl,Monster_Collision
+  add hl,bc
+  set MONSTER_COLLISION_UP,[hl]
+  ; Calculate penetration depth
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  and $0f
+  ld  e,a
+  ld  a,16
+  sub e
+  ; Push out of tile
+  add [hl]
+  ld  [hl],a
+  jr  .yCollideEnd
+.checkDown:
+  ; Check Bottom Collision
+  ; Bottom Left
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  sub MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileL
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  z,:+
+  cp  COLLISION_TOPSOLID
+  jr  z,:+
+  ; Bottom Right
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  e,a
+  push  af
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  ld  h,e
+  ld  l,a
+  ld  a,c
+  ldh [Temp1],a
+  call  GetTileCoordinates
+  ld  e,a
+  pop af
+  call  GetTileL
+  ld  e,a
+  ldh a,[Temp1]
+  ld  c,a
+  ld  b,0
+  ld  a,e
+  cp  COLLISION_SOLID
+  jr  z,:+
+  cp  COLLISION_TOPSOLID
+  jr  nz,.yCollideEnd
+:
+  ; Collision with floor
+  ; Set collision flag
+  ld  hl,Monster_Collision
+  add hl,bc
+  set MONSTER_COLLISION_DOWN,[hl]
+  ; Calculate penetration depth
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_HITBOXSIZE
+  and $0f
+  inc a
+  ld  e,a
+  ld  a,[hl]
+  ; Push out of tile
+  sub e
+  ld  [hl],a
+.yCollideEnd:
+  
   ; On Screen Check
   ld  hl,Monster_XPosition
   add hl,bc
@@ -444,10 +808,82 @@ UpdateMonsters:
   call  DeleteMonster
   jr  .nextMonster
   
+  ; Player Collision
+  ld  hl,Monster_Flags
+  add hl,bc
+  bit MONSTER_FLAG_CPLAYER,[hl]
+  jr  z,.nextMonster
+  
+  ld  hl,Monster_XPosition
+  add hl,bc
+  ld  a,[Player_XPos]
+  sub [hl]
+  ld  e,a
+  push  af
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]
+  and $0f
+  ld  d,a
+  ldh a,[Temp0]
+  and $0f
+  sbc d
+  bit 7,a
+  jr  z,:+
+  ld  d,a
+  ld  a,e
+  cpl
+  add 1
+  ld  e,a
+  ld  a,d
+  cpl
+  adc 0
+:
+  or  a
+  jr  nz,.nextMonster
+  ld  a,e
+  cp  MONSTER_HITBOXSIZE+Player_HitboxSize
+  jr  nc,.nextMonster
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[Player_YPos]
+  sub [hl]
+  ld  e,a
+  push  af
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ld  a,[hl]
+  and $0f
+  ld  d,a
+  ldh a,[Temp0]
+  and $0f
+  sbc d
+  bit 7,a
+  jr  z,:+
+  ld  d,a
+  ld  a,e
+  cpl
+  add 1
+  ld  e,a
+  ld  a,d
+  cpl
+  adc 0
+:
+  or  a
+  jr  nz,.nextMonster
+  ld  a,e
+  cp  MONSTER_HITBOXSIZE+Player_HitboxSize
+  jr  nc,.nextMonster
+  ld  hl,Monster_Collision
+  add hl,bc
+  set MONSTER_COLLISION_PLAYER,[hl]
+  
 .nextMonster
   dec c
   bit 7,c
   jp  z,.updateLoop
+  ldh a,[Temp0]
+  ld  [Engine_CurrentScreen],a
   ret
   
 ; Generate Monster sprite entries
