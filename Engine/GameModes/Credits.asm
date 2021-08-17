@@ -39,6 +39,7 @@ CreditsText:
     db      "    Hirokazu Tanaka "
     db      "          Superogue "
     db      "             ISSOtm "
+    db      "             Beware "
     db      "      Elmar Krieger "
     db      "   Alberto Gonzalez "
     db      "       Moviemovies1 "
@@ -46,3 +47,13 @@ CreditsText:
     db      "     THANK  YOU     "
     db      "    FOR PLAYING!    "
     db      "                    "
+
+; ================================================================
+
+section "Credits GFX",romx
+
+DevSoundLogoTiles:  incbin  "GFX/DevSoundLogo.2bpp.wle"
+DevSoundLogoMap:    incbin  "GFX/DevSoundLogo.til.wle"
+DevSoundLogoAttr:   incbin  "GFX/DevSoundLogo.atr.wle"
+
+Pal_DevSoundLogo:   incbin  "GFX/DevSoundLogo.pal"
