@@ -8,7 +8,7 @@ GM_Credits:
 CreditsText:
 ;            ####################
     db      "                    "
-    db      "    - REBOUND -     "
+    db      0,0 ; rebound logo goes here
     db      "  A game  by DevEd  "
     db      "                    "
     db      " Lead programmer:   "
@@ -20,13 +20,14 @@ CreditsText:
     db      " Graphics:          "
     db      "          Twoflower "
     db      "              DevEd "
+;   db      "             Mirage "
     db      "                    "
     db      " Music composition: "
     db      "              DevEd "
     db      "                    "
     db      " Sound programming: "
     db      "              DevEd "
-    db      "                ??? "
+    db      0,1 ; devsound logo goes here
     db      "                    "
     db      " Tools used:        "
     db      "                BGB "
