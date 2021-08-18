@@ -338,7 +338,7 @@ SoundTest_SongNames:
     db  "    Cave Cleared                "
     db  "   Temple Triumph               "
     db  "   Down 'n  Dirty               "
-    db  "    Try Again...                "
+    db  "     Game  Over                 "
     db  "    Bonus  Time!                "
     db  "     Staff Roll                 "
 ;        -##################-------------

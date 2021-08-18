@@ -21,7 +21,7 @@
     const   MUS_CAVE_CLEAR
     const   MUS_TEMPLE_CLEAR
     const   MUS_BOSS
-    const   MUS_PLAYER_DOWN
+    const   MUS_GAME_OVER
     const   MUS_BONUS
     const   MUS_CREDITS
 
@@ -46,7 +46,7 @@ SongSpeedTable:
     db  3,3 ; cave stage clear
     db  3,3 ; temple stage clear
     db  3,3 ; boss battle
-    db  3,3 ; player down
+    db  4,3 ; game over
     db  3,3 ; bonus stage
     db  3,3 ; credits
 
@@ -65,7 +65,7 @@ SongPointerTable:
     dw  PT_CaveClear
     dw  PT_TempleClear
     dw  PT_Boss
-    dw  PT_PlayerDown
+    dw  PT_GameOver
     dw  PT_Bonus
     dw  PT_Credits
 
@@ -91,57 +91,63 @@ w3          =   %00100000
 ; is interpreted as a "loop" command, use initial volume $F +
 ; envelope length $0 instead.
 
-vol_Bass1:          db  w3,$ff
-vol_PulseBass:      db  15,15,14,14,13,13,12,12,11,11,10,10,9,9,8,8,8,7,7,7,6,6,6,5,5,5,4,4,4,4,3,3,3,3,2,2,2,2,2,1,1,1,1,1,1,0,$ff
+vol_Bass1:              db  w3,$ff
+vol_PulseBass:          db  15,15,14,14,13,13,12,12,11,11,10,10,9,9,8,8,8,7,7,7,6,6,6,5,5,5,4,4,4,4,3,3,3,3,2,2,2,2,2,1,1,1,1,1,1,0,$ff
 
-vol_Kick:           db  $1c,$1c,$18,$ff
-vol_Snare:          db  $1d,$ff
-vol_CHH:            db  $18,$ff
-vol_OHH:            db  $48,$ff
-vol_Cymbal:         db  $7e,$ff
+vol_Kick:               db  $1c,$1c,$18,$ff
+vol_Snare:              db  $1d,$ff
+vol_CHH:                db  $18,$ff
+vol_OHH:                db  $48,$ff
+vol_Cymbal:             db  $7e,$ff
 
-vol_Echo1:          db  8,$ff   
-vol_Echo2:          db  3,$ff
+vol_Echo1:              db  8,$ff   
+vol_Echo2:              db  3,$ff
 
-vol_PyramidArp:     db  w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
-vol_PyramidLeadS:   db  w3,w3,w3,w3,w3
-vol_PyramidLeadF:   db  w2,w2,w2,w2,w2
-                    db  w1,$ff              
-vol_PyramidLeadL:   db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
-                    db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
-                    db  w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2
-                    db  w1,$ff
+vol_PyramidArp:         db  w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
+vol_PyramidLeadS:       db  w3,w3,w3,w3,w3
+vol_PyramidLeadF:       db  w2,w2,w2,w2,w2
+                        db  w1,$ff              
+vol_PyramidLeadL:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
+                        db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
+                        db  w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2
+                        db  w1,$ff
         
-vol_TomEcho:        db  $1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f
-                    db  $18,$18,$18,$18,$18,$18,$18,$18,$18
-                    db  $14,$14,$14,$14,$14,$14,$14,$14,$14
-                    db  $12,$12,$12,$12,$12,$12,$12,$12,$12
-                    db  $11,$11,$11,$11,$11,$11,$11,$11,$11
-                    db  $ff
+vol_TomEcho:            db  $1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f
+                        db  $18,$18,$18,$18,$18,$18,$18,$18,$18
+                        db  $14,$14,$14,$14,$14,$14,$14,$14,$14
+                        db  $12,$12,$12,$12,$12,$12,$12,$12,$12
+                        db  $11,$11,$11,$11,$11,$11,$11,$11,$11
+                        db  $ff
 
 ; ========
 
-vol_MenuLead:       db  w3,w3,w3,w3,w3,w3,w3,w2,w1,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_MenuLead:           db  w3,w3,w3,w3,w3,w3,w3,w2,w1,w2,w2,w2,w2,w2,w2,w1,$ff
 
-vol_MenuOctave:     db  w3,w3,w3,w2,w2,w1,$ff
-vol_MenuOctaveEcho: db  w1,$ff
-vol_MenuBass:       db  $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$38,$ff
-vol_MenuArp:        db  $1b,$1b,$1b,$1b,$27,$27,$27,$27,$27,$27,$27,$27,$27,$27,$53,$ff
-
-; ========
-
-vol_PlainsBass:     db  w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w1,$ff
-vol_PlainsLead:     db  $5a,$ff
-vol_PlainsEcho:     db  2,$ff
-vol_PlainsHarmony:  db  $59,$ff
-vol_PlainsHarmonyR: db  4,$ff
+vol_MenuOctave:         db  w3,w3,w3,w2,w2,w1,$ff
+vol_MenuOctaveEcho:     db  w1,$ff
+vol_MenuBass:           db  $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$38,$ff
+vol_MenuArp:            db  $1b,$1b,$1b,$1b,$27,$27,$27,$27,$27,$27,$27,$27,$27,$27,$53,$ff
 
 ; ========
 
-vol_CityArp:        db  $1b,$1b,$1b,$1b,$48,$ff
-vol_CityLead:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
-vol_CityLead2:      db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w1,$ff
-vol_CityLeadL:      db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff 
+vol_PlainsBass:         db  w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_PlainsLead:         db  $5a,$ff
+vol_PlainsEcho:         db  2,$ff
+vol_PlainsHarmony:      db  $59,$ff
+vol_PlainsHarmonyR:     db  4,$ff
+
+; ========
+
+vol_CityArp:            db  $1b,$1b,$1b,$1b,$48,$ff
+vol_CityLead:           db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
+vol_CityLead2:          db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_CityLeadL:          db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+
+; ========
+
+vol_GameOverLead:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_GameOverGuitarA:    db  $7a,$ff
+vol_GameOverGuitarB:    db  $4a,$ff
 
 ; =================================================================
 ; Arpeggio sequences
@@ -216,6 +222,9 @@ waveseq_PlainsHarmony:  db  2,2,0,$ff
 waveseq_CityArp:
     db  0,0,0,1,1,1,2,2,2,3,3,3,2,2,2,1,1,1,$80,0
 
+waveseq_GameOverGuitarA:
+    db  1,0,$ff
+
 ; =================================================================
 ; Vibrato sequences
 ; Must be terminated with a loop command!
@@ -244,6 +253,7 @@ WaveTable:
     dw      wave_ForestBass
     dw      wave_PlainsBass
     dw      wave_CityLead
+    dw      wave_SoftSquare
 
 wave_PyramidLead:       db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
 wave_PyramidSquare:     db  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
@@ -253,6 +263,7 @@ wave_MenuTri:           db  $68,$8c,$ef,$fd,$b9,$75,$32,$02,$68,$8c,$ef,$fd,$b9,
 wave_ForestBass:        db  $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,$44,$44,$45 
 wave_PlainsBass:        db  $ff,$ff,$ff,$ff,$ee,$d7,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
 wave_CityLead:          db  $bb,$cc,$cd,$dd,$dd,$ba,$29,$54,$56,$76,$55,$43,$24,$14,$11,$00
+wave_SoftSquare:        db  $ab,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$00,$00,$00,$00,$00,$00,$00,$12
 
 waveseq_Tri:            db  0,$ff
 waveseq_PyramidLead:    db  1,$ff
@@ -263,6 +274,7 @@ waveseq_PlainsBass:     db  7,$ff
 waveseq_CityLead:       db  8,$ff
 waveseq_ForestBass:     db  6,$ff
 waveseq_WaveBuffer:     db  $fd,$ff
+waveseq_SoftSquare:     db  9,$ff
 
 ; =================================================================
 ; Instruments
@@ -315,51 +327,59 @@ InstrumentTable:
     dins    CityLead2
     dins    CityLeadL
 
+    dins    GameOverLead
+    dins    GameOverGuitarA
+    dins    GameOverGuitarB
+
 ; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
 ; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
-ins_Kick:           Instrument  0,Kick,Kick,_,_ ; pulse/waveseq and vibrato unused by noise instruments
-ins_Snare:          Instrument  0,Snare,Snare,_,_
-ins_CHH:            Instrument  0,CHH,Hat,_,_
-ins_OHH:            Instrument  0,OHH,Hat,_,_
-ins_Cymbal:         Instrument  0,Cymbal,Cymbal,_,_
+ins_Kick:               Instrument  0,Kick,Kick,_,_ ; pulse/waveseq and vibrato unused by noise instruments
+ins_Snare:              Instrument  0,Snare,Snare,_,_
+ins_CHH:                Instrument  0,CHH,Hat,_,_
+ins_OHH:                Instrument  0,OHH,Hat,_,_
+ins_Cymbal:             Instrument  0,Cymbal,Cymbal,_,_
 
-ins_Echo1:          Instrument  0,Echo1,_,_,_
-ins_Echo2:          Instrument  0,Echo2,_,_,_
-ins_TomEcho:        Instrument  0,TomEcho,TomEcho,Square,_
-ins_PyramidBass:    Instrument  0,PulseBass,Pluck,PyramidBass,_
-ins_PyramidLead:    Instrument  0,Bass1,Pluck,PyramidLead,BeachLead
-ins_PyramidLeadF:   Instrument  0,PyramidLeadF,_,PyramidLead,_
-ins_PyramidLeadS:   Instrument  0,PyramidLeadS,Pluck,PyramidLead,_
-ins_PyramidLeadL:   Instrument  0,PyramidLeadL,Pluck,PyramidLead,BeachLead
-ins_PyramidOctArp:  Instrument  0,PyramidArp,Oct2,Square,BeachLead
-ins_PyramidArp720:  Instrument  0,PyramidArp,720,PyramidSquare,_
-ins_PyramidArp940:  Instrument  0,PyramidArp,940,PyramidSquare,_
-ins_PyramidArp520:  Instrument  0,PyramidArp,520,PyramidSquare,_
+ins_Echo1:              Instrument  0,Echo1,_,_,_
+ins_Echo2:              Instrument  0,Echo2,_,_,_
+ins_TomEcho:            Instrument  0,TomEcho,TomEcho,Square,_
+ins_PyramidBass:        Instrument  0,PulseBass,Pluck,PyramidBass,_
+ins_PyramidLead:        Instrument  0,Bass1,Pluck,PyramidLead,BeachLead
+ins_PyramidLeadF:       Instrument  0,PyramidLeadF,_,PyramidLead,_
+ins_PyramidLeadS:       Instrument  0,PyramidLeadS,Pluck,PyramidLead,_
+ins_PyramidLeadL:       Instrument  0,PyramidLeadL,Pluck,PyramidLead,BeachLead
+ins_PyramidOctArp:      Instrument  0,PyramidArp,Oct2,Square,BeachLead
+ins_PyramidArp720:      Instrument  0,PyramidArp,720,PyramidSquare,_
+ins_PyramidArp940:      Instrument  0,PyramidArp,940,PyramidSquare,_
+ins_PyramidArp520:      Instrument  0,PyramidArp,520,PyramidSquare,_
 
-ins_MenuLead:       Instrument  0,MenuLead,Pluck,MenuLead,BeachLead
-ins_MenuOctave:     Instrument  0,MenuOctave,Oct2,MenuTri,_
-ins_MenuOctaveEcho: Instrument  0,MenuOctaveEcho,Oct2,MenuTri,_
-ins_MenuBass:       Instrument  0,MenuBass,Pluck,Pulse25,_
-ins_MenuArp027:     Instrument  1,MenuArp,MenuArp027,MenuArp,_
-ins_MenuArp037:     Instrument  1,MenuArp,MenuArp037,MenuArp,_
-ins_MenuArp047:     Instrument  1,MenuArp,MenuArp047,MenuArp,_
-ins_MenuArp057:     Instrument  1,MenuArp,MenuArp057,MenuArp,_
-ins_MenuArp038:     Instrument  1,MenuArp,MenuArp038,MenuArp,_
-ins_MenuArp059:     Instrument  1,MenuArp,MenuArp059,MenuArp,_
-ins_MenuArp05A:     Instrument  1,MenuArp,MenuArp05A,MenuArp,_
-ins_MenuTom:        Instrument  0,MenuArp,MenuTom,Pulse50,_
+ins_MenuLead:           Instrument  0,MenuLead,Pluck,MenuLead,BeachLead
+ins_MenuOctave:         Instrument  0,MenuOctave,Oct2,MenuTri,_
+ins_MenuOctaveEcho:     Instrument  0,MenuOctaveEcho,Oct2,MenuTri,_
+ins_MenuBass:           Instrument  0,MenuBass,Pluck,Pulse25,_
+ins_MenuArp027:         Instrument  1,MenuArp,MenuArp027,MenuArp,_
+ins_MenuArp037:         Instrument  1,MenuArp,MenuArp037,MenuArp,_
+ins_MenuArp047:         Instrument  1,MenuArp,MenuArp047,MenuArp,_
+ins_MenuArp057:         Instrument  1,MenuArp,MenuArp057,MenuArp,_
+ins_MenuArp038:         Instrument  1,MenuArp,MenuArp038,MenuArp,_
+ins_MenuArp059:         Instrument  1,MenuArp,MenuArp059,MenuArp,_
+ins_MenuArp05A:         Instrument  1,MenuArp,MenuArp05A,MenuArp,_
+ins_MenuTom:            Instrument  0,MenuArp,MenuTom,Pulse50,_
 
-ins_PlainsBass:     Instrument  0,PlainsBass,PlainsBass,PlainsBass,_
-ins_PlainsLead:     Instrument  0,PlainsLead,_,PlainsLead,PlainsLead
-ins_PlainsEcho:     Instrument  0,PlainsEcho,_,Pulse25,PlainsEcho
-ins_PlainsHarmony:  Instrument  0,PlainsHarmony,_,PlainsHarmony,PlainsLead
-ins_PlainsHarmonyR: Instrument  0,PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
+ins_PlainsBass:         Instrument  0,PlainsBass,PlainsBass,PlainsBass,_
+ins_PlainsLead:         Instrument  0,PlainsLead,_,PlainsLead,PlainsLead
+ins_PlainsEcho:         Instrument  0,PlainsEcho,_,Pulse25,PlainsEcho
+ins_PlainsHarmony:      Instrument  0,PlainsHarmony,_,PlainsHarmony,PlainsLead
+ins_PlainsHarmonyR:     Instrument  0,PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
 
-ins_BassOctave:     Instrument  0,MenuBass,BassOctave,Pulse25,_
-ins_CityArp:        Instrument  1,CityArp,Buffer,CityArp,_
-ins_CityLead:       Instrument  0,CityLead,PluckDelay,CityLead,CityLead
-ins_CityLead2:      Instrument  0,CityLead2,PluckDelay,CityLead,CityLead
-ins_CityLeadL:      Instrument  0,CityLeadL,_,CityLead,CityLead
+ins_BassOctave:         Instrument  0,MenuBass,BassOctave,Pulse25,_
+ins_CityArp:            Instrument  1,CityArp,Buffer,CityArp,_
+ins_CityLead:           Instrument  0,CityLead,PluckDelay,CityLead,CityLead
+ins_CityLead2:          Instrument  0,CityLead2,PluckDelay,CityLead,CityLead
+ins_CityLeadL:          Instrument  0,CityLeadL,_,CityLead,CityLead
+
+ins_GameOverLead:       Instrument  0,GameOverLead,PluckDelay,SoftSquare,CityLead
+ins_GameOverGuitarA:    Instrument  0,GameOverGuitarA,_,GameOverGuitarA,_
+ins_GameOverGuitarB:    Instrument  0,GameOverGuitarB,PluckDelay,Pulse25,_
 
 ; =================================================================
 
@@ -1909,6 +1929,92 @@ City_CH4:
 
 ; =================================================================
 
+PT_GameOver:    dw  GameOver_CH1,GameOver_CH2,GameOver_CH3,GameOver_CH4
+
+GameOver_CH1:
+    db      SetInstrument,_GameOverGuitarA
+    db      B_3,2
+    db      F#4,30
+    db      A_3,2
+    db      E_4,22
+    db      SetInstrument,_GameOverGuitarB
+    db      A_2,8
+    
+    db      G_2,4
+    db      G_2,4
+    db      G_2,4
+    db      A_2,8
+    db      A_2,4
+    db      A_2,4
+    db      A_2,8
+    db      B_2,4
+    db      B_2,16
+    db      EndChannel
+
+GameOver_CH2:
+    db      SetInstrument,_GameOverGuitarA
+    db      rest,1
+    db      D_4,2
+    db      B_4,30
+    db      C#4,2
+    db      A_4,21
+    db      SetInstrument,_GameOverGuitarB
+    db      C#3,8
+
+    db      D_3,4
+    db      D_3,4
+    db      D_3,4
+    db      C#3,8
+    db      C#3,4
+    db      C#3,4
+    db      C#3,8
+    db      D_3,4
+    db      D_3,16
+    db      EndChannel
+
+GameOver_CH3:
+    db      SetInstrument,_GameOverLead
+    db      B_5,8
+    db      B_5,4
+    db      F#5,4
+    db      A_5,4
+    db      F#5,8
+    db      E_5,8
+    db      F#5,16
+    db      F#5,4
+    db      A_5,4
+    db      C#6,4
+    db      D_6,8
+    db      D_6,4
+    db      C#6,8
+    db      B_5,4
+    db      A_5,4
+    db      A_5,8
+    db      B_5,4
+    db      B_5,16
+    db      rest,1
+    db      EndChannel
+
+GameOver_CH4:
+    Drum    Cymbal,32
+    Drum    Cymbal,20
+    Drum    Snare,4
+    Drum    Snare,4
+    Drum    Snare,4
+    Drum    Cymbal,8
+    Drum    Snare,4
+    Drum    Kick,4
+    Drum    CHH,4
+    Drum    Kick,4
+    Drum    Snare,4
+    Drum    Kick,4
+    Drum    CHH,4
+    Drum    Snare,4
+    Drum    Cymbal,24
+    db      EndChannel
+
+; =================================================================
+
 PT_Forest:
 
 ; =================================================================
@@ -1942,10 +2048,6 @@ PT_TempleClear:
 ; =================================================================
 
 PT_Boss:
-
-; =================================================================
-
-PT_PlayerDown:
 
 ; =================================================================
 
