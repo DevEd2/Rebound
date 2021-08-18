@@ -5,7 +5,6 @@
 ; TODO
 ; - Object Behaviors
 ; - Object Sprites
-; - Particle Gravity
 
 section "Object Memory",wram0
 
@@ -14,16 +13,22 @@ MONSTER_WRAMSIZE  equ 16
 
 MONSTER_FLAG_CPLAYER      equ 0 ; Collides with player
 MONSTER_FLAG_CWORLD       equ 1 ; Collides with world
+MONSTER_FLAG_GRAVITY      equ 2
 MONSTER_FLAG_FLIPH        equ 5
 MOSNTER_FLAG_FLIPV        equ 6
 
 MONSTER_HITBOXSIZE        equ 6
+
+MONSTER_GRAVITY           equ $25
 
 MONSTER_COLLISION_LEFT    equ 0
 MONSTER_COLLISION_RIGHT   equ 1
 MONSTER_COLLISION_UP      equ 2
 MONSTER_COLLISION_DOWN    equ 3
 MONSTER_COLLISION_PLAYER  equ 4
+
+MONSTER_COLLISION_HORIZ   equ %00000011
+MONSTER_COLLISION_VERT    equ %00001100
 
 ; Monster IDs
 MONSTER_NULL        equ 0
@@ -89,12 +94,19 @@ TempS:  db
 TempX:  db
 TempY:  db
 
+; Monster type init data
+; Format: XVelocityS, XVelocity, YVelocityS, YVelocity, Flags
+section "Object Init Data",romx
+ObjectInit:
+  db  0,1,0,0,%00000110   ; MONSTER_TEST
+
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
+; INPUT:  bc = Slot Number
 section "Object Behvaiors",romx
 BehaviorTable:
-  dw  Monster_NoBehavior  ; MONSTER_NULL
-  dw  Monster_NoBehavior  ; MONSTER_TEST
+  dw  Monster_NoBehavior    ; MONSTER_NULL
+  dw  Monster_TestBehavior  ; MONSTER_TEST
 
 BehaviorDispatch:
   bit 7,h
@@ -102,6 +114,34 @@ BehaviorDispatch:
   jp  hl
   
 Monster_NoBehavior:
+  ret
+  
+Monster_TestBehavior:
+  ld  hl,Monster_Collision
+  add hl,bc
+  ld  a,[hl]
+  ld  e,a
+  and MONSTER_COLLISION_HORIZ
+  jr  z,:+
+  xor a
+  ld  hl,Monster_XVelocity
+  add hl,bc 
+  ld  [hl],a
+  ld  hl,Monster_XVelocityS
+  add hl,bc
+  ld  [hl],a
+:
+  ld  a,e
+  and MONSTER_COLLISION_VERT
+  jr  z,:+
+  xor a
+  ld  hl,Monster_YVelocity
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_YVelocityS
+  add hl,bc
+  ld  [hl],a
+:
   ret
 
 section "Object System Routines",rom0
@@ -160,6 +200,21 @@ InitSpawnMonsters:
   ldh [TempS],a         ; Save Screen
   ld  a,[hl+]           ; Get X Position
   ldh [TempX],a         ; Save X Position
+  ld  b,a
+  ld  a,[Engine_CameraX]; Get Camera X
+  add SCRN_X/2          ; Find center
+  sub b                 ; Calculate x distance
+  bit 7,a
+  jr  z,:+
+  cpl
+  inc a
+:
+  cp  SCRN_X/2+SPAWN_THRESHOLD_LEFT
+  jr  c,:+
+  inc hl
+  inc d
+  jr  .spawnLoop
+:
   ld  a,[hl+]           ; Get Y Position
   ldh [TempY],a         ; Save Y Position
   push  hl              ; Save object data pointer
@@ -227,7 +282,8 @@ SpawnMonsters:
   ld  a,[hl+]               ; Get X Position
   ldh [TempX],a             ; Save X Position
   ld  c,a
-  ld  a,[Player_XPos]       ; Calculate Player.X - Object.X
+  ld  a,[Engine_CameraX]    ; Calculate Camera Center - Object X
+  add SCRN_X/2
   sub c
   push  af
   ld  c,a
@@ -304,6 +360,45 @@ InitMonster:
   add hl,bc
   ld  a,d               ; Get current list index
   ld  [hl],a            ; Set list index
+  push  de
+  ldh a,[TempID]        ; Get Object ID
+  dec a                 ; Init data starts at Object 1
+  ld  e,a               ; Calculate ID * 5
+  sla a
+  add e
+  push  bc
+  ldfar de,ObjectInit   ; Load fields from object type init data
+  pop bc
+  add e
+  ld  e,a
+  jr  nc,:+
+  inc d
+:
+  ld  a,[de]
+  ld  hl,Monster_XVelocityS
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_XVelocity
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_YVelocityS
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_YVelocity
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_Flags
+  add hl,bc
+  ld  [hl],a
+  pop de
   xor a                 ; Clear all remaining fields
   ld  hl,Monster_XPositionS
   add hl,bc
@@ -311,21 +406,7 @@ InitMonster:
   ld  hl,Monster_YPositionS
   add hl,bc
   ld  [hl],a
-  ld  hl,Monster_XVelocity
-  add hl,bc
-  ld  [hl],a
-  ld  hl,Monster_XVelocityS
-  add hl,bc
-  ld  [hl],a
-  ld  hl,Monster_YVelocity
-  add hl,bc
-  ld  [hl],a
-  ld  hl,Monster_YVelocityS
-  add hl,bc
-  ld  [hl],a
-  ld  hl,Monster_Flags
-  add hl,bc
-  ld  [hl],a
+  resbank
   ret
   
 ; Update all Monsters
@@ -364,15 +445,6 @@ UpdateMonsters:
   ld  hl,Monster_Collision
   add hl,bc
   ld  [hl],0
-  
-  ; Set current screen for this monster
-  ld  hl,Monster_ParentScreen
-  add hl,bc
-  ldh a,[Temp0]
-  xor [hl]
-  and $f0
-  xor [hl]
-  ld  [Engine_CurrentScreen],a
   
   ; Check Parent
   ld  hl,Monster_ParentScreen
@@ -436,6 +508,15 @@ UpdateMonsters:
   or  d
   ld  [hl],a
 .xMoveDone:
+
+  ; Set current screen for this monster
+  ld  hl,Monster_ParentScreen
+  add hl,bc
+  ldh a,[Temp0]
+  xor [hl]
+  and $f0
+  xor [hl]
+  ld  [Engine_CurrentScreen],a
 
   ; Horizontal Collision
   ld  hl,Monster_Flags
@@ -615,24 +696,40 @@ UpdateMonsters:
 .xCollideEnd:
   
   ; Vertical Movement
-  ld  hl,Monster_YVelocityS ; Monster Y Velocity Sub Pointer
-  add hl,bc                 ; Point to this Monster
-  ld  a,[hl]                ; Get Y Velocity Sub
-  ld  hl,Monster_YPositionS ; Monster Y Position Sub Pointer
-  add hl,bc                 ; Point to this Monster
-  add a,[hl]                ; Add Y Position Sub
-  ld  [hl],a                ; Store new Y Position Sub
-  push  af                  ; Save Carry Flag
-  ld  hl,Monster_YVelocity  ; Monster Y Velocity Pointer
-  add hl,bc                 ; Point to this Monster
-  ld  a,[hl]                ; Get Y Velocity
-  ld  d,a                   ; Save Y Velocity
-  ld  hl,Monster_YPosition  ; Monster Y Position Pointer
-  add hl,bc                 ; Point to this Monster
-  pop af                    ; Restore Carry Flag
-  ld  a,d                   ; Restore Y Velocity
-  adc a,[hl]                ; Add Y Position + Carry
-  ld  [hl],a                ; Store new Y Position
+  ld  hl,Monster_Flags          ; Monster Flags Pointer
+  add hl,bc                     ; Point to this Monster
+  bit MONSTER_FLAG_GRAVITY,[hl] ; Apply Gravity?
+  jr  z,:+
+  ld  hl,Monster_YVelocityS
+  add hl,bc
+  ld  a,[hl]
+  add MONSTER_GRAVITY
+  push  af
+  ld  [hl],a
+  ld  hl,Monster_YVelocity
+  add hl,bc
+  pop af
+  jr  nc,:+
+  inc [hl]
+:
+  ld  hl,Monster_YVelocityS     ; Monster Y Velocity Sub Pointer
+  add hl,bc                     ; Point to this Monster
+  ld  a,[hl]                    ; Get Y Velocity Sub
+  ld  hl,Monster_YPositionS     ; Monster Y Position Sub Pointer
+  add hl,bc                     ; Point to this Monster
+  add a,[hl]                    ; Add Y Position Sub
+  ld  [hl],a                    ; Store new Y Position Sub
+  push  af                      ; Save Carry Flag
+  ld  hl,Monster_YVelocity      ; Monster Y Velocity Pointer
+  add hl,bc                     ; Point to this Monster
+  ld  a,[hl]                    ; Get Y Velocity
+  ld  d,a                       ; Save Y Velocity
+  ld  hl,Monster_YPosition      ; Monster Y Position Pointer
+  add hl,bc                     ; Point to this Monster
+  pop af                        ; Restore Carry Flag
+  ld  a,d                       ; Restore Y Velocity
+  adc a,[hl]                    ; Add Y Position + Carry
+  ld  [hl],a                    ; Store new Y Position
   
   ; Vertical Collision
   ld  hl,Monster_Flags
