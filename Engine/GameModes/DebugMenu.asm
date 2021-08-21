@@ -134,10 +134,7 @@ Debug_ExitToLevelSelect:
     xor     a
     ldh     [rLCDC],a
     
-    ld      a,PLAYER_LIVES
-    ld      [Player_LifeCount],a
-    ld      a,MapID_TestMap
-    jp      GM_Level
+    jp      GM_LevelSelect
     
 Debug_ExitToSoundTest:
     halt

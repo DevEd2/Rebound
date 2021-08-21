@@ -392,6 +392,10 @@ include "Engine/GameModes/SFXTest.asm"
 
 ; ================================
 
+include "Engine/GameModes/LevelSelect.asm"
+
+; ================================
+
 include "Engine/GameModes/Level.asm"
 
 ; ================================
