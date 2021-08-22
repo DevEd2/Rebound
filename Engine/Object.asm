@@ -942,11 +942,11 @@ UpdateMonsters:
   ld  a,[hl]
   sub d
   cp  SCRN_X+OFFSCREEN_THRESHOLD
-  jr  c,.nextMonster
+  jr  c,:+
   cp  -OFFSCREEN_THRESHOLD
-  jr  nc,.nextMonster
+  jr  nc,:+
   call  DeleteMonster
-  jr  .nextMonster
+:
   
   ; Player Collision
   ld  hl,Monster_Flags
@@ -959,7 +959,6 @@ UpdateMonsters:
   ld  a,[Player_XPos]
   sub [hl]
   ld  e,a
-  push  af
   ld  hl,Monster_ParentScreen
   add hl,bc
   ld  a,[hl]
@@ -989,7 +988,6 @@ UpdateMonsters:
   ld  a,[Player_YPos]
   sub [hl]
   ld  e,a
-  push  af
   ld  hl,Monster_ParentScreen
   add hl,bc
   ld  a,[hl]
