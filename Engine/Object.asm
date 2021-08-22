@@ -153,7 +153,6 @@ Monster_TestBehavior:
     ret
   
 Monster_MoveLeftRight:
-    ld      b,b
     ld      hl,Monster_Collision
     add     hl,bc
     ld      a,[hl]
