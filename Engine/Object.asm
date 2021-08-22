@@ -404,6 +404,7 @@ InitMonster:
   dec a                 ; Init data starts at Object 1
   ld  e,a               ; Calculate ID * 5
   sla a
+  sla a
   add e
   push  bc
   ldfar de,ObjectInit   ; Load fields from object type init data
