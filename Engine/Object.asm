@@ -8,81 +8,81 @@
 
 section "Object Memory",wram0
 
-MONSTER_COUNT     equ 16
-MONSTER_WRAMSIZE  equ 16
+MONSTER_COUNT               equ 16 ; maximum number of monster slots
+MONSTER_WRAMSIZE            equ 16 ; dedicated memory for each monster
 
-MONSTER_FLAG_CPLAYER      equ 0 ; Collides with player
-MONSTER_FLAG_CWORLD       equ 1 ; Collides with world
-MONSTER_FLAG_GRAVITY      equ 2
-MONSTER_FLAG_FLIPH        equ 5
-MOSNTER_FLAG_FLIPV        equ 6
+MONSTER_FLAG_CPLAYER        equ 0 ; Collides with player
+MONSTER_FLAG_CWORLD         equ 1 ; Collides with world
+MONSTER_FLAG_GRAVITY        equ 2 ; Affected by gravity
+MONSTER_FLAG_FLIPH          equ 5 ; Horizontal mirroring
+MOSNTER_FLAG_FLIPV          equ 6 ; Vertical mirroring
 
-MONSTER_HITBOXSIZE        equ 6
+MONSTER_HITBOXSIZE          equ 6
 
-MONSTER_GRAVITY           equ $25
+MONSTER_GRAVITY             equ $25
 
-MONSTER_COLLISION_LEFT    equ 0
-MONSTER_COLLISION_RIGHT   equ 1
-MONSTER_COLLISION_UP      equ 2
-MONSTER_COLLISION_DOWN    equ 3
-MONSTER_COLLISION_PLAYER  equ 4
+MONSTER_COLLISION_LEFT      equ 0 ; Colliding with a wall to the left
+MONSTER_COLLISION_RIGHT     equ 1 ; Colliding with a wall to the right
+MONSTER_COLLISION_UP        equ 2 ; Colliding with a ceiling
+MONSTER_COLLISION_DOWN      equ 3 ; Colliding with a floor
+MONSTER_COLLISION_PLAYER    equ 4 ; Colliding with the player
 
-MONSTER_COLLISION_HORIZ   equ %00000011
-MONSTER_COLLISION_VERT    equ %00001100
+MONSTER_COLLISION_HORIZ     equ %00000011 ; Colliding with a wall
+MONSTER_COLLISION_VERT      equ %00001100 ; Colliding with a floor or ceiling
 
 ; Monster IDs
-MONSTER_NULL        equ 0
-MONSTER_TEST        equ 1
-MONSTER_TEST2       equ 2
+MONSTER_NULL                equ 0
+MONSTER_TEST                equ 1
+MONSTER_TEST2               equ 2
 
-Monster_ID:           ds  MONSTER_COUNT
-Monster_WRAMPointer:  ds  MONSTER_COUNT
-Monster_ParentScreen: ds  MONSTER_COUNT ; Parent Object = High Nibble, Screen Index = Low Nibble
-Monster_Flags:        ds  MONSTER_COUNT
-Monster_Collision:    ds  MONSTER_COUNT
-Monster_XPosition:    ds  MONSTER_COUNT
-Monster_XPositionS:   ds  MONSTER_COUNT
-Monster_YPosition:    ds  MONSTER_COUNT
-Monster_YPositionS:   ds  MONSTER_COUNT
-Monster_XVelocity:    ds  MONSTER_COUNT
-Monster_XVelocityS:   ds  MONSTER_COUNT
-Monster_YVelocity:    ds  MONSTER_COUNT
-Monster_YVelocityS:   ds  MONSTER_COUNT
-Monster_AnimBank:     ds  MONSTER_COUNT
-Monster_AnimPtrHi:    ds  MONSTER_COUNT
-Monster_AnimPtrLo:    ds  MONSTER_COUNT
-Monster_AnimTimer:    ds  MONSTER_COUNT
-Monster_ListIndex:    ds  MONSTER_COUNT
+Monster_ID:                 ds  MONSTER_COUNT
+Monster_WRAMPointer:        ds  MONSTER_COUNT
+Monster_ParentScreen:       ds  MONSTER_COUNT ; Parent Object = High Nibble, Screen Index = Low Nibble
+Monster_Flags:              ds  MONSTER_COUNT
+Monster_Collision:          ds  MONSTER_COUNT
+Monster_XPosition:          ds  MONSTER_COUNT
+Monster_XPositionS:         ds  MONSTER_COUNT
+Monster_YPosition:          ds  MONSTER_COUNT
+Monster_YPositionS:         ds  MONSTER_COUNT
+Monster_XVelocity:          ds  MONSTER_COUNT
+Monster_XVelocityS:         ds  MONSTER_COUNT
+Monster_YVelocity:          ds  MONSTER_COUNT
+Monster_YVelocityS:         ds  MONSTER_COUNT
+Monster_AnimBank:           ds  MONSTER_COUNT
+Monster_AnimPtrHi:          ds  MONSTER_COUNT
+Monster_AnimPtrLo:          ds  MONSTER_COUNT
+Monster_AnimTimer:          ds  MONSTER_COUNT
+Monster_ListIndex:          ds  MONSTER_COUNT
 
-PARTICLE_COUNT  equ 6
+PARTICLE_COUNT              equ 6 ; maximum number of particle slots
 
-PARTICLE_FLICKERTIME      equ 30
+PARTICLE_FLICKERTIME        equ 30 ; particles will flicker when their lifetime is smaller than this
 
-PARTICLE_FLAG_DSOLID      equ 0
-PARTICLE_FLAG_DWATER      equ 1
-PARTICLE_FLAG_GRAVITY     equ 2
+PARTICLE_FLAG_DSOLID        equ 0 ; Destroyed when colliding with a solid tile
+PARTICLE_FLAG_DWATER        equ 1 ; Destroyed when colliding with water
+PARTICLE_FLAG_GRAVITY       equ 2 ; Affected by gravity
 
-PARTICLE_COLLIDES         equ %00000011
+PARTICLE_COLLIDES           equ %00000011 ; Destroyed when colliding with water or a solid tile
 
-PARTICLE_GRAVITY          equ $25
+PARTICLE_GRAVITY            equ $25
 
-Particle_Sprite:      ds  PARTICLE_COUNT
-Particle_Attribute:   ds  PARTICLE_COUNT
-Particle_Flags:       ds  PARTICLE_COUNT
-Particle_Screen:      ds  PARTICLE_COUNT
-Particle_Lifetime:    ds  PARTICLE_COUNT ; 0 = Infinite
-Particle_XPosition:   ds  PARTICLE_COUNT
-Particle_XPositionS:  ds  PARTICLE_COUNT
-Particle_YPosition:   ds  PARTICLE_COUNT
-Particle_YPositionS:  ds  PARTICLE_COUNT
-Particle_XVelocity:   ds  PARTICLE_COUNT
-Particle_XVelocityS:  ds  PARTICLE_COUNT
-Particle_YVelocity:   ds  PARTICLE_COUNT
-Particle_YVelocityS:  ds  PARTICLE_COUNT
+Particle_Sprite:            ds  PARTICLE_COUNT
+Particle_Attribute:         ds  PARTICLE_COUNT
+Particle_Flags:             ds  PARTICLE_COUNT
+Particle_Screen:            ds  PARTICLE_COUNT
+Particle_Lifetime:          ds  PARTICLE_COUNT ; 0 = Infinite
+Particle_XPosition:         ds  PARTICLE_COUNT
+Particle_XPositionS:        ds  PARTICLE_COUNT
+Particle_YPosition:         ds  PARTICLE_COUNT
+Particle_YPositionS:        ds  PARTICLE_COUNT
+Particle_XVelocity:         ds  PARTICLE_COUNT
+Particle_XVelocityS:        ds  PARTICLE_COUNT
+Particle_YVelocity:         ds  PARTICLE_COUNT
+Particle_YVelocityS:        ds  PARTICLE_COUNT
 
-OFFSCREEN_THRESHOLD   equ 32
-SPAWN_THRESHOLD_LEFT  equ 8
-SPAWN_THRESHOLD_RIGHT equ 32
+OFFSCREEN_THRESHOLD         equ 32 ; Number of pixels until object is considered offscreen
+SPAWN_THRESHOLD_LEFT        equ 8 ; Number of pixels objects will spawn offscreen to the left
+SPAWN_THRESHOLD_RIGHT       equ 32 ; Number of pixels objects will spawn offscreen to the right
 
 section "Object WRAM",wram0,align[8]
 Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
@@ -104,8 +104,8 @@ minit:  macro
 ; Format: XVelocityS, XVelocity, YVelocityS, YVelocity, Flags
 section "Object Init Data",romx
 ObjectInit:
-    minit   $100,$000,%00000110 ; MONSTER_TEST
-    minit   $080,$000,%00000110 ; MONSTER_TEST2
+    minit   $100,$000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST
+    minit   $080,$000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST2
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
@@ -179,6 +179,10 @@ Monster_MoveLeftRight:
     ld      hl,Monster_YVelocityS
     add     hl,bc
     ld      [hl],a
+:
+    bit     MONSTER_COLLISION_PLAYER,e
+    jr      z,:+
+    ld      b,b
 :
     ret
 
