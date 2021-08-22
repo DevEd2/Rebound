@@ -212,4 +212,4 @@ LevelSelect_LevelNames:
 .45 db          "TRAP TEMPLE 5",0
 .46 db          "TRAP TEMPLE 6",0
 .47 db          "TRAP TEMPLE 7",0
-.NUM_LEVEL_SELECT_ENTRIES db          "FINAL BOSS",0
+.48 db          "FINAL BOSS",0
