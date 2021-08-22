@@ -33,6 +33,7 @@ MONSTER_COLLISION_VERT    equ %00001100
 ; Monster IDs
 MONSTER_NULL        equ 0
 MONSTER_TEST        equ 1
+MONSTER_TEST2       equ 2
 
 Monster_ID:           ds  MONSTER_COUNT
 Monster_WRAMPointer:  ds  MONSTER_COUNT
@@ -94,55 +95,93 @@ TempS:  db
 TempX:  db
 TempY:  db
 
+minit:  macro
+    dw  \1,\2
+    db  \3
+    endm
+
 ; Monster type init data
 ; Format: XVelocityS, XVelocity, YVelocityS, YVelocity, Flags
 section "Object Init Data",romx
 ObjectInit:
-  db  0,1,0,0,%00000110   ; MONSTER_TEST
+    minit   $100,$000,%00000110 ; MONSTER_TEST
+    minit   $080,$000,%00000110 ; MONSTER_TEST2
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
 ; INPUT:  bc = Slot Number
 section "Object Behvaiors",romx
 BehaviorTable:
-  dw  Monster_NoBehavior    ; MONSTER_NULL
-  dw  Monster_TestBehavior  ; MONSTER_TEST
+    dw      Monster_NoBehavior      ; MONSTER_NULL
+    dw      Monster_TestBehavior    ; MONSTER_TEST
+    dw      Monster_MoveLeftRight   ; MONSTER_TEST2
 
 BehaviorDispatch:
-  bit 7,h
-  ret nz  ; return if pointer is outside ROM
-  jp  hl
+    bit     7,h
+    ret     nz  ; return if pointer is outside ROM
+    jp      hl
   
 Monster_NoBehavior:
-  ret
+    ret
   
 Monster_TestBehavior:
-  ld  hl,Monster_Collision
-  add hl,bc
-  ld  a,[hl]
-  ld  e,a
-  and MONSTER_COLLISION_HORIZ
-  jr  z,:+
-  xor a
-  ld  hl,Monster_XVelocity
-  add hl,bc 
-  ld  [hl],a
-  ld  hl,Monster_XVelocityS
-  add hl,bc
-  ld  [hl],a
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    xor     a
+    ld      hl,Monster_XVelocity
+    add     hl,bc 
+    ld      [hl],a
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      [hl],a
 :
-  ld  a,e
-  and MONSTER_COLLISION_VERT
-  jr  z,:+
-  xor a
-  ld  hl,Monster_YVelocity
-  add hl,bc
-  ld  [hl],a
-  ld  hl,Monster_YVelocityS
-  add hl,bc
-  ld  [hl],a
+    ld      a,e
+    and     MONSTER_COLLISION_VERT
+    jr      z,:+
+    xor     a
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],a
 :
-  ret
+    ret
+  
+Monster_MoveLeftRight:
+    ld      b,b
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    ld      [hl+],a
+    ld      a,[hl]
+    cpl
+    inc     a
+    ld      [hl],a
+:
+    ld      a,e
+    and     MONSTER_COLLISION_VERT
+    jr      z,:+
+    xor     a
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],a
+:
+    ret
 
 section "Object System Routines",rom0
 
