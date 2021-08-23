@@ -958,6 +958,7 @@ UpdateMonsters:
   add hl,bc
   ld  a,[Player_XPos]
   sub [hl]
+  push  af
   ld  e,a
   ld  hl,Monster_ParentScreen
   add hl,bc
@@ -966,6 +967,9 @@ UpdateMonsters:
   ld  d,a
   ldh a,[Temp0]
   and $0f
+  ldh [Temp1],a
+  pop af
+  ldh a,[Temp1]
   sbc d
   bit 7,a
   jr  z,:+
@@ -987,29 +991,11 @@ UpdateMonsters:
   add hl,bc
   ld  a,[Player_YPos]
   sub [hl]
-  ld  e,a
-  ld  hl,Monster_ParentScreen
-  add hl,bc
-  ld  a,[hl]
-  and $0f
-  ld  d,a
-  ldh a,[Temp0]
-  and $0f
-  sbc d
   bit 7,a
   jr  z,:+
-  ld  d,a
-  ld  a,e
   cpl
   add 1
-  ld  e,a
-  ld  a,d
-  cpl
-  adc 0
 :
-  or  a
-  jr  nz,.nextMonster
-  ld  a,e
   cp  MONSTER_HITBOXSIZE+Player_HitboxSize
   jr  nc,.nextMonster
   ld  hl,Monster_Collision
