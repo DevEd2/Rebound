@@ -191,8 +191,8 @@ ProcessPlayer:
     ldh     [rLCDC],a
     ld      a,[Engine_LevelID]
     inc     a
-    cp      NUM_LEVELS-1
-    jp      nz,GM_EndScreen
+    cp      NUM_LEVELS
+    jp      z,GM_EndScreen
     ld      [Engine_LevelID],a
     ; restore stack pointer
     pop     hl

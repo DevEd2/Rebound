@@ -104,8 +104,8 @@ minit:  macro
 ; Format: XVelocityS, XVelocity, YVelocityS, YVelocity, Flags
 section "Object Init Data",romx
 ObjectInit:
-    minit   $100,$000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST
-    minit   $080,$000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST2
+    minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST2
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
