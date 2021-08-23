@@ -113,7 +113,7 @@ ObjectInit:
 section "Object Behvaiors",romx
 BehaviorTable:
     dw      Monster_NoBehavior      ; MONSTER_NULL
-    dw      Monster_TestBehavior    ; MONSTER_TEST
+    dw      Monster_MoveLeftRight   ; MONSTER_TEST
     dw      Monster_MoveLeftRight   ; MONSTER_TEST2
 
 BehaviorDispatch:
@@ -159,11 +159,15 @@ Monster_MoveLeftRight:
     ld      e,a
     and     MONSTER_COLLISION_HORIZ
     jr      z,:+
-    ld      hl,Monster_XVelocity
+    ld      hl,Monster_XVelocityS
     add     hl,bc
     ld      a,[hl]
     cpl
-    ld      [hl+],a
+    add     1
+    ld      [hl],a
+    jr      nc,:+
+    ld      hl,Monster_XVelocity
+    add     hl,bc
     ld      a,[hl]
     cpl
     inc     a
@@ -182,7 +186,7 @@ Monster_MoveLeftRight:
 :
     bit     MONSTER_COLLISION_PLAYER,e
     jr      z,:+
-    ld      b,b
+;   ld      b,b
 :
     ret
 
