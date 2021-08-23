@@ -918,7 +918,7 @@ UpdateMonsters:
   call  GetTileCoordinates
   ld  e,a
   pop af
-  call  GetTileL
+  call  GetTileR
   ld  e,a
   ldh a,[Temp1]
   ld  c,a
