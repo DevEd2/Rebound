@@ -8,24 +8,25 @@
 
 section "Object Memory",wram0
 
-MONSTER_COUNT               equ 16 ; maximum number of monster slots
-MONSTER_WRAMSIZE            equ 16 ; dedicated memory for each monster
+MONSTER_COUNT               equ 16  ; maximum number of monster slots
+MONSTER_WRAMSIZE            equ 16  ; dedicated memory for each monster
+MONSTER_TILESTART           equ $c0 ; tile id of the first dynamic object tile
 
-MONSTER_FLAG_CPLAYER        equ 0 ; Collides with player
-MONSTER_FLAG_CWORLD         equ 1 ; Collides with world
-MONSTER_FLAG_GRAVITY        equ 2 ; Affected by gravity
-MONSTER_FLAG_FLIPH          equ 5 ; Horizontal mirroring
-MOSNTER_FLAG_FLIPV          equ 6 ; Vertical mirroring
+MONSTER_FLAG_CPLAYER        equ 0   ; Collides with player
+MONSTER_FLAG_CWORLD         equ 1   ; Collides with world
+MONSTER_FLAG_GRAVITY        equ 2   ; Affected by gravity
+MONSTER_FLAG_FLIPH          equ 5   ; Horizontal mirroring
+MOSNTER_FLAG_FLIPV          equ 6   ; Vertical mirroring
 
 MONSTER_HITBOXSIZE          equ 6
 
 MONSTER_GRAVITY             equ $25
 
-MONSTER_COLLISION_LEFT      equ 0 ; Colliding with a wall to the left
-MONSTER_COLLISION_RIGHT     equ 1 ; Colliding with a wall to the right
-MONSTER_COLLISION_UP        equ 2 ; Colliding with a ceiling
-MONSTER_COLLISION_DOWN      equ 3 ; Colliding with a floor
-MONSTER_COLLISION_PLAYER    equ 4 ; Colliding with the player
+MONSTER_COLLISION_LEFT      equ 0   ; Colliding with a wall to the left
+MONSTER_COLLISION_RIGHT     equ 1   ; Colliding with a wall to the right
+MONSTER_COLLISION_UP        equ 2   ; Colliding with a ceiling
+MONSTER_COLLISION_DOWN      equ 3   ; Colliding with a floor
+MONSTER_COLLISION_PLAYER    equ 4   ; Colliding with the player
 
 MONSTER_COLLISION_HORIZ     equ %00000011 ; Colliding with a wall
 MONSTER_COLLISION_VERT      equ %00001100 ; Colliding with a floor or ceiling
@@ -53,6 +54,7 @@ Monster_AnimPtrHi:          ds  MONSTER_COUNT
 Monster_AnimPtrLo:          ds  MONSTER_COUNT
 Monster_AnimTimer:          ds  MONSTER_COUNT
 Monster_ListIndex:          ds  MONSTER_COUNT
+Monster_TileIndex:          ds  MONSTER_COUNT
 
 PARTICLE_COUNT              equ 6 ; maximum number of particle slots
 
@@ -447,7 +449,14 @@ InitMonster:
   add hl,bc
   ld  [hl],a
   pop de
-  xor a                 ; Clear all remaining fields
+  ld  hl,Monster_TileIndex  ; Set VRAM tile
+  add hl,bc
+  ld  a,c                   ; Get slot number
+  sla a                     ; * 2
+  sla a                     ; * 4
+  add MONSTER_TILESTART     ; Offset to dynamic object tiles
+  ld  [hl],a
+  xor a                     ; Clear all remaining fields
   ld  hl,Monster_XPositionS
   add hl,bc
   ld  [hl],a
