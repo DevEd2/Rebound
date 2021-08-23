@@ -16,3 +16,5 @@ LevelPointers:
     addlevel    TestMap
     addlevel    Plains1
     addlevel    Plains2
+    addlevel    Plains3
+    
