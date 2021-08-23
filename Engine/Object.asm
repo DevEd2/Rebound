@@ -164,13 +164,14 @@ Monster_MoveLeftRight:
     ld      a,[hl]
     cpl
     add     1
+    push    af
     ld      [hl],a
-    jr      nc,:+
     ld      hl,Monster_XVelocity
     add     hl,bc
+    pop     af
     ld      a,[hl]
     cpl
-    inc     a
+    adc     0
     ld      [hl],a
 :
     ld      a,e
