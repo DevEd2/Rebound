@@ -175,6 +175,11 @@ Monster_MoveLeftRight:
     cpl
     adc     0
     ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
 :
     ld      a,e
     and     MONSTER_COLLISION_VERT
