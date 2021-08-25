@@ -70,3 +70,37 @@ EndSprites:
   cp  40
   jr   nz,:-
   ret
+  
+; Load dynamic tiles
+; INPUT:  hl = Tile Data Pointer
+;          a = Tile ID
+;          b = Byte Count
+LoadSpriteTiles:
+  ld  de,$8000
+  swap  a
+  ld  c,a
+  and $f0
+  add e
+  push  af
+  ld  e,a
+  ld  a,c
+  and $0f
+  ld  c,a
+  pop af
+  ld  a,c
+  adc d
+  ld  d,a
+  ld  a,1
+  ldh [rVBK],a
+.loadLoop:
+  ldh a,[rSTAT]
+  and 2
+  jr  nz,.loadLoop
+  ld  a,[hl+]
+  ld  [de],a
+  inc de
+  dec b
+  jr  nz,.loadLoop
+  xor a
+  ldh [rVBK],a
+  ret

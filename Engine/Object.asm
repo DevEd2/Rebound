@@ -426,6 +426,7 @@ SpawnMonsters:
 ; INPUT:    bc    = Slot Number
 ;            d    = List Index
 ;           Temp* = Object ID, X, Y, Screen
+; TODO:     Load actual enemy tiles
 InitMonster:
   ldh a,[TempID]        ; Restore Object ID
   ld  [hl],a            ; Set Object ID
@@ -492,6 +493,8 @@ InitMonster:
   add hl,bc
   ld  [hl],a
   pop de
+  resbank
+  ld  a,[hl]
   ld  hl,Monster_TileIndex  ; Set VRAM tile
   add hl,bc
   ld  a,c                   ; Get slot number
@@ -499,6 +502,14 @@ InitMonster:
   sla a                     ; * 4
   add MONSTER_TILESTART     ; Offset to dynamic object tiles
   ld  [hl],a
+  push  de
+  push  bc
+  ldfar hl,PlayerTiles
+  ld  b,$40
+  call  LoadSpriteTiles
+  resbank
+  pop bc
+  pop de
   xor a                     ; Clear all remaining fields
   ld  hl,Monster_XPositionS
   add hl,bc
@@ -1086,7 +1097,6 @@ UpdateMonsters:
   ret
   
 ; Generate Monster sprite entries
-; TODO - Remove placeholder sprite
 RenderMonsters:
   ld  b,0
   ld  c,MONSTER_COUNT-1
@@ -1099,6 +1109,10 @@ RenderMonsters:
   ld  de,0
   push  bc
 :
+  ld  hl,Monster_TileIndex
+  add hl,bc
+  ld  a,[hl]
+  ldh [Temp0],a
   ld  hl,Monster_XPosition
   add hl,bc
   ld  a,[hl]
@@ -1136,11 +1150,12 @@ RenderMonsters:
   or  %00001000
   push  bc
   ld  c,a
-  ld  b,0
+  ldh a,[Temp0]
   bit MONSTER_FLAG_FLIPH,c
   jr  z,:+
-  ld  b,2
+  add 2
 :
+  ld  b,a
   call  AddSprite
   ld  a,e
   add 8
