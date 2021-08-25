@@ -15,6 +15,7 @@ MONSTER_TILESTART           equ $c0 ; tile id of the first dynamic object tile
 MONSTER_FLAG_CPLAYER        equ 0   ; Collides with player
 MONSTER_FLAG_CWORLD         equ 1   ; Collides with world
 MONSTER_FLAG_GRAVITY        equ 2   ; Affected by gravity
+MONSTER_FLAG_REMOVE_Y       equ 3   ; Delete if offscreen vertically
 MONSTER_FLAG_FLIPH          equ 5   ; Horizontal mirroring
 MOSNTER_FLAG_FLIPV          equ 6   ; Vertical mirroring
 
@@ -194,7 +195,7 @@ Monster_MoveLeftRight:
 :
     bit     MONSTER_COLLISION_PLAYER,e
     ret     z
-;   jr      Monster_CheckKill
+    jr      Monster_CheckKill
 
 Monster_CheckKill:
     ld      a,[sys_btnHold]
@@ -212,7 +213,7 @@ Monster_CheckKill:
     ld      hl,Monster_Flags
     add     hl,bc
     ld      a,[hl]
-    ld      a,1<<MONSTER_FLAG_GRAVITY
+    ld      a,1<<MONSTER_FLAG_GRAVITY | 1<<MONSTER_FLAG_REMOVE_Y
     ld      [hl],a
     ; clear horizontal velocity
     ld      hl,Monster_XVelocity
@@ -1002,6 +1003,24 @@ UpdateMonsters:
   cp  -OFFSCREEN_THRESHOLD
   jr  nc,:+
   call  DeleteMonster
+  jr  .nextMonster
+:
+  ld  hl,Monster_Flags
+  add hl,bc
+  bit MONSTER_FLAG_REMOVE_Y,[hl]
+  jr  z,:+
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[Engine_CameraY]
+  ld  d,a
+  ld  a,[hl]
+  sub d
+  cp  SCRN_Y+OFFSCREEN_THRESHOLD
+  jr  c,:+
+  cp  -OFFSCREEN_THRESHOLD
+  jr  nc,:+
+  call  DeleteMonster
+  jr  .nextMonster
 :
   
   ; Player Collision
