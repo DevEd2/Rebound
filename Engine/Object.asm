@@ -125,7 +125,7 @@ BehaviorDispatch:
   
 Monster_NoBehavior:
     ret
-  
+
 Monster_TestBehavior:
     ld      hl,Monster_Collision
     add     hl,bc
@@ -193,9 +193,46 @@ Monster_MoveLeftRight:
     ld      [hl],a
 :
     bit     MONSTER_COLLISION_PLAYER,e
-    jr      z,:+
-;   ld      b,b
-:
+    ret     z
+;   jr      Monster_CheckKill
+
+Monster_CheckKill:
+    ld      a,[sys_btnHold]
+    bit     btnA,a  ; is A held?
+    jr      nz,.dokill
+    jp      KillPlayer
+
+.dokill
+    ; check if player is falling
+    ld      a,[Player_YVelocity]
+    bit     7,a
+    jp      nz,KillPlayer
+
+    ; disable all collision
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    ld      a,1<<MONSTER_FLAG_GRAVITY
+    ld      [hl],a
+    ; clear horizontal velocity
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    ld      [hl],0
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      [hl],0
+    ; set vertical velocity
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      [hl],low(-$300)
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],high(-$300)
+    ; make player bounce
+    ld      a,-3
+    ld      [Player_YVelocity],a
+    xor     a
+    ld      [Player_YVelocityS],a
     ret
 
 section "Object System Routines",rom0

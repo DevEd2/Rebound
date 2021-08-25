@@ -1091,6 +1091,7 @@ KillPlayer:
     ld      hl,Player_MovementFlags
     bit     bPlayerIsDead,[hl]
     ret     nz
+    push    bc
     xor     a
     ld      [Player_XVelocity],a
     ld      [Player_XVelocityS],a
@@ -1103,6 +1104,7 @@ KillPlayer:
     ld      hl,Anim_Player_Hurt
     call    Player_SetAnimation
     PlaySFX death
+    pop     bc
     ret
     
 Player_Respawn:
