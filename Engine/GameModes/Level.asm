@@ -230,6 +230,7 @@ LevelLoop::
 
 .nocamera
     
+    call    SpawnMonsters
     call    BeginSprites
     ld      a,[Player_XPos]
     push    af
@@ -294,7 +295,6 @@ LevelLoop::
     call    Level_LoadMapRow
     ; fall through
 .skipload
-    call    SpawnMonsters
     call    UpdateMonsters
     call    UpdateParticles
     call    RenderMonsters
