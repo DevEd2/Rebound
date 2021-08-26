@@ -114,14 +114,14 @@ mgraphic: macro
 section "Object Init Data",romx
 ObjectInit:
     minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1 ; MONSTER_TEST
-    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(TestAnim),TestAnim ; MONSTER_TEST2
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk ; MONSTER_TEST2
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
 section "Object Tile Pointers",romx
 ObjectGraphics:
     mgraphic  BANK(PlayerTiles), PlayerTiles  ; MOSNTER_TEST
-    mgraphic  BANK(PlayerTiles), PlayerTiles  ; MONSTER_TEST2
+    mgraphic  BANK(GoonyTiles),GoonyTiles  ; MONSTER_TEST2
     
 ; Object animations
 section "Object Animation Data",romx
@@ -129,6 +129,21 @@ TestAnim:
     db  6,6
     db  7,6
     dbw $80,TestAnim
+	
+Anim_GoonyWalk:
+	db	0,4
+	db	1,4
+	db	2,4
+	db	3,4
+	db	4,4
+	db	5,4
+	db	6,4
+	db	7,4
+	dbw	$80,Anim_GoonyWalk
+
+Anim_GoonyKill:
+	db	8,1
+	dbw	$80,Anim_GoonyKill
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
@@ -237,9 +252,9 @@ Monster_CheckKill:
     ld      hl,Player_MovementFlags
     set     bPlayerHitEnemy,[hl]
     ; play "enemy killed" sound effect
-    push	  bc
-    PlaySFX	enemykill
-    pop		  bc
+    push	bc
+	PlaySFX	enemykill
+	pop		bc
     ; disable all collision
     ld      hl,Monster_Flags
     add     hl,bc

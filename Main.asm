@@ -979,9 +979,12 @@ include "Audio/DevSound.asm"
 ; Graphics data
 ; =============
 
+; Sprite graphics
+include	"GFX/Sprites/Goony/Goony.inc"
+
 section "Particle tiles",romx
 ParticleTiles:
     incbin  "GFX/Particles.2bpp.wle"
-    
+
 section "Palette data",romx
 include "Data/Palettes.asm"

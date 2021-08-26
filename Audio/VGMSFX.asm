@@ -59,6 +59,7 @@ VGMSFX_Init:
     ld      [VGMSFX_Pointer+1],a
     xor     a
     ldh     [rNR10],a           ; reset sweep
+	resbank
     ret                         ; done!
     
 VGMSFX_ClearCH1:
