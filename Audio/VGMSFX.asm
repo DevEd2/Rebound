@@ -30,7 +30,7 @@ section "VGMSFX",rom0
 
 ;  A = SFX bank
 ; HL = SFX pointer
-; Destroys: a, hl
+; Destroys: a, b, hl
 VGMSFX_Init:
     ; selectively clear sound channels
     push    af
