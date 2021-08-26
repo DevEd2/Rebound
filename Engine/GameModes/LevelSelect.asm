@@ -14,7 +14,7 @@ GM_LevelSelect:
     call    LoadPal
     call    CopyPalettes
 
-    ld      hl,Font
+    ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
 

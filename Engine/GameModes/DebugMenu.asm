@@ -15,10 +15,10 @@ GM_DebugMenu:
     call    LoadPal
     call    CopyPalettes
 
-    ld      hl,Font
+    ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
-    ld      hl,Debug_MainMenuText
+    ldfar   hl,Debug_MainMenuText
     call    LoadTilemapText
 
     ld      a,3
@@ -150,6 +150,7 @@ Debug_InvalidMenu:
     PlaySFX menudeny
     jp      DebugLoop.drawcursor
 
+section "Debug menu text",romx
 Debug_MainMenuText:
     db  "                    "
     db  "   - REBOUND GB -   "

@@ -197,6 +197,7 @@ ROMChecksum:    dw  0                           ; ROM checksum (2 bytes) (handle
 ; Start of program code
 ; =====================
 
+section fragment "Program code",rom0[$150]
 ProgramStart::
     di
     ld      sp,$d000
@@ -274,10 +275,10 @@ EmuScreen:
     call    LoadPal
     call    CopyPalettes
 
-    ld      hl,Font
+    ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
-    ld      hl,EmuText
+    ldfar   hl,EmuText
     call    LoadTilemapText
 
     ld      a,%10010001
@@ -294,10 +295,10 @@ GBCOnlyScreen:
     
     ; GBC only screen
     SetDMGPal   rBGP,0,3,3,0
-    ld      hl,Font
+    ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
-    ld      hl,GBCOnlyText
+    ldfar   hl,GBCOnlyText
     call    LoadTilemapText
     
     ld      a,%10010001
@@ -308,6 +309,7 @@ GBCOnlyScreen:
 GBCOnlyLoop:
     jr      GBCOnlyLoop
 
+section	"DMG and emulator lockout screen text",romx
 GBCOnlyText:    ; 20x18 char tilemap
     db  "                    "
     db  "                    "
@@ -346,7 +348,9 @@ EmuText:
     db  "                    "
     db  "                    "
     db  "                    "
-    
+
+section fragment "Program code",rom0
+
 ; ========================================================================
 
 SkipGBCScreen:
@@ -428,31 +432,6 @@ DoVBlank::
     inc a
     ld  [sys_CurrentFrame],a    ; increment current frame
     call    CheckInput
-    ; sleep mode check
-    ld      a,[sys_PauseGame]
-    and     a   ; is game paused?
-    jr      z,:++
-    ld      a,[sys_btnHold]
-    and     a   ; are any buttons being pressed?
-    jr      z,:+
-    ld      a,60
-    ld      [sys_SleepModeTimer],a
-    ld      [sys_SecondsUntilSleep],a
-    jr      :++
-:   ld      a,[sys_SleepModeTimer]
-    dec     a
-    ld      [sys_SleepModeTimer],a
-    jr      nz,:+
-    ld      a,60
-    ld      [sys_SleepModeTimer],a
-    ld      a,[sys_SecondsUntilSleep]
-    dec     a
-    ld      [sys_SecondsUntilSleep],a
-    jr      nz,:+
-    call    SleepMode
-    ld      a,60
-    ld      [sys_SleepModeTimer],a
-    ld      [sys_SecondsUntilSleep],a
     
 :   ; setup HDMA for parallax GFX transfer
     ld      a,[sys_EnableHDMA]
@@ -795,42 +774,9 @@ include "Engine/Sprite.asm"
 ; Misc routines
 ; =============
 
-include "Engine/GBPrinter.asm"
+; include "Engine/GBPrinter.asm"
 
 ; ================
-
-; Enter low-power mode until the user presses A, B, Start, or Select.
-; FIXME: Doesn't work on hardware, figure out why
-; Commenting this out for now
-SleepMode:
-;    di                      ; disable interrupts
-;    ldh     a,[rLCDC]
-;    push    af              ; store current LCD enable state
-;    ; wait for VBlank
-;    ld      hl,rLY
-;    ld      a,SCRN_Y
-;.wait
-;    cp      [hl]
-;    jr      nz,.wait
-;    xor     a
-;    ldh     [rLCDC],a       ; disable LCD
-;    ld      a,P1F_GET_BTN
-;    ldh     [rP1],a         ; enable high/low transition when A/B/Start/Select is pressed
-;    ldh     a,[rIE]
-;    ld      e,a             ; save currently enabled interrupts
-;    ld      a,IEF_HILO
-;    ldh     [rIE],a         ; enable joypad high/low transition interrupt
-;    xor     a
-;    ldh     [rNR52],a       ; disable sound
-;    ei
-;    stop                    ; enter low power mode until an interrupt occurs
-;    ld      a,%10000000
-;    ldh     [rNR52],a       ; re-enable sound
-;    ld      a,e
-;    ldh     [rIE],a         ; restore previously enabled interrupts
-;    pop     af
-;    ldh     [rLCDC],a       ; restore previous LCD enable state
-    ret
 
 ; Performs a bankswitch to bank B, preserving previous ROM bank.
 ; INPUT:    b = bank
@@ -925,7 +871,7 @@ include "Engine/WLE_Decode.asm"
 ; Misc data
 ; =========
 
-section "Sine table",rom0,align[8]
+section "Sine table",romx,align[8]
 SinTable:
 angle=0.0
     rept    256
@@ -938,16 +884,15 @@ angle=0.0
     db  mul(127.0,cos(angle)+1.0)>>16
 angle=angle+256.0
     endr
-
-; =============
-; Graphics data
-; =============
-
-Font::              incbin  "GFX/Font.bin.wle"
     
 ; =============
 ; Misc routines
 ; =============
+
+include "Engine/Metatile.asm"
+include "Engine/Parallax.asm"
+include "Engine/Player.asm"
+include "Engine/Object.asm"
 
 ; 16-bit Compare
 ; INPUT:    bc = value 1
@@ -963,11 +908,6 @@ Compare16:
     cp  e
     ret
 
-include "Engine/Metatile.asm"
-include "Engine/Parallax.asm"
-include "Engine/Player.asm"
-include "Engine/Object.asm"
-
 ; ==========
 ; Sound data
 ; ==========
@@ -979,7 +919,9 @@ include "Audio/DevSound.asm"
 ; Graphics data
 ; =============
 
-; Sprite graphics
+section "Font",romx
+Font::              incbin  "GFX/Font.bin.wle"
+
 include	"GFX/Sprites/Goony/Goony.inc"
 
 section "Particle tiles",romx
