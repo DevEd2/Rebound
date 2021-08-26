@@ -296,6 +296,7 @@ LevelLoop::
     ; fall through
 .skipload
     call    UpdateMonsters
+    call    AnimateMonsters
     call    UpdateParticles
     call    RenderMonsters
     call    RenderParticles

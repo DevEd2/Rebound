@@ -100,15 +100,36 @@ TempY:  db
 
 minit:  macro
     dw  \1,\2
-    db  \3
+    db  \3,\4
+    dw  \5
+    endm
+    
+mgraphic: macro
+    db  \1
+    dw  \2
     endm
 
 ; Monster type init data
-; Format: XVelocityS, XVelocity, YVelocityS, YVelocity, Flags
+; Format: XVelocity, YVelocity, Flags, Anim Bank, Anim Pointer
+; Anim Pointer of -1 = No Animation
 section "Object Init Data",romx
 ObjectInit:
-    minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST
-    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY ; MONSTER_TEST2
+    minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1 ; MONSTER_TEST
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(TestAnim),TestAnim ; MONSTER_TEST2
+    
+; Monster graphics pointer table
+; Format: Bank, Pointer
+section "Object Tile Pointers",romx
+ObjectGraphics:
+    mgraphic  BANK(PlayerTiles), PlayerTiles  ; MOSNTER_TEST
+    mgraphic  BANK(PlayerTiles), PlayerTiles  ; MONSTER_TEST2
+    
+; Object animations
+section "Object Animation Data",romx
+TestAnim:
+    db  6,6
+    db  7,6
+    dbw $80,TestAnim
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
@@ -426,7 +447,6 @@ SpawnMonsters:
 ; INPUT:    bc    = Slot Number
 ;            d    = List Index
 ;           Temp* = Object ID, X, Y, Screen
-; TODO:     Load actual enemy tiles
 InitMonster:
   ldh a,[TempID]        ; Restore Object ID
   ld  [hl],a            ; Set Object ID
@@ -456,10 +476,9 @@ InitMonster:
   push  de
   ldh a,[TempID]        ; Get Object ID
   dec a                 ; Init data starts at Object 1
-  ld  e,a               ; Calculate ID * 5
-  sla a
-  sla a
-  add e
+  sla a                 ; ID * 2
+  sla a                 ; ID * 4
+  sla a                 ; ID * 8
   push  bc
   ldfar de,ObjectInit   ; Load fields from object type init data
   pop bc
@@ -492,6 +511,28 @@ InitMonster:
   ld  hl,Monster_Flags
   add hl,bc
   ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_AnimBank
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_AnimPtrLo
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_AnimPtrHi
+  add hl,bc
+  ld  [hl],a
+  cp  -1
+  jr  z,:+
+  ld  a,1
+:
+  ld  hl,Monster_AnimTimer
+  add hl,bc
+  ld  [hl],a
   pop de
   resbank
   ld  a,[hl]
@@ -502,14 +543,6 @@ InitMonster:
   sla a                     ; * 4
   add MONSTER_TILESTART     ; Offset to dynamic object tiles
   ld  [hl],a
-  push  de
-  push  bc
-  ldfar hl,PlayerTiles
-  ld  b,$40
-  call  LoadSpriteTiles
-  resbank
-  pop bc
-  pop de
   xor a                     ; Clear all remaining fields
   ld  hl,Monster_XPositionS
   add hl,bc
@@ -1095,6 +1128,132 @@ UpdateMonsters:
   ldh a,[Temp0]
   ld  [Engine_CurrentScreen],a
   ret
+  
+; Update Monster animations
+AnimateMonsters:
+  ld  b,0
+  ld  c,MONSTER_COUNT-1
+.animLoop:
+  ld  hl,Monster_ID
+  add hl,bc
+  ld  a,[hl]
+  or  a
+  jp  z,.nextMonster
+  ld  hl,Monster_AnimTimer
+  add hl,bc
+  ld  a,[hl]
+  cp  -1                    ; -1 = Infinite
+  jp  z,.nextMonster
+  dec a                     ; Decrement timer
+  ld  [hl],a
+  jp  nz,.nextMonster       ; If zero, advance animation
+  ld  hl,Monster_AnimBank   ; Bank switch to animation data
+  add hl,bc
+  ld  b,[hl]
+  call  _Bankswitch
+  ld  b,0
+  ld  hl,Monster_AnimPtrLo  ; Get animation pointer in DE
+  add hl,bc
+  ld  e,[hl]
+  ld  hl,Monster_AnimPtrHi
+  add hl,bc
+  ld  d,[hl]
+  bit 7,d                   ; Make sure pointer is pointing to ROM
+  jr  nz,.nextMonster
+.getEntry:
+  ld  a,[de]                ; Get next frame or command
+  inc de                    ; Advance pointer
+  bit 7,a                   ; Bit 7 Set = Command
+  jr  nz,.cmdProc
+  ldh [Temp0],a             ; Save next frame
+  ld  hl,Monster_TileIndex  
+  add hl,bc
+  ld  a,[hl]
+  ldh [Temp1],a             ; Save tile index
+  push  de
+  ld  hl,Monster_ID         ; Get Object ID
+  add hl,bc
+  ld  a,[hl]
+  dec a                     ; Table starts at Object 1
+  ld  e,a                   ; Calculate ID * 3
+  ld  d,0                   ; And place in DE
+  sla a
+  jr  nc,:+
+  inc d
+:
+  add e
+  jr  nc,:+
+  inc d
+:
+  ld  e,a
+  push  bc
+  ldfar hl,ObjectGraphics   ; Object graphics table
+  add hl,de
+  ld  a,[hl+]               ; Graphics Bank
+  ld  b,a
+  ld  a,[hl+]               ; Pointer Lo
+  ld  e,a
+  ld  d,[hl]                ; Pointer Hi
+  ldh a,[Temp0]             ; Restore frame index
+  ld  l,a
+  ld  h,0
+  add hl,hl                 ; Frame * 2
+  add hl,hl                 ; Frame * 4
+  add hl,hl                 ; Frame * 8
+  add hl,hl                 ; Frame * 16
+  add hl,hl                 ; Frame * 32
+  add hl,hl                 ; Frame * 64
+  add hl,de                 ; Add to start of object frames
+  call  _Bankswitch         ; Bank switch to tile data
+  ldh a,[Temp1]
+  ld  b,$40
+  call  LoadSpriteTiles
+  pop bc
+  pop de
+  ld  hl,Monster_AnimBank   ; Switch back to animation bank
+  add hl,bc
+  ld  b,[hl]
+  call _Bankswitch
+  ld  b,0
+  ld  a,[de]                ; Next timer
+  inc de
+  ld  hl,Monster_AnimTimer
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_AnimPtrLo  ; Save animation pointer
+  add hl,bc
+  ld  [hl],e
+  ld  hl,Monster_AnimPtrHi
+  add hl,bc
+  ld  [hl],d
+  jr  .nextMonster
+.cmdProc:
+  sla a
+  ld  hl,.cmdTable
+  add l
+  ld  l,a
+  jr  nc,:+
+  inc h
+:
+  ld  a,[hl+]
+  ld  h,[hl]
+  ld  l,a
+  jp  hl
+.nextMonster:
+  dec c
+  bit 7,c
+  jp  z,.animLoop
+  ret
+.cmdTable:
+  dw  .setAnim
+.setAnim:
+  ld  a,[de]
+  inc de
+  ld  l,a
+  ld  a,[de]
+  ld  d,a
+  ld  e,l
+  jp  .getEntry
   
 ; Generate Monster sprite entries
 RenderMonsters:
