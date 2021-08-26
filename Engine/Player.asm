@@ -51,7 +51,7 @@ bPlayerIsMoving             = 0
 bPlayerIsUnderwater         = 1
 bPlayerIsDead               = 2
 bPlayerVictory              = 3
-bPlayerUnused4              = 4
+bPlayerHitEnemy             = 4
 bPlayerUnused5              = 5
 bPlayerUnused6              = 6
 bPlayerDirection            = 7
@@ -129,6 +129,8 @@ InitPlayer:
 ; ========
 
 ProcessPlayer:
+    ld      hl,Player_MovementFlags
+    res     bPlayerHitEnemy,[hl]
     ; Player Input
     ld      a,[sys_btnPress]
     bit     btnSelect,a

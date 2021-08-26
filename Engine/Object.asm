@@ -224,15 +224,22 @@ Monster_CheckKill:
     jp      KillPlayer
 
 .dokill
+    ; check if player has killed an enemy this frame
+    ld      a,[Player_MovementFlags]
+    bit     bPlayerHitEnemy,a
+    jr      :+
     ; check if player is falling
     ld      a,[Player_YVelocity]
     bit     7,a
     jp      nz,KillPlayer
-
-	; play "enemy killed" sound effect
-	push	bc
-	PlaySFX	enemykill
-	pop		bc
+:
+    ; set flag that player has killed an enemy
+    ld      hl,Player_MovementFlags
+    set     bPlayerHitEnemy,[hl]
+    ; play "enemy killed" sound effect
+    push	  bc
+    PlaySFX	enemykill
+    pop		  bc
     ; disable all collision
     ld      hl,Monster_Flags
     add     hl,bc
