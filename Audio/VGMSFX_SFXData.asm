@@ -45,4 +45,5 @@ endm
     defsfx  1up,SFX_CH1
     defsfx  1up_nointro,SFX_CH1
     defsfx  explosion,SFX_CH1|SFX_CH4
+	defsfx	enemykill,SFX_CH1
     endsfx

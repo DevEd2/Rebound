@@ -230,6 +230,10 @@ Monster_CheckKill:
     bit     7,a
     jp      nz,KillPlayer
 
+	; play "enemy killed" sound effect
+	push	bc
+	PlaySFX	enemykill
+	pop		bc
     ; disable all collision
     ld      hl,Monster_Flags
     add     hl,bc
@@ -251,9 +255,9 @@ Monster_CheckKill:
     add     hl,bc
     ld      [hl],high(-$300)
     ; make player bounce
-    ld      a,-3
+    ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
-    xor     a
+    ld      a,low(Player_HighBounceHeight)
     ld      [Player_YVelocityS],a
     ret
 
