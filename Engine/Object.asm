@@ -4,7 +4,6 @@
 
 ; TODO
 ; - Object Behaviors
-; - Object Sprites
 
 section "Object Memory",wram0
 
@@ -552,6 +551,9 @@ InitMonster:
   add hl,bc
   ld  [hl],a
   ld  hl,Monster_YPositionS
+  add hl,bc
+  ld  [hl],a
+  ld  hl,Monster_Collision
   add hl,bc
   ld  [hl],a
   resbank
