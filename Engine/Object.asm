@@ -228,10 +228,24 @@ Monster_MoveLeftRight:
     add     hl,bc
     ld      [hl],a
 :
-    bit     MONSTER_COLLISION_PLAYER,e
-    ret     z
-    jr      Monster_CheckKill
+	bit     MONSTER_COLLISION_PLAYER,e
+	ld		de,Anim_GoonyKill
+ 	jr		nz,Monster_CheckKill
+	; death animation flipping
+    ld      hl,Monster_Flags
+    add     hl,bc
+	bit		MONSTER_FLAG_REMOVE_Y,[hl]
+	ret		z
+	ld		a,[sys_CurrentFrame]
+	and		$7
+	and		a
+	ret		nz
+	ld		a,[hl]
+	xor		1<<MONSTER_FLAG_FLIPH
+	ld		[hl],a
+	ret
 
+; INPUT: de = animation pointer for death animation
 Monster_CheckKill:
     ld      a,[sys_btnHold]
     bit     btnA,a  ; is A held?
@@ -271,10 +285,20 @@ Monster_CheckKill:
     ; set vertical velocity
     ld      hl,Monster_YVelocity
     add     hl,bc
-    ld      [hl],low(-$300)
+    ld      [hl],high(-$300)
     ld      hl,Monster_YVelocityS
     add     hl,bc
-    ld      [hl],high(-$300)
+    ld      [hl],low(-$300)
+	; set animation
+	ld		hl,Monster_AnimPtrHi
+	add		hl,bc
+	ld		[hl],d
+	ld		hl,Monster_AnimPtrLo
+	add		hl,bc
+	ld		[hl],e
+	ld		hl,Monster_AnimTimer
+	add		hl,bc
+	ld		[hl],1
     ; make player bounce
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
