@@ -343,6 +343,9 @@ Level_PauseLoop:
     ret
     
 Level_TransitionUp:
+    ld      a,[Engine_CurrentSubarea]
+    and     $30
+    jr      z,:+
     ld      a,[Player_MovementFlags]
     bit     2,a
     ret     nz
@@ -379,8 +382,19 @@ Level_TransitionUp:
     dec     b
     jr      nz,.loop
     ret
+:
+    xor     a
+    ld      [Player_YVelocity],a
+    ld      [Player_YVelocityS],a
+    ld      [Player_YSubpixel],a
+    ld      a,8
+    ld      [Player_YPos],a
+    ret
     
 Level_TransitionDown:
+    ld      a,[Engine_CurrentSubarea]
+    cp      $30
+    jp      nc,KillPlayer
     ld      a,[Player_MovementFlags]
     bit     2,a
     ret     nz
@@ -419,9 +433,7 @@ Level_TransitionDown:
     halt
     dec     b
     jr      nz,.loop
-
-    ret
-    
+    ret    
 
 ; ================================================================
 
