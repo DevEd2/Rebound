@@ -91,6 +91,9 @@ OFFSCREEN_THRESHOLD         equ 32 ; Number of pixels until object is considered
 SPAWN_THRESHOLD_LEFT        equ 8 ; Number of pixels objects will spawn offscreen to the left
 SPAWN_THRESHOLD_RIGHT       equ 32 ; Number of pixels objects will spawn offscreen to the right
 
+section "Object Perma Killed",wram0,align[8]
+NoRespawn:                  ds  256
+
 section "Object WRAM",wram0,align[8]
 Monster_WRAM: ds MONSTER_WRAMSIZE*MONSTER_COUNT
 
@@ -276,7 +279,7 @@ Collectable_ExtraLife:
     add     hl,bc
     ld      [hl],MONSTER_NULL
     ; prevent monster from respawning
-    jp      KillMonster
+    jp      PermaKillMonster
     
 
 ; INPUT: de = animation pointer for death animation
@@ -356,7 +359,7 @@ ClearMonsters:
   jr  nz,:-
   ret
   
-; Clear Respawn List
+; Clear Respawn Lists
 ClearRespawn:
   ld    hl,Respawn_Index
   ld    b,RESPAWN_LIST_SIZE
@@ -367,6 +370,11 @@ ClearRespawn:
   jr    nz,:-
   xor   a
   ld    [Respawn_Next],a
+  ld    hl,NoRespawn
+:
+  ld    [hl+],a
+  dec   b
+  jr    nz,:-
   ret
   
 ; Get Free Monster Slot
@@ -494,6 +502,11 @@ SpawnMonsters:
   jr  z,.existFound
   dec b
   jr  nz,.respawnLoop
+  ld  h,HIGH(NoRespawn)
+  ld  l,d
+  ld  a,[hl]
+  or  a
+  jr  nz,.existFound
   pop hl                    ; Restore object data pointer
   ld  a,[hl+]               ; Get Screen Number
   ldh [TempS],a             ; Save Screen Number
@@ -543,11 +556,11 @@ SpawnMonsters:
   call InitMonster          ; Set monster fields
   pop hl                    ; Restore object data pointer
   inc d
-  jr  .spawnLoop            ; Next entry
+  jp  .spawnLoop            ; Next entry
 .noSpawn:
   inc hl                    ; Advance to next entry
   inc d
-  jr  .spawnLoop
+  jp  .spawnLoop
   
 ; Initialize a monster slot
 ; INPUT:    bc    = Slot Number
@@ -1463,6 +1476,17 @@ KillMonster:
   inc a
   and $0f
   ld  [Respawn_Next],a
+  ret
+  
+; Mark Monster as permanently killed
+; INPUT:  bc = Monster Slot Number
+PermaKillMonster:
+  ld  hl,Monster_ListIndex
+  add hl,bc
+  ld  l,[hl]
+  ld  h,HIGH(NoRespawn)
+  ld  a,1
+  ld  [hl],a
   ret
   
 ; Delete a Monster and all children
