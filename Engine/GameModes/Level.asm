@@ -62,6 +62,7 @@ GM_Level:
     ; initialize object lists
     call    ClearMonsters
     call    ClearParticles
+    call    ClearRespawn
     
     ; spawn initial objects
     call    InitSpawnMonsters

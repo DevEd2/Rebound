@@ -57,6 +57,10 @@ Monster_AnimTimer:          ds  MONSTER_COUNT
 Monster_ListIndex:          ds  MONSTER_COUNT
 Monster_TileIndex:          ds  MONSTER_COUNT
 
+RESPAWN_LIST_SIZE           equ 16
+Respawn_Index:              ds  RESPAWN_LIST_SIZE ; -1 = Empty
+Respawn_Next:               db
+
 PARTICLE_COUNT              equ 6 ; maximum number of particle slots
 
 PARTICLE_FLICKERTIME        equ 30 ; particles will flicker when their lifetime is smaller than this
@@ -294,6 +298,8 @@ Monster_CheckKill:
     ; set flag that player has killed an enemy
     ld      hl,Player_MovementFlags
     set     bPlayerHitEnemy,[hl]
+    ; prevent monster from respawning
+    call  KillMonster
     ; play "enemy killed" sound effect
     push    bc
     PlaySFX enemykill
@@ -347,6 +353,19 @@ ClearMonsters:
   ld  [hl+],a
   dec b
   jr  nz,:-
+  ret
+  
+; Clear Respawn List
+ClearRespawn:
+  ld    hl,Respawn_Index
+  ld    b,RESPAWN_LIST_SIZE
+  ld    a,-1
+:
+  ld    [hl+],a
+  dec   b
+  jr    nz,:-
+  xor   a
+  ld    [Respawn_Next],a
   ret
   
 ; Get Free Monster Slot
@@ -466,6 +485,14 @@ SpawnMonsters:
   inc d
   jr  .spawnLoop
 .existEnd:
+  ld  hl,Respawn_Index
+  ld  b,RESPAWN_LIST_SIZE
+.respawnLoop:
+  ld  a,[hl+]
+  cp  a,d
+  jr  z,.existFound
+  dec b
+  jr  nz,.respawnLoop
   pop hl                    ; Restore object data pointer
   ld  a,[hl+]               ; Get Screen Number
   ldh [TempS],a             ; Save Screen Number
@@ -1415,6 +1442,26 @@ RenderMonsters:
   dec c
   bit 7,c
   jr  z,.renderLoop
+  ret
+  
+; Mark Monster as killed and prevent it from respawning
+; INPUT:  bc = Monster Slot Number
+KillMonster:
+  ld  a,[Respawn_Next]
+  add LOW(Respawn_Index)
+  ld  e,a
+  ld  d,HIGH(Respawn_Index)
+  jr  nc,:+
+  inc d
+:
+  ld  hl,Monster_ListIndex
+  add hl,bc
+  ld  a,[hl]
+  ld  [de],a
+  ld  a,[Respawn_Next]
+  inc a
+  and $0f
+  ld  [Respawn_Next],a
   ret
   
 ; Delete a Monster and all children
