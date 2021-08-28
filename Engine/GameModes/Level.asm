@@ -108,6 +108,7 @@ LevelLoop::
     jr      nc,.checkright
     ld      b,a
     ld      a,[Engine_CurrentScreen]
+    and     $f
     and     a
     ld      a,b
     jr      nz,.setcamx
@@ -115,6 +116,7 @@ LevelLoop::
     jr      .setcamx
 .checkright
     ld      a,[Engine_CurrentScreen]
+    and     $f
     ld      b,a
     ld      a,[Engine_NumScreens]
     cp      b
@@ -340,6 +342,87 @@ Level_PauseLoop:
     ld      [sys_PauseGame],a
     ret
     
+Level_TransitionUp:
+    ld      a,[Player_MovementFlags]
+    bit     2,a
+    ret     nz
+    
+    ld      b,b
+    ld      a,[Engine_CurrentSubarea]
+    sub     $10
+    and     $3f
+    ld      [Engine_CurrentSubarea],a
+
+    PlaySFX transitionup
+    
+    ld      b,16
+.loop    
+    push    bc
+    ld      a,[Player_XPos]
+    and     $f0
+    swap    a
+    ld      c,a
+    ld      a,[Engine_CurrentSubarea]
+    ld      e,a
+    ld      d,b
+    call    Level_LoadMapColumn
+    ld      a,[Player_YPos]
+    dec     a
+    ld      [Player_YPos],a
+    ld      [Player_LastBounceY],a
+    ld      a,[Engine_CameraY]
+    sub     SCRN_Y/16
+    ld      [Engine_CameraY],a
+    call    DrawPlayer
+    pop     bc
+
+    halt
+    dec     b
+    jr      nz,.loop
+    ret
+    
+Level_TransitionDown:
+    ld      a,[Player_MovementFlags]
+    bit     2,a
+    ret     nz
+    
+    ld      b,b
+    ld      a,[Engine_CurrentSubarea]
+    add     $10
+    and     $3f
+    ld      [Engine_CurrentSubarea],a
+    PlaySFX transitiondown
+    
+    ld      b,16
+.loop
+    push    bc
+    ld      a,[Player_XPos]
+    and     $f0
+    swap    a
+    ld      c,a
+    ld      a,[Engine_CurrentSubarea]
+    ld      e,a
+    ld      a,b
+    xor     $f
+    ld      d,a
+    call    Level_LoadMapColumn
+    ld      a,[Player_YPos]
+    inc     a
+    ld      [Player_YPos],a
+    ld      [Player_LastBounceY],a
+    ld      a,[Engine_CameraY]
+    add     SCRN_Y/16
+    ld      [Engine_CameraY],a
+    call    DrawPlayer
+    pop     bc
+
+    halt
+    dec     b
+    jr      nz,.loop
+
+    ret
+    
+
 ; ================================================================
 
 ; Input:     A = Level ID
@@ -624,6 +707,60 @@ Level_LoadMapRow:
     dec     b
     jr      nz,.loop
 
+    ret
+    
+; ========
+
+; INPUT: c = player X position
+;        d = column to load
+;        e = screen to load from
+; TODO: Currently doesn't work, figure out why and fix it
+Level_LoadMapColumn:
+    ld      a,[Player_MovementFlags]
+    bit     3,a
+    ret     nz
+
+    ld      hl,Engine_LevelData
+    ldh     a,[rSVBK]
+    and     7
+    ldh     [sys_TempSVBK],a
+    ; get subarea
+    ld      a,e
+    and     $f0
+    swap    a
+    ; set correct WRAM bank
+    add     2
+    ldh     [rSVBK],a
+    
+    ; get screen
+    ld      a,e
+    and     $f
+    add     h
+    ld      h,a
+    ; get row
+    ld      a,d
+    and     $f0
+    add     l
+    ld      l,a
+    
+    ld      b,16
+.loop
+    push    bc
+    ld      a,[hl]
+    push    hl
+    ld      b,a
+    
+    ld      a,l ; L = tile coordinates
+    add     c
+    swap    a   ; DrawMetatile expects unswapped coordinates
+    call    DrawMetatile
+    pop     hl
+    ld      a,l
+    add     16
+    ld      l,a
+    pop     bc
+    dec     b
+    jr      nz,.loop
     ret
 
 ; ================================================================

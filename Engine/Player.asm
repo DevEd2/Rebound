@@ -226,8 +226,8 @@ ProcessPlayer:
     ld      d,a
     
 .noaccel
-    ; check if we're underwater
     res     1,d
+    ; get tile underneath player
     ld      a,[Player_YPos]
     ld      l,a
     ld      a,[Player_XPos]
@@ -236,6 +236,7 @@ ProcessPlayer:
     ld      e,a
     and     a               ; clear carry
     call    GetTileL        ; doesn't matter if we use GetTileL or GetTileR, the result is the same
+    ; check if we're underwater
     cp      COLLISION_WATER ; are we touching a water tile?
     jr      nz,.checkcoin   ; if not, skip
     ld      a,[Player_MovementFlags]
@@ -604,12 +605,15 @@ ProcessPlayer:
     ld      a,l
     ld      [Player_YVelocityS],a
     ; Velocity
+    ld      a,[Player_YPos]
+    ld      b,a
     ld      a,[Player_YSubpixel]
     add     l
     ld      [Player_YSubpixel],a
     ld      a,[Player_YPos]
     adc     h
     ld      [Player_YPos],a
+    call    Player_CheckSubscreenBoundary
     jr      .checkCollisionVertical
 .movewater
     ld      a,[Player_YVelocity]
@@ -633,12 +637,16 @@ ProcessPlayer:
     ld      a,l
     ld      [Player_YVelocityS],a
     ; Velocity
+    ld      a,[Player_YPos]
+    ld      b,a
     ld      a,[Player_YSubpixel]
     add     l
     ld      [Player_YSubpixel],a
     ld      a,[Player_YPos]
     adc     h
     ld      [Player_YPos],a
+    call    Player_CheckSubscreenBoundary
+    ; fall through
  
 .checkCollisionVertical   
     ld      a,[Player_MovementFlags]
@@ -1227,6 +1235,24 @@ Player_Splash:
     ld      [hl],1<<PARTICLE_FLAG_GRAVITY
 
     ret
+
+; INPUT: a = current Y position
+;        b = previous Y position
+Player_CheckSubscreenBoundary:
+    ld      e,a
+    ld      a,[Player_YVelocity]
+    bit     7,a
+    ld      a,e
+    jr      nz,.up
+.down
+    cp      b
+    ret     nc
+    jp      Level_TransitionDown
+.up
+    cp      b
+    ret     z
+    ret     c
+    jp      Level_TransitionUp
     
 ; ===================
 ; Animation constants
