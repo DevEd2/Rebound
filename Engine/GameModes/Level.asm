@@ -714,7 +714,6 @@ Level_LoadMapRow:
 ; INPUT: c = player X position
 ;        d = column to load
 ;        e = screen to load from
-; TODO: Currently doesn't work, figure out why and fix it
 Level_LoadMapColumn:
     ld      b,b
     push    de
