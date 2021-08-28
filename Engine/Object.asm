@@ -276,8 +276,7 @@ Collectable_ExtraLife:
     add     hl,bc
     ld      [hl],MONSTER_NULL
     ; prevent monster from respawning
-    call  KillMonster
-    ret
+    jp      KillMonster
     
 
 ; INPUT: de = animation pointer for death animation
