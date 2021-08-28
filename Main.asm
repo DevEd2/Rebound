@@ -923,6 +923,7 @@ section "Font",romx
 Font::              incbin  "GFX/Font.bin.wle"
 
 include	"GFX/Sprites/Goony/Goony.inc"
+include "GFX/Sprites/1up.inc"
 
 section "Particle tiles",romx
 ParticleTiles:

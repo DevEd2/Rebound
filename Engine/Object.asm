@@ -35,6 +35,7 @@ MONSTER_COLLISION_VERT      equ %00001100 ; Colliding with a floor or ceiling
 MONSTER_NULL                equ 0
 MONSTER_TEST                equ 1
 MONSTER_TEST2               equ 2
+COLLECTABLE_1UP             equ 3
 
 Monster_ID:                 ds  MONSTER_COUNT
 Monster_WRAMPointer:        ds  MONSTER_COUNT
@@ -115,35 +116,41 @@ section "Object Init Data",romx
 ObjectInit:
     minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1 ; MONSTER_TEST
     minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk ; MONSTER_TEST2
+    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
 section "Object Tile Pointers",romx
 ObjectGraphics:
-    mgraphic  BANK(PlayerTiles), PlayerTiles  ; MOSNTER_TEST
-    mgraphic  BANK(GoonyTiles),GoonyTiles  ; MONSTER_TEST2
+    mgraphic    bank(PlayerTiles),PlayerTiles       ; MOSNTER_TEST
+    mgraphic    bank(GoonyTiles),GoonyTiles         ; MONSTER_TEST2
+    mgraphic    bank(OneUpTiles),OneUpTiles         ; COLLECTABLE_1UP
     
 ; Object animations
 section "Object Animation Data",romx
+Anim_Default:
+    db  0,1
+    dbw $80,Anim_Default
+
 TestAnim:
     db  6,6
     db  7,6
     dbw $80,TestAnim
-	
+    
 Anim_GoonyWalk:
-	db	0,4
-	db	1,4
-	db	2,4
-	db	3,4
-	db	4,4
-	db	5,4
-	db	6,4
-	db	7,4
-	dbw	$80,Anim_GoonyWalk
+    db  0,4
+    db  1,4
+    db  2,4
+    db  3,4
+    db  4,4
+    db  5,4
+    db  6,4
+    db  7,4
+    dbw $80,Anim_GoonyWalk
 
 Anim_GoonyKill:
-	db	8,1
-	dbw	$80,Anim_GoonyKill
+    db  8,1
+    dbw $80,Anim_GoonyKill
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
@@ -153,6 +160,7 @@ BehaviorTable:
     dw      Monster_NoBehavior      ; MONSTER_NULL
     dw      Monster_MoveLeftRight   ; MONSTER_TEST
     dw      Monster_MoveLeftRight   ; MONSTER_TEST2
+    dw      Collectable_ExtraLife   ; COLLECTABLE_1UP
 
 BehaviorDispatch:
     bit     7,h
@@ -228,22 +236,43 @@ Monster_MoveLeftRight:
     add     hl,bc
     ld      [hl],a
 :
-	bit     MONSTER_COLLISION_PLAYER,e
-	ld		de,Anim_GoonyKill
- 	jr		nz,Monster_CheckKill
-	; death animation flipping
+    bit     MONSTER_COLLISION_PLAYER,e
+    ld      de,Anim_GoonyKill
+    jr      nz,Monster_CheckKill
+    ; death animation flipping
     ld      hl,Monster_Flags
     add     hl,bc
-	bit		MONSTER_FLAG_REMOVE_Y,[hl]
-	ret		z
-	ld		a,[sys_CurrentFrame]
-	and		$7
-	and		a
-	ret		nz
-	ld		a,[hl]
-	xor		1<<MONSTER_FLAG_FLIPH
-	ld		[hl],a
-	ret
+    bit     MONSTER_FLAG_REMOVE_Y,[hl]
+    ret     z
+    ld      a,[sys_CurrentFrame]
+    and     $7
+    and     a
+    ret     nz
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+    ret
+    
+Collectable_ExtraLife:
+    ; TODO: More eye candy
+    ld      hl,Monster_Collision
+    add     hl,bc
+    bit     MONSTER_COLLISION_PLAYER,[hl]
+    ret     z
+    ; play 1up sound
+    push    bc
+    PlaySFX 1up
+    pop     bc
+    ld      a,[Player_LifeCount]
+    cp      99
+    jr      z,:+
+    inc     a
+    ld      [Player_LifeCount],a
+:   ld      hl,Monster_ID
+    add     hl,bc
+    ld      [hl],MONSTER_NULL
+    ret
+    
 
 ; INPUT: de = animation pointer for death animation
 Monster_CheckKill:
@@ -266,9 +295,9 @@ Monster_CheckKill:
     ld      hl,Player_MovementFlags
     set     bPlayerHitEnemy,[hl]
     ; play "enemy killed" sound effect
-    push	bc
-	PlaySFX	enemykill
-	pop		bc
+    push    bc
+    PlaySFX enemykill
+    pop     bc
     ; disable all collision
     ld      hl,Monster_Flags
     add     hl,bc
@@ -289,16 +318,16 @@ Monster_CheckKill:
     ld      hl,Monster_YVelocityS
     add     hl,bc
     ld      [hl],low(-$300)
-	; set animation
-	ld		hl,Monster_AnimPtrHi
-	add		hl,bc
-	ld		[hl],d
-	ld		hl,Monster_AnimPtrLo
-	add		hl,bc
-	ld		[hl],e
-	ld		hl,Monster_AnimTimer
-	add		hl,bc
-	ld		[hl],1
+    ; set animation
+    ld      hl,Monster_AnimPtrHi
+    add     hl,bc
+    ld      [hl],d
+    ld      hl,Monster_AnimPtrLo
+    add     hl,bc
+    ld      [hl],e
+    ld      hl,Monster_AnimTimer
+    add     hl,bc
+    ld      [hl],1
     ; make player bounce
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
