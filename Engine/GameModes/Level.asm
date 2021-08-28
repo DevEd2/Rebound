@@ -347,7 +347,6 @@ Level_TransitionUp:
     bit     2,a
     ret     nz
     
-    ld      b,b
     ld      a,[Engine_CurrentSubarea]
     sub     $10
     and     $3f
@@ -356,7 +355,7 @@ Level_TransitionUp:
     PlaySFX transitionup
     
     ld      b,16
-.loop    
+.loop
     push    bc
     ld      a,[Player_XPos]
     and     $f0
@@ -386,7 +385,6 @@ Level_TransitionDown:
     bit     2,a
     ret     nz
     
-    ld      b,b
     ld      a,[Engine_CurrentSubarea]
     add     $10
     and     $3f
@@ -404,6 +402,8 @@ Level_TransitionDown:
     ld      e,a
     ld      a,b
     xor     $f
+    inc     a
+    and     $f
     ld      d,a
     call    Level_LoadMapColumn
     ld      a,[Player_YPos]
@@ -716,9 +716,8 @@ Level_LoadMapRow:
 ;        e = screen to load from
 ; TODO: Currently doesn't work, figure out why and fix it
 Level_LoadMapColumn:
-    ld      a,[Player_MovementFlags]
-    bit     3,a
-    ret     nz
+    ld      b,b
+    push    de
 
     ld      hl,Engine_LevelData
     ldh     a,[rSVBK]
@@ -737,9 +736,8 @@ Level_LoadMapColumn:
     and     $f
     add     h
     ld      h,a
-    ; get row
+    ; get column
     ld      a,d
-    and     $f0
     add     l
     ld      l,a
     
@@ -751,7 +749,6 @@ Level_LoadMapColumn:
     ld      b,a
     
     ld      a,l ; L = tile coordinates
-    add     c
     swap    a   ; DrawMetatile expects unswapped coordinates
     call    DrawMetatile
     pop     hl
@@ -761,6 +758,7 @@ Level_LoadMapColumn:
     pop     bc
     dec     b
     jr      nz,.loop
+    pop     de
     ret
 
 ; ================================================================
