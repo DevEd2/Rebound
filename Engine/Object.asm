@@ -275,6 +275,8 @@ Collectable_ExtraLife:
 :   ld      hl,Monster_ID
     add     hl,bc
     ld      [hl],MONSTER_NULL
+    ; prevent monster from respawning
+    call  KillMonster
     ret
     
 
@@ -298,8 +300,6 @@ Monster_CheckKill:
     ; set flag that player has killed an enemy
     ld      hl,Player_MovementFlags
     set     bPlayerHitEnemy,[hl]
-    ; prevent monster from respawning
-    call  KillMonster
     ; play "enemy killed" sound effect
     push    bc
     PlaySFX enemykill
@@ -339,6 +339,8 @@ Monster_CheckKill:
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighBounceHeight)
     ld      [Player_YVelocityS],a
+    ; prevent monster from respawning
+    call  KillMonster
     ret
 
 section "Object System Routines",rom0
