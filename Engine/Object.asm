@@ -417,6 +417,17 @@ InitSpawnMonsters:
   cp  e                 ; Same as current screen?
   jr  nz,.offScreen     ; If no, don't spawn this object
   ldh [TempS],a         ; Save Screen
+  and $f0               ; Get subarea
+  ld  c,a               ; Save into C
+  ld  a,[Engine_CurrentScreen]
+  and $f0               ; Get current subarea
+  cp  c                 ; Only spawn monsters for this subarea
+  jr  z,:+
+  inc hl                ; Advance to next object
+  inc hl
+  inc d
+  jr  .spawnLoop
+:
   ld  a,[hl+]           ; Get X Position
   ldh [TempX],a         ; Save X Position
   ld  b,a
@@ -509,7 +520,23 @@ SpawnMonsters:
   jr  nz,.existFound
   pop hl                    ; Restore object data pointer
   ld  a,[hl+]               ; Get Screen Number
+  ld  b,a
+  and $0f
   ldh [TempS],a             ; Save Screen Number
+  ld  a,b
+  and $f0                   ; Get subarea
+  ld  e,a                   ; Save into E
+  ld  a,[Engine_CurrentScreen]
+  and $f0                   ; Get current subarea
+  cp  e                     ; Only spawn monsters in this subarea
+  jr  z,:+
+  inc hl                    ; Advance to next object
+  inc hl
+  inc d
+  jr  .spawnLoop
+:
+  ld  a,b                   ; Restore Screen/Subarea
+  and $0f                   ; Get Screen Number
   ld  b,a
   ld  a,[hl+]               ; Get X Position
   ldh [TempX],a             ; Save X Position
