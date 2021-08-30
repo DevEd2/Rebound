@@ -357,6 +357,7 @@ Level_TransitionUp:
 
     PlaySFX transitionup
     
+    call    ClearMonsters
     ld      b,16
 .loop
     push    bc
@@ -389,7 +390,7 @@ Level_TransitionUp:
     ld      [Player_YSubpixel],a
     ld      a,8
     ld      [Player_YPos],a
-    ret
+    jp      InitSpawnMonsters
     
 Level_TransitionDown:
     ld      a,[Engine_CurrentSubarea]
@@ -405,6 +406,7 @@ Level_TransitionDown:
     ld      [Engine_CurrentSubarea],a
     PlaySFX transitiondown
     
+    call    ClearMonsters
     ld      b,16
 .loop
     push    bc
@@ -433,7 +435,7 @@ Level_TransitionDown:
     halt
     dec     b
     jr      nz,.loop
-    ret    
+    jp      InitSpawnMonsters    
 
 ; ================================================================
 
