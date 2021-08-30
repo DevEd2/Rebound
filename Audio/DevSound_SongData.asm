@@ -45,7 +45,7 @@ SongSpeedTable:
     db  3,3 ; pyramid stage clear
     db  3,3 ; cave stage clear
     db  3,3 ; temple stage clear
-    db  3,3 ; boss battle
+    db  4,4 ; boss battle
     db  4,3 ; game over
     db  3,3 ; bonus stage
     db  3,3 ; credits
@@ -149,32 +149,50 @@ vol_GameOverLead:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w
 vol_GameOverGuitarA:    db  $7a,$ff
 vol_GameOverGuitarB:    db  $4a,$ff
 
+; ========
+
+vol_BossIntro1a:        db  $3a,$ff
+vol_BossKick:           ; fall through to next sequence
+vol_BossOHH:            ; fall through to next sequence
+vol_BossIntro1b:        db  $1a,$ff
+vol_BossIntro2a:        db  $46,$ff
+vol_BossIntro2b:        db  $16,$ff
+vol_BossLead:           db  $5a,$ff
+vol_BossTomKick:        db  w3,w3,w3,w3,w2,w1,w0,$ff
+vol_BossTomSnare:       db  w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w1,w1,w1,w1,w1,w1,w1,w1,0,$ff
+vol_BossCHH:            db  $1a,$1a,$1a,$1a,0,$ff
+vol_BossOHHRoll:        db  $1a,$1a,$1a,0,$1a,$1a,$1a,0,$1a,$1a,$1a,0,$ff
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
 
-arp_Pluck:      db  12,0,$ff
-arp_TomEcho:    db  22,20,18,16,14,12,10,9,7,$80,0
-arp_Oct2:       db  12,12,0,0,$80,0
+arp_PluckDelay:         db  0 ; fall through to next sequence
+arp_Pluck:              db  12,0,$ff
+arp_TomEcho:            db  22,20,18,16,14,12,10,9,7,$80,0
+arp_Oct2:               db  12,12,0,0,$80,0
 
-arp_940:        db  9,9,4,4,0,0,$80,0
-arp_720:        db  7,7,2,2,0,0,$80,0
-arp_520:        db  5,5,2,2,0,0,$80,0
+arp_940:                db  9,9,4,4,0,0,$80,0
+arp_720:                db  7,7,2,2,0,0,$80,0
+arp_520:                db  5,5,2,2,0,0,$80,0
 
-arp_MenuTom:    db  12,11,10,9,8,7,6,5,4,3,2,1,0,$80,12
+arp_MenuTom:            db  12,11,10,9,8,7,6,5,4,3,2,1,0,$80,12
 
-arp_MenuArp027: db  0,0,2,2,7,7,$80     ; last byte reads from next table
-arp_MenuArp037: db  0,0,3,3,7,7,$80     ; last byte reads from next table
-arp_MenuArp047: db  0,0,4,4,7,7,$80     ; last byte reads from next table
-arp_MenuArp057: db  0,0,5,5,7,7,$80     ; last byte reads from next table
-arp_MenuArp038: db  0,0,3,3,8,8,$80     ; last byte reads from next table
-arp_MenuArp059: db  0,0,5,5,9,9,$80     ; last byte reads from next table
-arp_MenuArp05A: db  0,0,5,5,10,10,$80,0
+arp_MenuArp027:         db  0,0,2,2,7,7,$80     ; last byte reads from next table
+arp_MenuArp037:         db  0,0,3,3,7,7,$80     ; last byte reads from next table
+arp_MenuArp047:         db  0,0,4,4,7,7,$80     ; last byte reads from next table
+arp_MenuArp057:         db  0,0,5,5,7,7,$80     ; last byte reads from next table
+arp_MenuArp038:         db  0,0,3,3,8,8,$80     ; last byte reads from next table
+arp_MenuArp059:         db  0,0,5,5,9,9,$80     ; last byte reads from next table
+arp_MenuArp05A:         db  0,0,5,5,10,10,$80,0
 
-arp_PlainsBass: db  12,12,0,$ff
+arp_PlainsBass:         db  12,12,0,$ff
 
-arp_BassOctave: db  12,0,0,0,0,0,0,0,0,0,0,0,12,$ff
-arp_PluckDelay: db  0,12,0,$ff
+arp_BassOctave:         db  12,0,0,0,0,0,0,0,0,0,0,0,12,$ff
+
+arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,$ff
+arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,$80,0
+arp_BossBass:           db  0,$80,0
 
 ; =================================================================
 ; Noise sequences
@@ -190,10 +208,14 @@ arp_PluckDelay: db  0,12,0,$ff
 
 s7 = $2d
 
-arp_Kick:       db  s7+18,s7+18,43,$80,2
-arp_Snare:      db  s7+29,s7+23,s7+20,35,$80,3
-arp_Hat:        db  43,$80,0
-arp_Cymbal:     db  35,40,43,$80,2 
+arp_Kick:               db  s7+18,s7+18,43,$80,2
+arp_Snare:              db  s7+29,s7+23,s7+20,35,$80,3
+arp_BossCHH:            ; fall through to next sequence
+arp_Hat:                db  43,$80,0
+arp_Cymbal:             db  35,40,43,$80,2
+
+arp_BossKick:           db  40,23,17,28,20,12,$80,5
+arp_BossOHH:            db  42,$80,0
 
 ; =================================================================
 ; Pulse sequences
@@ -254,6 +276,8 @@ WaveTable:
     dw      wave_PlainsBass
     dw      wave_CityLead
     dw      wave_SoftSquare
+    dw      wave_BossTom
+    dw      wave_BossBass
 
 wave_PyramidLead:       db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
 wave_PyramidSquare:     db  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
@@ -264,6 +288,8 @@ wave_ForestBass:        db  $54,$44,$44,$43,$20,$07,$a9,$9a,$ac,$ee,$aa,$96,$54,
 wave_PlainsBass:        db  $ff,$ff,$ff,$ff,$ee,$d7,$00,$00,$00,$00,$00,$00,$00,$00,$00,$03
 wave_CityLead:          db  $bb,$cc,$cd,$dd,$dd,$ba,$29,$54,$56,$76,$55,$43,$24,$14,$11,$00
 wave_SoftSquare:        db  $ab,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$00,$00,$00,$00,$00,$00,$00,$12
+wave_BossTom:           db  $ac,$cc,$cc,$cc,$cc,$cc,$cc,$ca,$20,$00,$00,$00,$00,$00,$00,$02
+wave_BossBass:          db  $66,$60,$6c,$cc,$66,$60,$66,$60,$00,$06,$06,$66,$60,$00,$60,$00
 
 waveseq_Tri:            db  0,$ff
 waveseq_PyramidLead:    db  1,$ff
@@ -275,6 +301,8 @@ waveseq_CityLead:       db  8,$ff
 waveseq_ForestBass:     db  6,$ff
 waveseq_WaveBuffer:     db  $fd,$ff
 waveseq_SoftSquare:     db  9,$ff
+waveseq_BossTom:        db  10,$ff
+waveseq_BossBass:       db  11,$ff
 
 ; =================================================================
 ; Instruments
@@ -330,6 +358,21 @@ InstrumentTable:
     dins    GameOverLead
     dins    GameOverGuitarA
     dins    GameOverGuitarB
+    
+    dins    BossIntro1a
+    dins    BossIntro1b
+    dins    BossIntro2a
+    dins    BossIntro2b
+    dins    BossIntro3a
+    dins    BossIntro3b
+    dins    BossLead
+    dins    BossTomKick
+    dins    BossTomSnare
+    dins    BossBass
+    dins    BossKick
+    dins    BossCHH
+    dins    BossOHH
+    dins    BossOHHRoll
 
 ; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
 ; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
@@ -380,6 +423,21 @@ ins_CityLeadL:          Instrument  0,CityLeadL,_,CityLead,CityLead
 ins_GameOverLead:       Instrument  0,GameOverLead,PluckDelay,SoftSquare,CityLead
 ins_GameOverGuitarA:    Instrument  0,GameOverGuitarA,_,GameOverGuitarA,_
 ins_GameOverGuitarB:    Instrument  0,GameOverGuitarB,PluckDelay,Pulse25,_
+
+ins_BossIntro1a:        Instrument  0,BossIntro1a,Pluck,Pulse125,_
+ins_BossIntro1b:        Instrument  0,BossIntro1b,Pluck,Pulse125,_
+ins_BossIntro2a:        Instrument  0,BossIntro2a,Pluck,Pulse25,_
+ins_BossIntro2b:        Instrument  0,BossIntro2b,Pluck,Pulse25,_
+ins_BossIntro3a:        Instrument  0,BossIntro1a,Pluck,Pulse125,PlainsEcho
+ins_BossIntro3b:        Instrument  0,BossIntro1b,Pluck,Pulse125,PlainsEcho
+ins_BossLead:           Instrument  0,BossLead,_,Pulse125,PlainsLead
+ins_BossTomKick:        Instrument  0,BossTomKick,BossTomKick,BossTom,_
+ins_BossTomSnare:       Instrument  0,BossTomSnare,BossTomSnare,BossTom,_
+ins_BossBass:           Instrument  0,Bass1,BossBass,BossBass,_
+ins_BossKick:           Instrument  0,BossKick,BossKick,_,_
+ins_BossCHH:            Instrument  0,BossCHH,BossCHH,_,_
+ins_BossOHH:            Instrument  0,BossOHH,BossOHH,_,_
+ins_BossOHHRoll:        Instrument  0,BossOHHRoll,BossOHH,_,_
 
 ; =================================================================
 
@@ -2012,7 +2070,452 @@ GameOver_CH4:
     Drum    Snare,4
     Drum    Cymbal,24
     db      EndChannel
+    
+    
+; =================================================================
 
+PT_Boss:    dw  Boss_CH1,Boss_CH2,Boss_CH3,Boss_CH4
+
+; ========
+
+Boss_CH1:
+    db      SetInstrument,_BossIntro1a
+    db      C_2,4
+    db      SetInstrument,_BossIntro1b
+    dbw     CallSection,Boss_Shared1
+    db      SetInstrument,_BossIntro1a
+    db      C_3,6
+    db      SetInstrument,_BossIntro1b
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossIntro1a
+    db      A#2,4
+    db      SetInstrument,_BossIntro1b
+    dbw     CallSection,Boss_Shared2
+    db      SetInstrument,_BossIntro1a
+    db      A#3,6
+    db      SetInstrument,_BossIntro1b
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossIntro1a
+    db      F_2,4
+    db      SetInstrument,_BossIntro1b
+    dbw     CallSection,Boss_Shared3
+    db      SetInstrument,_BossIntro1a
+    db      F_3,6
+    db      SetInstrument,_BossIntro1b
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossIntro1a
+    db      G_2,4
+    db      SetInstrument,_BossIntro1b
+    dbw     CallSection,Boss_Shared4
+    db      SetInstrument,_BossIntro1a
+    db      G_3,6
+    db      SetInstrument,_BossIntro1b
+    db      F_3,2
+    db      G_3,2
+    dbw     Goto,Boss_CH1
+    
+; ========
+
+Boss_CH2:
+    db      LoopCount,2
+:   db      SetInstrument,_BossIntro2a
+    db      C_2,4
+    db      SetInstrument,_BossIntro2b
+    dbw     CallSection,Boss_Shared1
+    db      SetInstrument,_BossIntro2a
+    db      C_3,6
+    db      SetInstrument,_BossIntro2b
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossIntro2a
+    db      A#2,4
+    db      SetInstrument,_BossIntro2b
+    dbw     CallSection,Boss_Shared2
+    db      SetInstrument,_BossIntro2a
+    db      A#3,6
+    db      SetInstrument,_BossIntro2b
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossIntro2a
+    db      F_2,4
+    db      SetInstrument,_BossIntro2b
+    dbw     CallSection,Boss_Shared3
+    db      SetInstrument,_BossIntro2a
+    db      F_3,6
+    db      SetInstrument,_BossIntro2b
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossIntro2a
+    db      G_2,4
+    db      SetInstrument,_BossIntro2b
+    dbw     CallSection,Boss_Shared4
+    db      SetInstrument,_BossIntro2a
+    db      G_3,6
+    db      SetInstrument,_BossIntro2b
+    db      F_3,2
+    db      G_3,2
+    dbw     Loop,:-
+    db      LoopCount,2
+:   
+    db      SetInstrument,_BossIntro3a
+    db      C_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared1
+.loop
+    db      SetInstrument,_BossIntro3a
+    db      C_3,6
+    db      SetInstrument,_BossIntro3b
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossIntro3a
+    db      A#2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared2
+    db      SetInstrument,_BossIntro3a
+    db      A#3,6
+    db      SetInstrument,_BossIntro3b
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossIntro3a
+    db      F_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared3
+    db      SetInstrument,_BossIntro3a
+    db      F_3,6
+    db      SetInstrument,_BossIntro3b
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossIntro3a
+    db      G_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared4
+    db      SetInstrument,_BossIntro3a
+    db      G_3,6
+    db      SetInstrument,_BossIntro3b
+    db      F_3,2
+    db      G_3,2
+    dbw     Loop,:-
+    
+    db      SetInstrument,_BossLead
+    db      C_4,12
+    db      C_4,4
+    db      D#4,6
+    db      C_4,6
+    db      F_4,1
+    db      G_4,11
+    db      A#4,4
+    db      G_4,4
+    db      F_4,2
+    db      D#4,4
+    db      C_4,4
+    db      D#4,2
+    db      C_4,2
+    db      A#3,2
+    dbw     CallSection,.block0
+    db      D#4,4
+    db      D_4,2
+    db      D#4,2
+    db      D_4,2
+    db      A#3,4
+    db      G_3,4
+    db      A#3,2
+    db      C_4,12
+    db      D_4,4
+    db      D#4,6
+    db      C_4,6
+    db      A#4,1
+    db      C_5,7
+    db      A#4,4
+    db      G_4,4
+    db      F#4,4
+    db      D#4,2
+    db      F_4,2
+    db      D#4,2
+    db      C_4,2
+    db      D#4,2
+    db      C_4,2
+    db      A#3,2
+    db      G_3,2
+    db      A#3,1
+    db      C_4,3
+    db      D_4,4
+    db      D#4,2
+    db      C_4,4
+    db      D_4,1
+    db      D#4,5
+    db      F_4,4
+    db      D#4,2
+    db      D_4,2
+    db      A#3,2
+    db      G_3,2
+    db      D#4,2
+    db      D_4,4
+    db      A#3,6
+    db      D#4,2
+    db      D_4,4
+    db      A#3,6
+    db      F_3,4
+    db      G_3,4
+    
+    dbw     CallSection,.block2
+    dbw     Goto,:++
+:   
+    db      SetInstrument,_BossIntro3a
+    db      C_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared1
+:
+    db      SetInstrument,_BossIntro3a
+    db      C_3,6
+    db      SetInstrument,_BossIntro3b
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossIntro3a
+    db      A#2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared2
+    db      SetInstrument,_BossIntro3a
+    db      A#3,6
+    db      SetInstrument,_BossIntro3b
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossIntro3a
+    db      F_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared3
+    db      SetInstrument,_BossIntro3a
+    db      F_3,6
+    db      SetInstrument,_BossIntro3b
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossIntro3a
+    db      G_2,4
+    db      SetInstrument,_BossIntro3b
+    dbw     CallSection,Boss_Shared4
+    db      SetInstrument,_BossIntro3a
+    db      G_3,6
+    db      SetInstrument,_BossIntro3b
+    db      F_3,2
+    db      G_3,2
+    dbw     Loop,:--
+    
+    dbw     CallSection,.block1
+    db      F_4,2
+    db      D#4,4
+    db      C_4,4
+    db      A#3,4
+    db      D#4,2
+    db      C_4,2
+    db      A#3,2
+    dbw     CallSection,.block0
+    db      G_4,4
+    db      F_4,2
+    db      G_4,4
+    db      A#4,4
+    db      G_4,6
+    dbw     CallSection,.block1
+    db      A#4,4
+    db      C_5,8
+    db      D#5,8
+    db      F_5,8
+    db      D#5,4
+    db      C_5,8
+    db      D#5,8
+    db      A#4,8
+    db      G_4,4
+    db      F_4,4
+    db      D#4,4
+    db      C_4,4
+    db      A#3,2
+    db      D#4,4
+    db      C_4,2
+    db      A#3,2
+    db      G_3,2
+    dbw     CallSection,.block2
+    dbw     Goto,.loop
+    
+.block0
+    db      A#3,2
+    db      C_4,4
+    db      C_4,22
+    db      C_4,4
+    db      D_4,2
+    db      D#4,4
+    db      F_4,6
+    ret
+.block1
+    db      SetInstrument,_BossLead
+    db      B_4,1
+    db      C_5,7
+    db      C_5,4
+    db      G_4,4
+    db      A#4,4
+    db      G_4,8
+    db      F_4,8
+    db      F#4,1
+    db      G_4,7
+    ret
+.block2
+    db      A#3,1
+    db      C_4,7
+    db      SetInstrument,_BossIntro3b
+    db      C_2,2
+    db      C_3,4
+    db      C_2,2
+    db      C_3,2
+    db      C_2,2
+    db      C_2,2
+    db      LoopCount,2
+    ret
+
+; ========
+Boss_CH3:
+    db      SetInstrument,_BossTomKick
+    db      LoopCount,31
+:   db      fix,8
+    dbw     Loop,:-
+    db      fix,4
+    db      SetInstrument,_BossTomSnare
+    db      fix,2
+    db      fix,2
+.loop
+    db      SetInstrument,_BossTomKick,fix,4,SetInstrument,_BossBass
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossTomSnare,fix,2,SetInstrument,_BossBass
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      C_2,2
+    db      C_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      C_2,2
+    db      SetInstrument,_BossTomSnare,fix,4,SetInstrument,_BossBass
+    db      C_3,2
+    db      C_2,2
+    db      SetInstrument,_BossTomKick,fix,4,SetInstrument,_BossBass
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossTomSnare,fix,2,SetInstrument,_BossBass
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      A#2,2
+    db      A#3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      A#2,2
+    db      SetInstrument,_BossTomSnare,fix,4,SetInstrument,_BossBass
+    db      A#3,2
+    db      A#2,2
+    db      SetInstrument,_BossTomKick,fix,4,SetInstrument,_BossBass
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossTomSnare,fix,2,SetInstrument,_BossBass
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      F_2,2
+    db      F_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      F_2,2
+    db      SetInstrument,_BossTomSnare,fix,4,SetInstrument,_BossBass
+    db      F_3,2
+    db      F_2,2
+    db      SetInstrument,_BossTomKick,fix,4,SetInstrument,_BossBass
+    db      G_2,2
+    db      G_3,2
+    db      SetInstrument,_BossTomSnare,fix,2,SetInstrument,_BossBass
+    db      G_2,2
+    db      G_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      G_2,2
+    db      G_3,2
+    db      SetInstrument,_BossTomKick,fix,2,SetInstrument,_BossBass
+    db      G_2,2
+    db      SetInstrument,_BossTomSnare,fix,4,SetInstrument,_BossBass
+    db      G_3,2
+    db      G_2,2
+    dbw     Goto,.loop
+
+; ========
+
+Boss_CH4:
+    db      LoopCount,31
+:   Drum    BossKick,2
+    Drum    BossCHH,2
+    Drum    BossOHH,2
+    Drum    BossCHH,2
+    dbw     Loop,:-
+    Drum    BossKick,2
+    Drum    BossCHH,2
+    Drum    Snare,2
+    Drum    Snare,2
+.loop
+    Drum    BossKick,2
+    Drum    BossCHH,2
+    Drum    BossOHHRoll,4
+    Drum    Snare,2
+    Drum    BossCHH,2
+    Drum    BossCHH,2
+    Drum    BossKick,2
+    Drum    BossCHH,2
+    Drum    BossOHHRoll,2
+    Drum    BossKick,2
+    Drum    BossCHH,2
+    Drum    Snare,2
+    Drum    BossCHH,2
+    Drum    BossOHHRoll,4
+    dbw     Goto,.loop
+    
+; ========
+
+Boss_Shared1:
+    db      C_3,2
+    db      C_2,2
+    db      C_2,2
+    db      C_3,4
+    db      C_2,2
+    db      C_3,2
+    db      C_2,2
+    db      C_2,2
+    ret
+    
+Boss_Shared2:
+    db      A#3,2
+    db      A#2,2
+    db      A#2,2
+    db      A#3,4
+    db      A#2,2
+    db      A#3,2
+    db      A#2,2
+    db      A#2,2
+    ret
+    
+Boss_Shared3:
+    db      F_3,2
+    db      F_2,2
+    db      F_2,2
+    db      F_3,4
+    db      F_2,2
+    db      F_3,2
+    db      F_2,2
+    db      F_2,2
+    ret
+    
+Boss_Shared4:
+    db      G_3,2
+    db      G_2,2
+    db      G_2,2
+    db      G_3,4
+    db      G_2,2
+    db      G_3,2
+    db      G_2,2
+    db      G_2,2
+    ret
+    
 ; =================================================================
 
 PT_Forest:
@@ -2044,10 +2547,6 @@ PT_CaveClear:
 ; =================================================================
 
 PT_TempleClear:
-
-; =================================================================
-
-PT_Boss:
 
 ; =================================================================
 
