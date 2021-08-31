@@ -414,6 +414,7 @@ ProcessPlayer:
     ; Top Left
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
+    jr      c,:+
     ld      l,a
     ld      a,[Player_XPos]
     sub     Player_HitboxSize
@@ -424,10 +425,12 @@ ProcessPlayer:
     pop     af
     call    GetTileL
     cp      COLLISION_SOLID
-    jr      z,:+
+    jr      z,:++
     ; Bottom Left
+:
     ld      a,[Player_YPos]
     add     Player_HitboxSize
+    jp      c,.xCollideEnd
     ld      l,a
     ld      a,[Player_XPos]
     sub     Player_HitboxSize
@@ -500,6 +503,7 @@ ProcessPlayer:
     ; Top Right
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
+    jr      c,:+
     ld      l,a
     ld      a,[Player_XPos]
     add     Player_HitboxSize
@@ -510,10 +514,12 @@ ProcessPlayer:
     pop     af
     call    GetTileR
     cp      COLLISION_SOLID
-    jr      z,:+
+    jr      z,:++
     ; Bottom Right
+:
     ld      a,[Player_YPos]
     add     Player_HitboxSize
+    jr      c,.xCollideEnd
     ld      l,a
     ld      a,[Player_XPos]
     add     Player_HitboxSize
@@ -660,6 +666,7 @@ ProcessPlayer:
     ; Top Left
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
+    jr      c,:+                ; If the point is past the top of the subarea, not solid
     ld      l,a
     ld      a,[Player_XPos]
     sub     Player_HitboxSize
@@ -670,10 +677,12 @@ ProcessPlayer:
     pop     af
     call    GetTileL
     cp      COLLISION_SOLID
-    jr      z,:+
+    jr      z,:++
+:
     ; Top Right
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
+    jp      c,.yCollideEnd
     ld      l,a
     ld      a,[Player_XPos]
     add     Player_HitboxSize
@@ -710,6 +719,7 @@ ProcessPlayer:
     ; Check Bottom Collision
     ld      a,[Player_YPos]
     add     Player_HitboxSize
+    jr      c,:+
     ld      l,a
     ld      a,[Player_XPos]
     sub     Player_HitboxSize
@@ -726,12 +736,14 @@ ProcessPlayer:
     bit     btnDown,a
     ld      a,b
     jr      nz,.nottopsolid1
-    jr      :+
+    jr      :++
 .nottopsolid1
     cp      COLLISION_SOLID
-    jr      z,:+
+    jr      z,:++
+:
     ld      a,[Player_YPos]
     add     Player_HitboxSize
+    jr      c,.yCollideEnd
     ld      l,a
     ld      a,[Player_XPos]
     add     Player_HitboxSize
