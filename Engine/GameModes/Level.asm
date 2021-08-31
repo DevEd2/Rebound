@@ -390,6 +390,9 @@ Level_TransitionUp:
     ld      [Player_YSubpixel],a
     ld      a,8
     ld      [Player_YPos],a
+	ld		[Player_LastBounceY],a
+	ld		a,[Engine_CameraY]
+	ld		[Engine_CameraTargetY],a
     jp      InitSpawnMonsters
     
 Level_TransitionDown:
@@ -435,6 +438,10 @@ Level_TransitionDown:
     halt
     dec     b
     jr      nz,.loop
+	ld		a,[Player_YPos]
+	ld		[Player_LastBounceY],a
+	ld		a,[Engine_CameraY]
+	ld		[Engine_CameraTargetY],a
     jp      InitSpawnMonsters    
 
 ; ================================================================

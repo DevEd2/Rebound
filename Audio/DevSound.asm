@@ -291,7 +291,7 @@ endc
 
 ; =====================
 
-section "DevSound Lite",romx
+section "DevSound Lite",romx[$4000]
 
 DevSound:
 
