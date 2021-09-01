@@ -264,6 +264,8 @@ SoundTest_RunMarquee:
     bit     7,a
     jr      nz,.reverse
 .forward
+    ld      b,bank(SoundTest_MarqueeScrollTable)
+    call    _Bankswitch
     ld      a,[SoundTest_MarqueePos]
     add     2
     bit     7,a
@@ -276,8 +278,6 @@ SoundTest_RunMarquee:
     farcall DS_Init
     ret
 .noreset
-    ld      b,bank(SoundTest_MarqueeScrollTable)
-    call    _Bankswitch
     ld      [SoundTest_MarqueePos],a
     ld      e,a
     ld      h,high(SoundTest_MarqueeScrollTable)
@@ -295,6 +295,8 @@ SoundTest_RunMarquee:
     jp      SoundTest_DrawSongNameChar
 
 .reverse
+    ld      b,bank(SoundTest_MarqueeScrollTable)
+    call    _Bankswitch
     ld      a,[SoundTest_MarqueePos]
     sub     2
     res     7,a
