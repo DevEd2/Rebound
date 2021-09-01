@@ -583,6 +583,8 @@ DS_CH1_CheckByte:
     xor     a
     ld      [DS_CH1VolPos],a
     ld      [DS_CH1ArpPos],a
+    ld      [DS_CH1VolTableTimer],a
+    ld      [DS_CH1ArpTableTimer],a
     inc     a
     ld      [DS_CH1VibPos],a
     ld      a,[VGMSFX_Flags]
@@ -601,6 +603,7 @@ DS_CH1_CheckByte:
     jp      nz,.noreset
     xor     a
     ld      [DS_CH1PulsePos],a
+    ld      [DS_CH1PulseTableTimer],a
 .noreset
     ld      a,[DS_CH1NoteCount]
     inc     a
@@ -864,6 +867,8 @@ DS_CH2_CheckByte:
     xor     a
     ld      [DS_CH2VolPos],a
     ld      [DS_CH2ArpPos],a
+    ld      [DS_CH2VolTableTimer],a
+    ld      [DS_CH2ArpTableTimer],a
     inc     a
     ld      [DS_CH2VibPos],a    
     ld      a,[VGMSFX_Flags]
@@ -882,6 +887,7 @@ DS_CH2_CheckByte:
     jp      nz,.noreset
     xor     a
     ld      [DS_CH2PulsePos],a
+    ld      [DS_CH2PulseTableTimer],a
 .noreset
     ld      a,[DS_CH2NoteCount]
     inc     a
@@ -1132,7 +1138,7 @@ DS_CH3_CheckByte:
     cp      $ff
     jr      z,.endChannel
     cp      $c9
-    jr      z,.retSection
+    jp      z,.retSection
     bit     7,a         ; check for command
     jr      nz,.getCommand
     ; if we have a note...
@@ -1145,6 +1151,8 @@ DS_CH3_CheckByte:
     xor     a
     ld      [DS_CH3VolPos],a
     ld      [DS_CH3ArpPos],a
+    ld      [DS_CH3VolTableTimer],a
+    ld      [DS_CH3ArpTableTimer],a
     inc     a
     ld      [DS_CH3VibPos],a
     ld      hl,DS_CH3VibPtr
@@ -1158,6 +1166,7 @@ DS_CH3_CheckByte:
     jp      nz,DS_CH3_DoneUpdating
     xor     a
     ld      [DS_CH3WavePos],a
+    ld      [DS_CH3WaveTableTimer],a
     ld      a,[DS_CH3NoteCount]
     inc     a
     ld      [DS_CH3NoteCount],a
@@ -1442,6 +1451,8 @@ DS_CH4_CheckByte:
     xor     a
     ld      [DS_CH4VolPos],a
     ld      [DS_CH4NoisePos],a
+    ld      [DS_CH4VolTableTimer],a
+    ld      [DS_CH4ArpTableTimer],a
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH4,a
     jr      nz,.noupdate
