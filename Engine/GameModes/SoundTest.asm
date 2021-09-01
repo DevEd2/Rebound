@@ -276,6 +276,8 @@ SoundTest_RunMarquee:
     farcall DS_Init
     ret
 .noreset
+    ld      b,bank(SoundTest_MarqueeScrollTable)
+    call    _Bankswitch
     ld      [SoundTest_MarqueePos],a
     ld      e,a
     ld      h,high(SoundTest_MarqueeScrollTable)
