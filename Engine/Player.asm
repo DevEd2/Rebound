@@ -177,7 +177,7 @@ ProcessPlayer:
     cp      32
     jp      c,.moveair
     
-    ld      a,MUS_PLAINS_CLEAR
+    ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
     ld      b,0
 :   halt

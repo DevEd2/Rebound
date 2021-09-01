@@ -14,12 +14,7 @@
     const   MUS_PYRAMID
     const   MUS_CAVE
     const   MUS_TEMPLE
-    const   MUS_PLAINS_CLEAR
-    const   MUS_CITY_CLEAR
-    const   MUS_FOREST_CLEAR
-    const   MUS_PYRAMID_CLEAR
-    const   MUS_CAVE_CLEAR
-    const   MUS_TEMPLE_CLEAR
+    const   MUS_STAGE_CLEAR
     const   MUS_BOSS
     const   MUS_GAME_OVER
     const   MUS_BONUS
@@ -39,12 +34,7 @@ SongSpeedTable:
     db  4,5 ; pyramid
     db  3,3 ; cave
     db  3,3 ; temple
-    db  6,6 ; plains stage clear
-    db  3,3 ; city stage clear
-    db  3,3 ; forest stage clear
-    db  3,3 ; pyramid stage clear
-    db  3,3 ; cave stage clear
-    db  3,3 ; temple stage clear
+    db  6,6 ; stage clear
     db  4,4 ; boss battle
     db  4,3 ; game over
     db  3,3 ; bonus stage
@@ -58,12 +48,7 @@ SongPointerTable:
     dw  PT_Pyramid
     dw  PT_Cave
     dw  PT_Temple
-    dw  PT_PlainsClear
-    dw  PT_CityClear
-    dw  PT_PyramidClear
-    dw  PT_ForestClear
-    dw  PT_CaveClear
-    dw  PT_TempleClear
+    dw  PT_StageClear
     dw  PT_Boss
     dw  PT_GameOver
     dw  PT_Bonus
@@ -1618,14 +1603,14 @@ Plains_CH4:
 
 ; =================================================================
 
-PT_PlainsClear: dw  PlainsClear_CH1,PlainsClear_CH2,PlainsClear_CH3,PlainsClear_CH4
+PT_StageClear: dw  StageClear_CH1,StageClear_CH2,StageClear_CH3,StageClear_CH4
 
-PlainsClear_CH1:
+StageClear_CH1:
     db      SetInstrument,_PlainsEcho
     db      rest,4
-    dbw     Goto,PlainsClear_CH2.skipinit
+    dbw     Goto,StageClear_CH2.skipinit
 
-PlainsClear_CH2:
+StageClear_CH2:
     db      SetInstrument,_PlainsLead
 .skipinit
     db      G_4,4
@@ -1642,7 +1627,7 @@ PlainsClear_CH2:
     db      rest,2
     db      EndChannel
 
-PlainsClear_CH3:
+StageClear_CH3:
     db      SetInstrument,_PlainsBass
     db      G_2,2
     db      G_3,2
@@ -1662,7 +1647,7 @@ PlainsClear_CH3:
     db      rest,2
     db      EndChannel
 
-PlainsClear_CH4:
+StageClear_CH4:
     db      LoopCount,4
 :   Drum    Kick,2
     Drum    Kick,2
@@ -2903,8 +2888,6 @@ Forest_CH4:
     dbw     Loop,:-
     dbw     Goto,Forest_CH4
     
-; ========
-
 ; =================================================================
 
 PT_Cave:
@@ -2912,26 +2895,6 @@ PT_Cave:
 ; =================================================================
 
 PT_Temple:
-
-; =================================================================
-
-PT_CityClear:
-
-; =================================================================
-
-PT_ForestClear:
-
-; =================================================================
-
-PT_PyramidClear:
-
-; =================================================================
-
-PT_CaveClear:
-
-; =================================================================
-
-PT_TempleClear:
 
 ; =================================================================
 

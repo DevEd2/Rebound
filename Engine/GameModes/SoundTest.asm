@@ -335,12 +335,7 @@ SoundTest_SongNames:
     db  "    Pyramid Jams                "
     db  "   Cave Cacophony               "
     db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune
-    db  "  Plains Perfected              "
-    db  "   City Conquered               "
-    db  "  Forest  Flourish              "
-    db  "   Pyramid Passed               "
-    db  "    Cave Cleared                "
-    db  "   Temple Triumph               "
+    db  "    Stage Clear!                "
     db  "   Down 'n  Dirty               "
     db  "     Game  Over                 "
     db  "    Bonus  Time!                "
