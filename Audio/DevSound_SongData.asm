@@ -35,7 +35,7 @@ SongSpeedTable:
     db  4,3 ; menu
     db  6,6 ; plains
     db  3,3 ; city
-    db  3,3 ; forest
+    db  8,8 ; forest
     db  4,5 ; pyramid
     db  3,3 ; cave
     db  3,3 ; temple
@@ -163,6 +163,74 @@ vol_BossTomSnare:       db  w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w1,w
 vol_BossCHH:            db  $1a,$1a,$1a,$1a,0,$ff
 vol_BossOHHRoll:        db  $1a,$1a,$1a,0,$1a,$1a,$1a,0,$1a,$1a,$1a,0,$ff
 
+; ========
+
+vol_ForestPluck         equ vol_GameOverGuitarB
+vol_ForestLead:
+    db      $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c
+    db        5,TableWait,16
+    db        6,TableWait,16
+    db        7,TableWait,16
+    db        8,TableWait,16
+    db        9,TableWait,16
+    db       10,TableWait,24
+    db        9,TableWait,24
+    db        8,TableWait,24
+    db        7,TableWait,24
+    db        6,TableWait,24
+    db        5,TableWait,24
+    db        4,TableWait,24
+    db        3,TableWait,24
+    db        2,TableWait,48
+    db        1,TableWait,56
+    db        0,TableEnd
+vol_ForestArp:
+    db        6,TableWait,12
+    db        7,TableWait,12
+    db        8,TableWait,12
+    db        9,TableWait,12
+    db       10,TableWait,12
+    db        9,TableWait,16
+    db        8,TableWait,24
+    db        7,TableWait,32
+    db        6,TableWait,40
+    db        5,TableWait,48
+    db        4,TableWait,56
+    db        3,TableWait,64
+    db        2,TableWait,72
+    db        1,TableWait,80
+    db        0,TableEnd
+vol_ForestEcho1:    db  $3a,$ff
+vol_ForestEcho2:    db  $44,$ff
+vol_ForestBass:     db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w1,$ff
+vol_ForestBassSustain   equ vol_Bass1
+vol_ForestBassDecay:
+    db       w2,TableWait,56
+    db       w1,TableWait,56
+    db       w0,TableEnd
+vol_ForestPercussion1:
+    db      $1e,TableWait,15
+    db      $15,TableWait,15
+    db      $1b,TableWait,15
+    db      $14,TableWait,15
+    db      $18,TableWait,15
+    db      $13,TableWait,15
+    db      TableEnd
+vol_ForestPercussion2:
+    db      $2e,TableWait,31
+vol_ForestPercussion3:
+    db      $47,TableWait,31
+    db      $73,TableWait,31
+    db      $71,TableWait,31
+    db      TableEnd
+vol_ForestPercussionV8: db  $8,TableWait,7,2,$ff
+vol_ForestPercussionV9: db  $9,TableWait,7,2,$ff
+vol_ForestPercussionVA: db  $a,TableWait,7,3,$ff
+vol_ForestPercussionVB: db  $b,TableWait,7,3,$ff
+vol_ForestPercussionVC: db  $c,TableWait,7,3,$ff
+vol_ForestPercussionVD: db  $d,TableWait,7,4,$ff
+vol_ForestPercussionVE: db  $e,TableWait,7,4,$ff
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
@@ -194,6 +262,8 @@ arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,$ff
 arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,$80,0
 arp_BossBass:           db  0,$80,0
 
+arp_ForestPluck:        db  1,0,$ff
+
 ; =================================================================
 ; Noise sequences
 ; =================================================================
@@ -216,6 +286,9 @@ arp_Cymbal:             db  35,40,43,$80,2
 
 arp_BossKick:           db  40,23,17,28,20,12,$80,5
 arp_BossOHH:            db  42,$80,0
+
+arp_ForestPercussion1   equ arp_BossOHH
+arp_ForestPercussion2:  db  40,$80,0
 
 ; =================================================================
 ; Pulse sequences
@@ -246,6 +319,15 @@ waveseq_CityArp:
 
 waveseq_GameOverGuitarA:
     db  1,0,$ff
+    
+waveseq_ForestArp:
+    db  0,0,0,0,0,0,0,0
+    db  1,1,1,1,1,1,1,1
+    db  2,2,2,2,2,2,2,2
+    db  3,3,3,3,3,3,3,3
+    db  2,2,2,2,2,2,2,2
+    db  1,1,1,1,1,1,1,1
+    db  TableLoop,0
 
 ; =================================================================
 ; Vibrato sequences
@@ -260,6 +342,7 @@ vib_PlainsLead:     db  18,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
 vib_PlainsEcho:     db  0,-2,$80,1
 vib_PlainsHarmonyR: db  0,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
 vib_CityLead:       db  9,1,2,2,1,0,-1,-2,-2,-1,0,$80,1
+vib_ForestPluck:    db  6,3,7,10,7,3,0,-3,-7,-10,-7,-3,0,$80,1
 
 ; =================================================================
 ; Wave sequences
@@ -373,6 +456,28 @@ InstrumentTable:
     dins    BossCHH
     dins    BossOHH
     dins    BossOHHRoll
+    
+    dins    ForestPluck0
+    dins    ForestPluck1
+    dins    ForestPluck2
+    dins    ForestPluck3
+    dins    ForestLead
+    dins    ForestArp
+    dins    ForestEcho1
+    dins    ForestEcho2
+    dins    ForestBass
+    dins    ForestBassSustain
+    dins    ForestBassDecay
+    dins    ForestPercussion1
+    dins    ForestPercussion2
+    dins    ForestPercussion3
+    dins    ForestPercussionV8
+    dins    ForestPercussionV9
+    dins    ForestPercussionVA
+    dins    ForestPercussionVB
+    dins    ForestPercussionVC
+    dins    ForestPercussionVD
+    dins    ForestPercussionVE
 
 ; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
 ; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
@@ -438,6 +543,28 @@ ins_BossKick:           Instrument  0,BossKick,BossKick,_,_
 ins_BossCHH:            Instrument  0,BossCHH,BossCHH,_,_
 ins_BossOHH:            Instrument  0,BossOHH,BossOHH,_,_
 ins_BossOHHRoll:        Instrument  0,BossOHHRoll,BossOHH,_,_
+
+ins_ForestPluck0:       Instrument  0,ForestPluck,ForestPluck,Pulse125,ForestPluck
+ins_ForestPluck1:       Instrument  0,ForestPluck,ForestPluck,Pulse25,ForestPluck
+ins_ForestPluck2:       Instrument  0,ForestPluck,ForestPluck,Pulse50,ForestPluck
+ins_ForestPluck3:       Instrument  0,ForestPluck,ForestPluck,Pulse75,ForestPluck
+ins_ForestLead:         Instrument  0,ForestLead,_,Pulse50,CityLead
+ins_ForestArp:          Instrument  0,ForestArp,Buffer,ForestArp,_
+ins_ForestEcho1:        Instrument  0,ForestEcho1,_,Pulse50,_
+ins_ForestEcho2:        Instrument  0,ForestEcho2,_,Pulse50,_
+ins_ForestBass:         Instrument  0,ForestBass,_,ForestBass,_
+ins_ForestBassSustain:  Instrument  0,ForestBassSustain,_,ForestBass,_
+ins_ForestBassDecay:    Instrument  0,ForestBassDecay,_,ForestBass,_
+ins_ForestPercussion1:  Instrument  0,ForestPercussion1,ForestPercussion1,_,_
+ins_ForestPercussion2:  Instrument  0,ForestPercussion2,ForestPercussion2,_,_
+ins_ForestPercussion3:  Instrument  0,ForestPercussion3,ForestPercussion2,_,_
+ins_ForestPercussionV8: Instrument  0,ForestPercussionV8,ForestPercussion1,_,_
+ins_ForestPercussionV9: Instrument  0,ForestPercussionV9,ForestPercussion1,_,_
+ins_ForestPercussionVA: Instrument  0,ForestPercussionVA,ForestPercussion1,_,_
+ins_ForestPercussionVB: Instrument  0,ForestPercussionVB,ForestPercussion1,_,_
+ins_ForestPercussionVC: Instrument  0,ForestPercussionVC,ForestPercussion1,_,_
+ins_ForestPercussionVD: Instrument  0,ForestPercussionVD,ForestPercussion1,_,_
+ins_ForestPercussionVE: Instrument  0,ForestPercussionVE,ForestPercussion1,_,_
 
 ; =================================================================
 
@@ -2518,7 +2645,265 @@ Boss_Shared4:
     
 ; =================================================================
 
-PT_Forest:
+PT_Forest:  dw  Forest_CH1,Forest_CH2,Forest_CH3,Forest_CH4
+
+Forest_CH1:
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    db      LoopCount,14
+:   db      SetInstrument,_ForestPluck0,SetPan,$10,D#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C#4,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,D#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,F#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C#4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$01,D#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,C#4,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,D#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$01,F#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C#4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$10,D#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F#3,2
+    dbw     Loop,:-          
+    dbw     CallSection,.block0
+    
+    dbw     CallSection,.block1
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C_4,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F_4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$10,G#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C_4,2
+    dbw     CallSection,.block1
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C#4,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,G#4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$10,G#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,D#4,2
+    
+    db      SetInsAlternate,_ForestEcho1,_ForestEcho2
+    db      LoopCount,10
+:
+    db      SetPan,$11,F#6,1,SetPan,$10,F#6,1
+    db      SetPan,$11,A#5,1,SetPan,$01,F#6,1
+    db      SetPan,$11,F#5,1,SetPan,$10,A#5,1
+    db      SetPan,$11,F_6,1,SetPan,$01,F#5,1
+    db      SetPan,$11,A#5,1,SetPan,$10,F_6,1
+    db      SetPan,$11,F#5,1,SetPan,$01,A#5,1
+    db      SetPan,$11,D#6,1,SetPan,$10,F#5,1
+    db      SetPan,$11,A#5,1,SetPan,$01,D#6,1
+    db      SetPan,$11,F#5,1,SetPan,$10,A#5,1
+    db      SetPan,$11,C#6,1,SetPan,$01,F#5,1
+    db      SetPan,$11,G#5,1,SetPan,$10,C#6,1
+    db      SetPan,$11,F_5,1,SetPan,$01,G#5,1
+    db      SetPan,$11,D#6,1,SetPan,$10,F_5,1
+    db      SetPan,$11,F_6,1,SetPan,$01,D#6,1
+    dbw     Loop,:-
+    dbw     Goto,Forest_CH1
+
+.block0
+    db      SetInstrument,_ForestPluck0,SetPan,$10,D#3,4
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C#4,4
+    db                                  SetPan,$10,F#3,4
+    db      SetInstrument,_ForestPluck0,SetPan,$01,D#3,4
+    db      SetInstrument,_ForestPluck2,SetPan,$10,C#4,4
+    db                                  SetPan,$01,F#3,4
+    db      SetInstrument,_ForestPluck0,SetPan,$10,D#3,4
+    db      SetInstrument,_ForestPluck2,SetPan,$01,D#3,4
+    db                                  SetPan,$10,C#4,4
+    db      SetInstrument,_ForestPluck0,SetPan,$01,F#3,4
+    db      SetInstrument,_ForestPluck2,SetPan,$10,D#3,4
+    db                                  SetPan,$01,C#4,4
+    db      SetInstrument,_ForestPluck0,SetPan,$10,F#3,4
+    db      SetInstrument,_ForestPluck2,SetPan,$01,D#3,4
+    ret
+.block1
+    db      SetInstrument,_ForestPluck0,SetPan,$10,D#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C#4,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,D#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,F#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C#4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$01,G#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C#4,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,F#4,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,G#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$01,C_4,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F_4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$10,G#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C_4,2
+    db      SetInstrument,_ForestPluck0,SetPan,$10,B_2,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,F#3,2
+    db      SetInstrument,_ForestPluck2,SetPan,$01,B_3,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,B_2,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,F#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,B_3,2
+    db      SetInstrument,_ForestPluck0,SetPan,$01,G#3,2
+    db      SetInstrument,_ForestPluck1,SetPan,$11,C#4,2
+    db      SetInstrument,_ForestPluck2,SetPan,$10,F#4,2
+    db      SetInstrument,_ForestPluck3,SetPan,$11,G#3,2
+
+    ret
+    
+; ========
+
+Forest_CH2:
+    db      rest,2
+    dbw     CallSection,.block0
+    db      SetInstrument,_ForestPluck3,F#3,4
+    dbw     CallSection,.block0
+    db      SetInstrument,_ForestPluck3,F#3,2
+    
+    dbw     CallSection,.block1
+    db      F#4,56
+    dbw     CallSection,.block1
+    db      D#5,50
+    db      F_5,6
+    
+    db      F#5,24
+    db      F_5,2
+    db      C#5,2
+    db      D#5,16
+    db      C#5,6
+    db      F#4,6
+    db      C#5,22
+    db      D#5,6
+    db      F_5,22
+    db      C#5,6
+    db      D#5,58
+    dbw     CallSection,.block0
+    db      SetInstrument,_ForestPluck3,F#3,2
+    db      SetInstrument,_ForestArp
+    db      LoopCount,3
+:   db      Arp,2,$37,D#4,12
+    db      Arp,2,$47,C#4, 6
+    db                C#4,10
+    db                B_3,12
+    db                C#4, 6
+    db                C#4,10
+    db      Arp,2,$37,D#4,12
+    db      Arp,2,$47,C#4, 6
+    db                C#4,10
+    db                B_3,12
+    db      Arp,2,$5a,G#3, 6
+    db      Arp,2,$59,G#3,10
+    dbw     Loop,:-
+    db      Arp,2,$37,D#4,56
+    dbw     Goto,Forest_CH2
+    
+.block0
+    db      SetInstrument,_ForestPluck1,F#3,4
+    db      SetInstrument,_ForestPluck3,D#3,4
+    db      SetInstrument,_ForestPluck1,C#4,4
+    db                                  F#3,4
+    db      SetInstrument,_ForestPluck3,D#3,4
+    db      SetInstrument,_ForestPluck1,C#4,4
+    db                                  F#3,4
+    db      SetInstrument,_ForestPluck3,F#3,4
+    db      SetInstrument,_ForestPluck1,D#3,4
+    db                                  C#4,4
+    db      SetInstrument,_ForestPluck3,F#3,4
+    db      SetInstrument,_ForestPluck1,D#3,4
+    db                                  C#4,4
+    ret
+    
+.block1
+    db      SetInstrument,_ForestLead
+    db      A#4,24
+    db      G#4,2
+    db      F#4,2
+    db      A#4,22
+    db      C#5,6
+    ret
+
+; ========
+
+Forest_CH3:
+    db      SetInstrument,_ForestBass
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    dbw     CallSection,.block0
+    db      LoopCount,6
+  
+:   db      D#3,2
+    db      D#4,4
+    db      D#3,2
+    db      D#4,4
+    db      C#3,2
+    db      C#4,4
+    db      C#3,2
+    db      C#4,4
+    db      C#3,2
+    db      G#3,2
+    db      B_2,2
+    db      B_3,4
+    db      B_2,2
+    db      B_3,4
+    db      C#3,2
+    db      C#4,4
+    db      C#3,2
+    db      C#4,4
+    db      C#3,2
+    db      G#3,2
+    dbw     Loop,:-
+    db      SetInstrument,_ForestBassSustain,D#2,14
+    db      SetInstrument,_ForestBassDecay,D#2,42
+    dbw     Goto,Forest_CH3
+    
+.block0
+    db      LoopCount,3
+:   db      D#3,2
+    db      D#4,4
+    db      D#3,2
+    db      D#4,4
+    db      C#3,2
+    dbw     Loop,:-
+    db      D#3,2
+    db      D#4,4
+    db      D#3,2
+    db      D#4,4
+    db      F#4,2
+    db      LoopCount,3
+:   db      B_2,2
+    db      B_3,4
+    db      B_2,2
+    db      B_3,4
+    db      A#2,2
+    dbw     Loop,:-
+    db      B_2,2
+    db      B_3,4
+    db      B_2,2
+    db      B_3,4
+    db      C#4,2
+    ret
+    
+; ========
+
+Forest_CH4:
+    db      LoopCount,20
+:   Drum    ForestPercussion1,12
+    Drum    ForestPercussion2,16
+    dbw     Loop,:-
+    db      LoopCount,14
+:
+    Drum    ForestPercussionV9,2
+    Drum    ForestPercussionVA,2
+    Drum    ForestPercussionVB,2
+    Drum    ForestPercussionVC,2
+    Drum    ForestPercussionVD,2
+    Drum    ForestPercussionVE,2
+    Drum    ForestPercussion2,2
+    Drum    ForestPercussionV8,2
+    Drum    ForestPercussion3,2
+    Drum    ForestPercussionVA,2
+    Drum    ForestPercussionV9,2
+    Drum    ForestPercussionV8,2
+    Drum    ForestPercussionV9,2
+    Drum    ForestPercussionVA,2
+    dbw     Loop,:-
+    dbw     Goto,Forest_CH4
+    
+; ========
 
 ; =================================================================
 
@@ -2559,3 +2944,5 @@ PT_Credits:
 ; =================================================================
 
 PT_Blank:   dw  DummyChannel,DummyChannel,DummyChannel,DummyChannel
+
+    db      "END"

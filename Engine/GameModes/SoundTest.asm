@@ -72,9 +72,9 @@ GM_SoundTest:
     ei
 
     xor     a
-    ld      [SoundTest_SongID],a
     ld      [SoundTest_MarqueeScroll],a
     ld      [SoundTest_MarqueePos],a
+    ld      [SoundTest_SongID],a
     push    af
     farcall DS_Init
     pop     af
