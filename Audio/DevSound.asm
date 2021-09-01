@@ -1836,6 +1836,28 @@ DS_CH1_UpdateRegisters:
     inc     h
 .nocarry2
     ld      a,[hl+]
+    cp      TableWait
+    jr      nz,.nowait3
+    ld      a,[DS_CH1PulseTableTimer]
+    bit     7,a
+    jr      z,:+
+    dec     a
+    ld      [DS_CH1PulseTableTimer],a
+    cp      $80
+    jr      nz,.updateNote
+    xor     a
+    ld      [DS_CH1PulseTableTimer],a
+    ld      a,l
+    ld      a,[DS_CH1PulsePos]
+    add     2
+    ld      [DS_CH1PulsePos],a
+    jr      .updatePulse
+:
+    ld      a,[hl]
+    set     7,a
+    ld      [DS_CH1PulseTableTimer],a
+    jr      .updateNote
+.nowait3
     cp      TableEnd
     jr      z,.updateNote
     ; convert pulse value
@@ -1859,29 +1881,9 @@ DS_CH1_UpdateRegisters:
     jr      nz,.noloop2
     ld      a,[hl]
     ld      [DS_CH1PulsePos],a
-    jr      .updateNote
+    ; fall through
 .noloop2
-    cp      TableWait
-    jr      nz,.nowait3
-    ld      a,[DS_CH1PulseTableTimer]
-    bit     7,a
-    jr      z,:+
-    dec     a
-    ld      [DS_CH1PulseTableTimer],a
-    cp      $80
-    jr      nz,.updateNote
-    xor     a
-    ld      [DS_CH1PulseTableTimer],a
-    ld      a,l
-    ld      a,[DS_CH1PulsePos]
-    add     2
-    ld      [DS_CH1PulsePos],a
-    jr      .updatePulse
-:
-    ld      a,[hl]
-    set     7,a
-    ld      [DS_CH1PulseTableTimer],a
-.nowait3
+    
     
 ; get note
 .updateNote
@@ -1990,6 +1992,7 @@ DS_CH1_UpdateRegisters:
     ld      a,[hl]
     set     7,a
     ld      [DS_CH1VolTableTimer],a
+    jr      .done
 .setVolume
     swap    a
     ld      b,a
@@ -2146,6 +2149,7 @@ DS_CH2_UpdateRegisters:
     ld      a,[hl]
     set     7,a
     ld      [DS_CH2PulseTableTimer],a
+    ; fall through
 .nowait3
     
 ; get note
@@ -2255,6 +2259,7 @@ DS_CH2_UpdateRegisters:
     ld      a,[hl]
     set     7,a
     ld      [DS_CH2VolTableTimer],a
+    jr      .done
 .setVolume
     swap    a
     ld      b,a
@@ -2349,6 +2354,7 @@ DS_CH3_UpdateRegisters:
     ld      a,[DS_CH3ArpPos]
     inc     a
     ld      [DS_CH3ArpPos],a
+    jr      .updateNote
 .continue
     
     ld      a,[VGMSFX_Flags]
@@ -2489,7 +2495,7 @@ DS_CH3_UpdateRegisters:
 .noloopX
     cp      TableWait
     jr      nz,.updateVolume
-    ld      a,[DS_CH3VolTableTimer]
+    ld      a,[DS_CH3WaveTableTimer]
     bit     7,a
     jr      z,:+
     dec     a
@@ -2506,8 +2512,10 @@ DS_CH3_UpdateRegisters:
 :
     ld      a,[hl]
     set     7,a
-    ld      [DS_CH3VolTableTimer],a
+    ld      [DS_CH3WaveTableTimer],a
+    ; fall through
     
+    ; update volume
 .updateVolume
     ld      hl,DS_CH3VolPtr
     ld      a,[hl+]
@@ -2520,39 +2528,13 @@ DS_CH3_UpdateRegisters:
     inc     h
 .nocarry5
     ld      a,[hl+]
-    cp      $ff
+    cp      TableEnd
     jr      z,.done
-    ld      b,a
-    ld      a,[VGMSFX_Flags]
-    bit     bSFX_CH3,a
-    jr      nz,.noreset3
-    
-    ld      a,[DS_CH3Vol]
-    cp      b
-    jr      z,.noreset3
-    ld      a,$80
-    ldh     [rNR30],a
-    ld      a,b
-    ldh     [rNR32],a
-    ld      [DS_CH3Vol],a
-    ld      a,e
-    set     7,a
-    ldh     [rNR34],a
-.noreset3
-    ld      a,[DS_CH3VolPos]
-    inc     a
-    ld      [DS_CH3VolPos],a
-    ld      a,[hl+]
-    cp      TableLoop
-    jr      nz,:+
-    ld      a,[hl]
-    ld      [DS_CH3VolPos],a
-:
     cp      TableWait
-    jr      nz,.done
+    jr      nz,.setVolume
     ld      a,[DS_CH3VolTableTimer]
     bit     7,a
-    jr      z,.done
+    jr      z,:+
     dec     a
     ld      [DS_CH3VolTableTimer],a
     cp      $80
@@ -2564,7 +2546,36 @@ DS_CH3_UpdateRegisters:
     add     2
     ld      [DS_CH3VolPos],a
     jr      .updateVolume
+:
+    ld      a,[hl]
+    set     7,a
+    ld      [DS_CH3VolTableTimer],a
+    jr      .done
+.setVolume
+    ld      b,a
+    ld      a,[VGMSFX_Flags]
+    bit     bSFX_CH3,a
+    jr      nz,.noreset3
+    ld      a,[DS_CH3Vol]
+    cp      b
+    jr      z,.noreset3
+    ld      a,b
+    and     %01100000
+    ld      [rNR32],a
+    ld      [DS_CH3Vol],a
+    ; fall through
+    
+.noreset3
+    ld      a,[DS_CH3VolPos]
+    inc     a
+    ld      [DS_CH3VolPos],a
+    ld      a,[hl+]
+    cp      $8f
+    jr      nz,.done
+    ld      a,[hl]
+    ld      [DS_CH3VolPos],a
 .done
+
     call    DoPWM
     ld      a,[DS_CH3Wave]
     cp      $fd
@@ -2711,6 +2722,7 @@ DS_CH4_UpdateRegisters:
     ld      a,[hl]
     set     7,a
     ld      [DS_CH4VolTableTimer],a
+    jr      .done
 .setVolume
     swap    a
     ld      b,a
