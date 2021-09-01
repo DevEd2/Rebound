@@ -77,7 +77,7 @@ w3          =   %00100000
 ; envelope length $0 instead.
 
 vol_Bass1:              db  w3,$ff
-vol_PulseBass:          db  15,15,14,14,13,13,12,12,11,11,10,10,9,9,8,8,8,7,7,7,6,6,6,5,5,5,4,4,4,4,3,3,3,3,2,2,2,2,2,1,1,1,1,1,1,0,$ff
+vol_PulseBass:          db  $2f,TableWait,12,$38,TableWait,11,$44,TableWait,7,$27,$ff
 
 vol_Kick:               db  $1c,$1c,$18,$ff
 vol_Snare:              db  $1d,$ff
@@ -88,34 +88,31 @@ vol_Cymbal:             db  $7e,$ff
 vol_Echo1:              db  8,$ff   
 vol_Echo2:              db  3,$ff
 
-vol_PyramidArp:         db  w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
-vol_PyramidLeadS:       db  w3,w3,w3,w3,w3
-vol_PyramidLeadF:       db  w2,w2,w2,w2,w2
+vol_PyramidArp:         db  w3,TableWait,4,w2,w2,TableWait,3,w1,$ff
+vol_PyramidLeadS:       db  w3,TableWait,4
+vol_PyramidLeadF:       db  w2,TableWait,4
                         db  w1,$ff              
-vol_PyramidLeadL:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
-                        db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3
-                        db  w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2
-                        db  w1,$ff
+vol_PyramidLeadL:       db  w3,TableWait,71,w2,TableWait,35,w1,$ff
         
-vol_TomEcho:            db  $1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f,$1f
-                        db  $18,$18,$18,$18,$18,$18,$18,$18,$18
-                        db  $14,$14,$14,$14,$14,$14,$14,$14,$14
-                        db  $12,$12,$12,$12,$12,$12,$12,$12,$12
-                        db  $11,$11,$11,$11,$11,$11,$11,$11,$11
+vol_TomEcho:            db  $1f,TableWait,8
+                        db  $18,TableWait,8
+                        db  $14,TableWait,8
+                        db  $12,TableWait,8
+                        db  $11,TableWait,8
                         db  $ff
 
 ; ========
 
-vol_MenuLead:           db  w3,w3,w3,w3,w3,w3,w3,w2,w1,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_MenuLead:           db  w3,TableWait,6,w2,w1,w2,TableWait,5,w1,$ff
 
 vol_MenuOctave:         db  w3,w3,w3,w2,w2,w1,$ff
 vol_MenuOctaveEcho:     db  w1,$ff
-vol_MenuBass:           db  $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c,$38,$ff
-vol_MenuArp:            db  $1b,$1b,$1b,$1b,$27,$27,$27,$27,$27,$27,$27,$27,$27,$27,$53,$ff
+vol_MenuBass:           db  $2c,TableWait,7,$38,$ff
+vol_MenuArp:            db  $1b,TableWait,3,$27,TableWait,9,$53,$ff
 
 ; ========
 
-vol_PlainsBass:         db  w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_PlainsBass:         db  w3,TableWait,6,w2,TableWait,6,w1,$ff
 vol_PlainsLead:         db  $5a,$ff
 vol_PlainsEcho:         db  2,$ff
 vol_PlainsHarmony:      db  $59,$ff
@@ -123,14 +120,14 @@ vol_PlainsHarmonyR:     db  4,$ff
 
 ; ========
 
-vol_CityArp:            db  $1b,$1b,$1b,$1b,$48,$ff
-vol_CityLead:           db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w1,$ff
-vol_CityLead2:          db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w1,$ff
-vol_CityLeadL:          db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_CityArp:            db  $1b,TableWait,3,$48,$ff
+vol_CityLead:           db  w3,TableWait,9,w2,TableWait,4,w1,$ff
+vol_CityLead2:          db  w3,TableWait,12,w2,TableWait,5,w1,$ff
+vol_CityLeadL:          db  w3,TableWait,8,w2,TableWait,22,w1,$ff
 
 ; ========
 
-vol_GameOverLead:       db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w2,w1,$ff
+vol_GameOverLead:       db  w3,TableWait,16,w2,TableWait,16,w1,$ff
 vol_GameOverGuitarA:    db  $7a,$ff
 vol_GameOverGuitarB:    db  $4a,$ff
 
@@ -143,51 +140,51 @@ vol_BossIntro1b:        db  $1a,$ff
 vol_BossIntro2a:        db  $46,$ff
 vol_BossIntro2b:        db  $16,$ff
 vol_BossLead:           db  $5a,$ff
-vol_BossTomKick:        db  w3,w3,w3,w3,w2,w1,w0,$ff
-vol_BossTomSnare:       db  w3,w3,w3,w3,w3,w3,w3,w3,w2,w2,w2,w2,w2,w2,w2,w2,w1,w1,w1,w1,w1,w1,w1,w1,0,$ff
-vol_BossCHH:            db  $1a,$1a,$1a,$1a,0,$ff
+vol_BossTomKick:        db  w3,TableWait,3,w2,w1,w0,$ff
+vol_BossTomSnare:       db  w3,TableWait,7,w2,TableWait,7,w1,TableWait,7,w0,$ff
+vol_BossCHH:            db  $1a,TableWait,3,0,$ff
 vol_BossOHHRoll:        db  $1a,$1a,$1a,0,$1a,$1a,$1a,0,$1a,$1a,$1a,0,$ff
 
 ; ========
 
 vol_ForestPluck         equ vol_GameOverGuitarB
 vol_ForestLead:
-    db      $2c,$2c,$2c,$2c,$2c,$2c,$2c,$2c
-    db        5,TableWait,16
-    db        6,TableWait,16
-    db        7,TableWait,16
-    db        8,TableWait,16
-    db        9,TableWait,16
-    db       10,TableWait,24
-    db        9,TableWait,24
-    db        8,TableWait,24
-    db        7,TableWait,24
-    db        6,TableWait,24
-    db        5,TableWait,24
-    db        4,TableWait,24
-    db        3,TableWait,24
-    db        2,TableWait,48
-    db        1,TableWait,56
+    db      $2c,TableWait,7
+    db        5,TableWait,15
+    db        6,TableWait,15
+    db        7,TableWait,15
+    db        8,TableWait,15
+    db        9,TableWait,15
+    db       10,TableWait,23
+    db        9,TableWait,23
+    db        8,TableWait,23
+    db        7,TableWait,23
+    db        6,TableWait,23
+    db        5,TableWait,23
+    db        4,TableWait,23
+    db        3,TableWait,23
+    db        2,TableWait,47
+    db        1,TableWait,55
     db        0,TableEnd
 vol_ForestArp:
-    db        6,TableWait,12
-    db        7,TableWait,12
-    db        8,TableWait,12
-    db        9,TableWait,12
-    db       10,TableWait,12
-    db        9,TableWait,16
-    db        8,TableWait,24
-    db        7,TableWait,32
-    db        6,TableWait,40
-    db        5,TableWait,48
-    db        4,TableWait,56
-    db        3,TableWait,64
-    db        2,TableWait,72
-    db        1,TableWait,80
+    db        6,TableWait,11
+    db        7,TableWait,11
+    db        8,TableWait,11
+    db        9,TableWait,11
+    db       10,TableWait,11
+    db        9,TableWait,15
+    db        8,TableWait,23
+    db        7,TableWait,31
+    db        6,TableWait,39
+    db        5,TableWait,47
+    db        4,TableWait,55
+    db        3,TableWait,63
+    db        2,TableWait,71
+    db        1,TableWait,79
     db        0,TableEnd
 vol_ForestEcho1:    db  $3a,$ff
 vol_ForestEcho2:    db  $44,$ff
-vol_ForestBass:     db  w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w3,w2,w1,$ff
+vol_ForestBass:     db  w3,TableWait,15,w2,w1,$ff
 vol_ForestBassSustain   equ vol_Bass1
 vol_ForestBassDecay:
     db       w2,TableWait,56
@@ -241,7 +238,7 @@ arp_MenuArp05A:         db  0,0,5,5,10,10,$80,0
 
 arp_PlainsBass:         db  12,12,0,$ff
 
-arp_BassOctave:         db  12,0,0,0,0,0,0,0,0,0,0,0,12,$ff
+arp_BassOctave:         db  12,0,TableWait,9,12,$ff
 
 arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,$ff
 arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,$80,0
@@ -287,13 +284,13 @@ waveseq_Pulse50:
 waveseq_Square:         db  2,$ff
 waveseq_Pulse75:        db  3,$ff
 
-waveseq_PyramidBass:    db  0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,$80,0
+waveseq_PyramidBass:    db  0,TableWait,3,1,TableWait,3,2,TableWait,3,3,TableWait,3,$80,0
 
 waveseq_MenuArp:
-    db  0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    db  1,1,1,1,1,1,1,1,1,1,1,1,1,1
-    db  2,2,2,2,2,2,2,2,2,2,2,2,2,2
-    db  3,3,3,3,3,3,3,3,3,3,3,3,3,3
+    db  0,TableWait,13
+    db  1,TableWait,13
+    db  2,TableWait,13
+    db  3,TableWait,13
     db  $80,0
 
 waveseq_PlainsLead:     db  0,0,0,0,1,$ff
@@ -306,12 +303,12 @@ waveseq_GameOverGuitarA:
     db  1,0,$ff
     
 waveseq_ForestArp:
-    db  0,0,0,0,0,0,0,0
-    db  1,1,1,1,1,1,1,1
-    db  2,2,2,2,2,2,2,2
-    db  3,3,3,3,3,3,3,3
-    db  2,2,2,2,2,2,2,2
-    db  1,1,1,1,1,1,1,1
+    db  0,TableWait,7
+    db  1,TableWait,7
+    db  2,TableWait,7
+    db  3,TableWait,7
+    db  2,TableWait,7
+    db  1,TableWait,7
     db  TableLoop,0
 
 ; =================================================================
