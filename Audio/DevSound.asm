@@ -1136,7 +1136,7 @@ DS_UpdateCH3:
 DS_CH3_CheckByte:
     ld      a,[hl+]     ; get byte
     cp      $ff
-    jr      z,.endChannel
+    jp      z,.endChannel
     cp      $c9
     jp      z,.retSection
     bit     7,a         ; check for command
@@ -1174,6 +1174,9 @@ DS_CH3_CheckByte:
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
     jr      nz,.noupdate
+    ld      a,$80
+    ldh     [rNR30],a
+    ldh     [rNR34],a
     ld      a,[DS_CH3Vol]
     ldh     [rNR32],a
 .noupdate
@@ -2568,8 +2571,6 @@ DS_CH3_UpdateRegisters:
     bit     bSFX_CH3,a
     jr      nz,.noreset3
     ld      a,[DS_CH3Vol]
-    cp      b
-    jr      z,.noreset3
     ld      a,b
     and     %01100000
     ld      [rNR32],a
