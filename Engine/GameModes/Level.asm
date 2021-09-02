@@ -361,13 +361,11 @@ Level_TransitionUp:
     ld      b,16
 .loop
     push    bc
-    ld      a,[Player_XPos]
+    ld      a,[Engine_CameraX]
     and     $f0
-    swap    a
     ld      c,a
-    ld      a,[Engine_CurrentSubarea]
-    ld      e,a
     ld      d,b
+    dec     d
     call    Level_LoadMapColumn
     ld      a,[Player_YPos]
     dec     a
@@ -413,12 +411,9 @@ Level_TransitionDown:
     ld      b,16
 .loop
     push    bc
-    ld      a,[Player_XPos]
+    ld      a,[Engine_CameraX]
     and     $f0
-    swap    a
     ld      c,a
-    ld      a,[Engine_CurrentSubarea]
-    ld      e,a
     ld      a,b
     xor     $f
     inc     a
@@ -732,34 +727,33 @@ Level_LoadMapRow:
     
 ; ========
 
-; INPUT: c = player X position
+; INPUT: c = camera X position
 ;        d = column to load
 ;        e = screen to load from
 Level_LoadMapColumn:
     ld      b,b
     push    de
-
-    ld      hl,Engine_LevelData
+    ld      a,[Engine_CurrentScreen]
+    and     $f
+    sub     1   ; dec a doesn't set carry and we need to check for overflow
+    jr      nc,:+
+    xor     a
+:   ld      h,high(Engine_LevelData)
+    or      h
+    ld      h,a
+    ld      a,c
+    add     d
+    ld      l,a
     ldh     a,[rSVBK]
     and     7
     ldh     [sys_TempSVBK],a
     ; get subarea
-    ld      a,e
-    and     $f0
+    ld      a,[Engine_CurrentScreen]
     swap    a
+    and     $f
     ; set correct WRAM bank
     add     2
     ldh     [rSVBK],a
-    
-    ; get screen
-    ld      a,e
-    and     $f
-    add     h
-    ld      h,a
-    ; get column
-    ld      a,d
-    add     l
-    ld      l,a
     
     ld      b,16
 .loop
@@ -775,6 +769,9 @@ Level_LoadMapColumn:
     ld      a,l
     add     16
     ld      l,a
+    jr      nc,:+
+    inc     h
+:
     pop     bc
     dec     b
     jr      nz,.loop
