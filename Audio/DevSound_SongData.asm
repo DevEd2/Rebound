@@ -303,12 +303,12 @@ waveseq_GameOverGuitarA:
     db  1,0,$ff
     
 waveseq_ForestArp:
-    db  0,TableWait,7
-    db  1,TableWait,7
-    db  2,TableWait,7
-    db  3,TableWait,7
-    db  2,TableWait,7
-    db  1,TableWait,7
+    db  0,0,0,0,0,0,0,0
+    db  1,1,1,1,1,1,1,1
+    db  2,2,2,2,2,2,2,2
+    db  3,3,3,3,3,3,3,3
+    db  2,2,2,2,2,2,2,2
+    db  1,1,1,1,1,1,1,1
     db  TableLoop,0
 
 ; =================================================================
