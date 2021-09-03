@@ -380,7 +380,7 @@ Level_TransitionUp:
     halt
     dec     b
     jr      nz,.loop
-    ret
+    jp      InitSpawnMonsters
 :
     xor     a
     ld      [Player_YVelocity],a
@@ -388,10 +388,10 @@ Level_TransitionUp:
     ld      [Player_YSubpixel],a
     ld      a,8
     ld      [Player_YPos],a
-	ld		[Player_LastBounceY],a
-	ld		a,[Engine_CameraY]
-	ld		[Engine_CameraTargetY],a
-    jp      InitSpawnMonsters
+    ld		[Player_LastBounceY],a
+    ld		a,[Engine_CameraY]
+    ld		[Engine_CameraTargetY],a
+    ret
     
 Level_TransitionDown:
     ld      a,[Engine_CurrentSubarea]
@@ -433,11 +433,11 @@ Level_TransitionDown:
     halt
     dec     b
     jr      nz,.loop
-	ld		a,[Player_YPos]
-	ld		[Player_LastBounceY],a
-	ld		a,[Engine_CameraY]
-	ld		[Engine_CameraTargetY],a
-    jp      InitSpawnMonsters    
+    ld		a,[Player_YPos]
+    ld		[Player_LastBounceY],a
+    ld		a,[Engine_CameraY]
+    ld		[Engine_CameraTargetY],a
+    jp    InitSpawnMonsters  
 
 ; ================================================================
 
