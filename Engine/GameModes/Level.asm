@@ -731,7 +731,6 @@ Level_LoadMapRow:
 ;        d = column to load
 ;        e = screen to load from
 Level_LoadMapColumn:
-    ld      b,b
     push    de
     ld      a,[Engine_CurrentScreen]
     and     $f
@@ -776,8 +775,7 @@ Level_LoadMapColumn:
     add     1
     cp      $e0
     jr      nz,:+
-    ld      a,$df
-    ld      h,a
+    ld      h,$df
 :
     pop     bc
     dec     b
