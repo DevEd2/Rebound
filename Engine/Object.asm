@@ -413,6 +413,19 @@ InitSpawnMonsters:
   or  a                 ; Test for 0
   ret z                 ; 0 = End of Object Data
   ldh [TempID],a        ; Save Object ID
+  push  hl              ; Save object data pointer
+  ld  h,HIGH(NoRespawn) ; Check no respawn table
+  ld  l,d
+  ld  a,[hl]
+  pop hl                ; Restore object data pointer
+  or  a
+  jr  z,:+              ; If entry is 0 then this object can spawn
+  inc hl                ; Advance to next object
+  inc hl
+  inc hl
+  inc d
+  jr  .spawnLoop
+:
   ld  a,[hl+]           ; Get Object Screen
   cp  e                 ; Same as current screen?
   jr  nz,.offScreen     ; If no, don't spawn this object
