@@ -286,12 +286,7 @@ waveseq_Pulse75:        db  3,$ff
 
 waveseq_PyramidBass:    db  0,TableWait,3,1,TableWait,3,2,TableWait,3,3,TableWait,3,$80,0
 
-waveseq_MenuArp:
-    db  0,TableWait,13
-    db  1,TableWait,13
-    db  2,TableWait,13
-    db  3,TableWait,13
-    db  $80,0
+waveseq_MenuArp         equ waveseq_Pulse25
 
 waveseq_PlainsLead:     db  0,0,0,0,1,$ff
 waveseq_PlainsHarmony:  db  2,2,0,$ff
@@ -486,13 +481,13 @@ ins_MenuLead:           Instrument  0,MenuLead,Pluck,MenuLead,BeachLead
 ins_MenuOctave:         Instrument  0,MenuOctave,Oct2,MenuTri,_
 ins_MenuOctaveEcho:     Instrument  0,MenuOctaveEcho,Oct2,MenuTri,_
 ins_MenuBass:           Instrument  0,MenuBass,Pluck,Pulse25,_
-ins_MenuArp027:         Instrument  1,MenuArp,MenuArp027,MenuArp,_
-ins_MenuArp037:         Instrument  1,MenuArp,MenuArp037,MenuArp,_
-ins_MenuArp047:         Instrument  1,MenuArp,MenuArp047,MenuArp,_
-ins_MenuArp057:         Instrument  1,MenuArp,MenuArp057,MenuArp,_
-ins_MenuArp038:         Instrument  1,MenuArp,MenuArp038,MenuArp,_
-ins_MenuArp059:         Instrument  1,MenuArp,MenuArp059,MenuArp,_
-ins_MenuArp05A:         Instrument  1,MenuArp,MenuArp05A,MenuArp,_
+ins_MenuArp027:         Instrument  0,MenuArp,MenuArp027,MenuArp,_
+ins_MenuArp037:         Instrument  0,MenuArp,MenuArp037,MenuArp,_
+ins_MenuArp047:         Instrument  0,MenuArp,MenuArp047,MenuArp,_
+ins_MenuArp057:         Instrument  0,MenuArp,MenuArp057,MenuArp,_
+ins_MenuArp038:         Instrument  0,MenuArp,MenuArp038,MenuArp,_
+ins_MenuArp059:         Instrument  0,MenuArp,MenuArp059,MenuArp,_
+ins_MenuArp05A:         Instrument  0,MenuArp,MenuArp05A,MenuArp,_
 ins_MenuTom:            Instrument  0,MenuArp,MenuTom,Pulse50,_
 
 ins_PlainsBass:         Instrument  0,PlainsBass,PlainsBass,PlainsBass,_
@@ -502,7 +497,7 @@ ins_PlainsHarmony:      Instrument  0,PlainsHarmony,_,PlainsHarmony,PlainsLead
 ins_PlainsHarmonyR:     Instrument  0,PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
 
 ins_BassOctave:         Instrument  0,MenuBass,BassOctave,Pulse25,_
-ins_CityArp:            Instrument  1,CityArp,Buffer,CityArp,_
+ins_CityArp:            Instrument  0,CityArp,Buffer,CityArp,_
 ins_CityLead:           Instrument  0,CityLead,PluckDelay,CityLead,CityLead
 ins_CityLead2:          Instrument  0,CityLead2,PluckDelay,CityLead,CityLead
 ins_CityLeadL:          Instrument  0,CityLeadL,_,CityLead,CityLead
