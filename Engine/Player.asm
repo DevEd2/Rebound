@@ -259,8 +259,10 @@ ProcessPlayer:
     ld      l,a
     ld      a,[Player_XPos]
     ld      h,a
+	push	bc
     call    GetTileCoordinates
-    ld      e,a
+    pop		bc
+	ld      e,a
     
     ld      hl,Engine_LevelData
     ld      a,[Engine_CurrentScreen]
@@ -273,8 +275,14 @@ ProcessPlayer:
     add     2
     ldh     [rSVBK],a
     ld      l,e
+	ld		a,b
+	cp		$19	; is coin underground?
+	jr		nz,.aboveground
+	ld		a,6
+	jr		:+
+.aboveground
     xor     a
-    ld      [hl],a
+:   ld      [hl],a
     ld      b,a
     ld      a,e
     swap    a

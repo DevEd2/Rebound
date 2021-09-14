@@ -33,7 +33,7 @@ GetTileCoordinates:
 ; Input:    E = Tile coordinates
 ;       Carry = Subtract 1 from screen 
 ; Output:   A = Collision ID, B = Tile ID
-; Destroys: B, HL, rROMB0
+; Destroys: HL, rROMB0
 
 GetTileL:
     push    af
@@ -56,6 +56,8 @@ GetTileL:
 .nocarry
     ld      l,e
     ld      a,[hl]
+	ld		b,a
+	push	bc
 	; get collision ID
 	ld		e,a
 	ld		a,[Engine_TilesetBank]
@@ -69,6 +71,7 @@ GetTileL:
 	jr		nc,:+
 	inc		h
 :	ld		a,[hl]
+	pop		bc
 	ret
     
 ; Input:    E = Tile coordinates

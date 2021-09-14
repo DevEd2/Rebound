@@ -734,8 +734,6 @@ Level_LoadMapColumn:
     push    de
     ld      a,[Engine_CurrentScreen]
     and     $f
-    cp      $f  ; check if we're in subscreen 15
-    jr      z,:+
     sub     1   ; dec a doesn't set carry and we need to check for overflow
     jr      nc,:+
     xor     a
@@ -771,11 +769,7 @@ Level_LoadMapColumn:
     add     16
     ld      l,a
     jr      nc,:+
-    ld      a,h
-    add     1
-    cp      $e0
-    jr      nz,:+
-    ld      h,$df
+	inc		h
 :
     pop     bc
     dec     b

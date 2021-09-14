@@ -110,8 +110,16 @@ if __name__ == "__main__":
 	
 	# parse JSON tags
 	mapdata = json.loads(infile.read())
-	map = mapdata['map']
-	obj = mapdata['objects']
+	# check for Tiled Map Editor export
+	try:
+		tv=mapdata['tiledversion']
+		print("Skipping " + inname + " (Tiled Map Editor format)...")
+		exit()
+	# if the above fails, we have a Tilekit export
+	except KeyError:
+		print("Converting " + inname + " (TileKit format)...")
+		map = mapdata['map']
+		obj = mapdata['objects']
 	
 	objlist = []
 	objcount = 0
