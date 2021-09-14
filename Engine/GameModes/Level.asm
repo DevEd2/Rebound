@@ -358,6 +358,9 @@ Level_TransitionUp:
     PlaySFX transitionup
     
     call    ClearMonsters
+	call	ClearParticles
+	call	RenderMonsters
+	call	RenderParticles
     ld      b,16
 .loop
     push    bc
@@ -408,6 +411,9 @@ Level_TransitionDown:
     PlaySFX transitiondown
     
     call    ClearMonsters
+	call	ClearParticles
+	call	RenderMonsters
+	call	RenderParticles
     ld      b,16
 .loop
     push    bc
