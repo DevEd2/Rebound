@@ -674,7 +674,12 @@ ProcessPlayer:
     ; Top Left
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
-    jr      c,:+                ; If the point is past the top of the subarea, not solid
+    jr      nc,:+
+    ld      a,[Engine_CurrentScreen]
+    and     $30
+    jr      z,:++++             ; If this is the top of the level, ceiling should be solid
+    jr      :++
+:
     ld      l,a
     ld      a,[Player_XPos]
     sub     Player_HitboxSize
@@ -685,12 +690,17 @@ ProcessPlayer:
     pop     af
     call    GetTileL
     cp      COLLISION_SOLID
-    jr      z,:++
+    jr      z,:+++
 :
     ; Top Right
     ld      a,[Player_YPos]
     sub     Player_HitboxSize
-    jp      c,.yCollideEnd
+    jr      nc,:+
+    ld      a,[Engine_CurrentScreen]
+    and     $30
+    jr      z,:++
+    jp      .yCollideEnd
+:
     ld      l,a
     ld      a,[Player_XPos]
     add     Player_HitboxSize
