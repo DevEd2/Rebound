@@ -6,20 +6,40 @@ section "Title screen + menu routines",rom0
 
 GM_TitleAndMenus:
     call    ClearScreen
-    ldfar   hl,TitleScreenTiles
+    ldfar   hl,TitleScreenTiles1
     ld      de,$8000
     call    DecodeWLE
 
     ld      hl,TitleScreenMap
     ld      de,sys_TilemapBuffer
     call    DecodeWLE
+    ld      hl,sys_TilemapBuffer
+    call    LoadTilemapScreen
 
+	ld		a,1
+	ldh		[rVBK],a
+	
+    ldfar   hl,TitleScreenTiles2
+    ld      de,$8000
+    call    DecodeWLE
+	
+	ld		hl,TitleScreenAttr
+    ld      de,sys_TilemapBuffer
+    call    DecodeWLE
     ld      hl,sys_TilemapBuffer
     call    LoadTilemapScreen
 
     ld      hl,Pal_TitleScreen
-    xor     a
+	ld		b,7
+	xor		a
+:	push	af
+	push	bc
     call    LoadPal
+	pop		bc
+	pop		af
+	inc		a
+	dec		b
+	jr		nz,:-
     call    ConvertPals
     call    PalFadeInWhite
     call    UpdatePalettes
@@ -71,12 +91,9 @@ TitleLoop:
     
 section "Title screen + menu GFX",romx
 
-; too lazy to properly convert the palette :V
-Pal_TitleScreen:
-    RGB (255>>3),(255>>3),(255>>3)
-    RGB (  0>>3),(116>>3),(224>>3)
-    RGB ( 32>>3),( 69>>3),(108>>3)
-    RGB (  0>>3),(  0>>3),(  0>>3)
+Pal_TitleScreen:	incbin	"GFX/TitleScreen.pal"
 
-TitleScreenTiles:   incbin  "GFX/TitleScreen.2bpp.wle"
+TitleScreenTiles1:  incbin  "GFX/TitleScreen_Block1.2bpp.wle"
+TitleScreenTiles2:  incbin  "GFX/TitleScreen_Block2.2bpp.wle"
 TitleScreenMap:     incbin  "GFX/TitleScreen.til.wle"
+TitleScreenAttr:    incbin  "GFX/TitleScreen.atr.wle"
