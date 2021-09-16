@@ -371,8 +371,6 @@ Level_TransitionUp:
     dec     d
     call    Level_LoadMapColumn
     ld      a,[Player_YPos]
-    dec     a
-    ld      [Player_YPos],a
     ld      [Player_LastBounceY],a
     ld      a,[Engine_CameraY]
     sub     SCRN_Y/16
@@ -427,8 +425,6 @@ Level_TransitionDown:
     ld      d,a
     call    Level_LoadMapColumn
     ld      a,[Player_YPos]
-    inc     a
-    ld      [Player_YPos],a
     ld      [Player_LastBounceY],a
     ld      a,[Engine_CameraY]
     add     SCRN_Y/16
