@@ -45,6 +45,7 @@ GM_TitleAndMenus:
     call    UpdatePalettes
 
     xor     a   ; MUS_MENU
+	ldh		[rVBK],a
     farcall DevSound_Init
 
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
