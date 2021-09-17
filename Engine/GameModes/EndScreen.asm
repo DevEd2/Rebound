@@ -17,7 +17,7 @@ GM_EndScreen:
 	ld		hl,sys_TilemapBuffer
 	call	LoadTilemapScreen
 
-	ldfar	hl,Pal_TitleScreen
+	ldfar	hl,Pal_DevEdPresents
 	xor		a
 	call	LoadPal
     call    ConvertPals

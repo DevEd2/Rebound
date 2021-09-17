@@ -89,7 +89,7 @@ GM_SplashScreens:
 	ld		hl,sys_TilemapBuffer
 	call	LoadTilemapScreen
 
-	ldfar	hl,Pal_TitleScreen
+	ldfar	hl,Pal_DevEdPresents
 	xor		a
 	call	LoadPal
     call    ConvertPals
@@ -137,6 +137,11 @@ Pal_GBCompo2021:
 	RGB	(103>>3),(158>>3), (71>>3)
 	RGB	(174>>3),(196>>3), (64>>3)
 	RGB	(215>>3),(232>>3),(148>>3)
+Pal_DevEdPresents:
+    RGB (255>>3),(255>>3),(255>>3)
+    RGB (  0>>3),(116>>3),(224>>3)
+    RGB ( 32>>3),( 69>>3),(108>>3)
+    RGB (  0>>3),(  0>>3),(  0>>3)
 
 LicenseScreenTiles:	incbin	"GFX/LicenseScreen.2bpp.wle"
 GBCompo2021Tiles:	incbin	"GFX/GBCompo2021.2bpp.wle"
