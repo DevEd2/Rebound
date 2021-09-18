@@ -866,40 +866,88 @@ DoubleSpeed:
     ret
 
 include "Engine/WLE_Decode.asm"
-
-; =========
-; Misc data
-; =========
-
-section "Sine table",romx,align[8]
-SinTable:
-angle=0.0
-    rept    256
-    db  mul(127.0,sin(angle)+1.0)>>16
-angle=angle+256.0
-    endr
-CosTable:
-angle=0.0
-    rept    256
-    db  mul(127.0,cos(angle)+1.0)>>16
-angle=angle+256.0
-    endr
     
 ; =============
 ; Misc routines
 ; =============
+
+section "Sine table",romx
+SineTable:
+    db         0,   3,   6,   9,  12,  16,  19,  22,  25,  28,  31,  34,  37,  40,  43,  46
+    db        49,  52,  55,  57,  60,  63,  66,  68,  71,  73,  76,  78,  81,  83,  86,  88
+    db        90,  92,  94,  97,  99, 101, 102, 104, 106, 108, 109, 111, 112, 114, 115, 117
+    db       118, 119, 120, 121, 122, 123, 124, 124, 125, 126, 126, 127, 127, 127, 127, 127
+CosineTable:
+    db       127, 127, 127, 127, 127, 127, 126, 126, 125, 124, 124, 123, 122, 121, 120, 119
+    db       118, 117, 115, 114, 112, 111, 109, 108, 106, 104, 102, 101,  99,  97,  94,  92
+    db        90,  88,  86,  83,  81,  78,  76,  73,  71,  68,  66,  63,  60,  57,  55,  52
+    db        49,  46,  43,  40,  37,  34,  31,  28,  25,  22,  19,  16,  12,   9,   6,   3
+    db         0,  -3,  -6,  -9, -12, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46
+    db       -49, -52, -55, -57, -60, -63, -66, -68, -71, -73, -76, -78, -81, -83, -86, -88
+    db       -90, -92, -94, -97, -99,-101,-102,-104,-106,-108,-109,-111,-112,-114,-115,-117
+    db      -118,-119,-120,-121,-122,-123,-124,-124,-125,-126,-126,-127,-127,-127,-127,-127
+    db      -127,-127,-127,-127,-127,-127,-126,-126,-125,-124,-124,-123,-122,-121,-120,-119
+    db      -118,-117,-115,-114,-112,-111,-109,-108,-106,-104,-102,-101, -99, -97, -94, -92
+    db       -90, -88, -86, -83, -81, -78, -76, -73, -71, -68, -66, -63, -60, -57, -55, -52
+    db       -49, -46, -43, -40, -37, -34, -31, -28, -25, -22, -19, -16, -12,  -9,  -6,  -3
+    db         0,   3,   6,   9,  12,  16,  19,  22,  25,  28,  31,  34,  37,  40,  43,  46
+    db        49,  52,  55,  57,  60,  63,  66,  68,  71,  73,  76,  78,  81,  83,  86,  88
+    db        90,  92,  94,  97,  99, 101, 102, 104, 106, 108, 109, 111, 112, 114, 115, 117
+    db       118, 119, 120, 121, 122, 123, 124, 124, 125, 126, 126, 127, 127, 127, 127, 127
+
+
+section "Misc routines",rom0
 
 include "Engine/Metatile.asm"
 include "Engine/Parallax.asm"
 include "Engine/Player.asm"
 include "Engine/Object.asm"
 
+; Reverse the bits in a byte.
+; INPUT:   a = byte
+; OUTPUT:  b = bit-reversed byte
+; TRASHES: a
+;ReverseBits:
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   rra
+;   rl      b
+;   ret
+
+; Calculate a sine wave.
+; INPUT:    a = angle
+; OUTPUT:   d = cosine
+;           e = sine
+; TRASHES:  bc, hl, flags, ROM bank
+GetSine:
+	ldfar	hl,SineTable
+	ld		c,a
+	ld		b,0
+	add		hl,bc
+	ld		d,[hl]
+    ld      hl,CosineTable
+	add		hl,bc
+	ld		e,[hl]
+	ret
+	
 ; 16-bit Compare
-; INPUT:    bc = value 1
-;           de = value 2
-; OUTPUT:   zero = set if equal
-;           carry = set if bc < de
-; TRASHES:  a
+; INPUT:   bc = value 1
+;          de = value 2
+; OUTPUT:  zero = set if equal
+;          carry = set if bc < de
+; TRASHES: a
 Compare16:
     ld  a,b
     cp  d
