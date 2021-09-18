@@ -1,16 +1,16 @@
 
 ; ================
 
-section "End screen routines",rom0
+section "Game over screen routines",rom0
 
-GM_EndScreen:
+GM_GameOver:
 	call    ClearScreen
     
-	ldfar	hl,EndScreenTiles
+	ldfar	hl,GameOverTiles
 	ld		de,$8000
 	call	DecodeWLE
 
-	ld		hl,EndScreenMap
+	ld		hl,GameOverMap
 	ld		de,sys_TilemapBuffer
 	call	DecodeWLE
 	ld		hl,sys_TilemapBuffer
@@ -19,7 +19,7 @@ GM_EndScreen:
     ld      a,1
     ldh     [rVBK],a
     
-	ld		hl,EndScreenAttr
+	ld		hl,GameOverAttr
 	ld		de,sys_TilemapBuffer
 	call	DecodeWLE
 	ld		hl,sys_TilemapBuffer
@@ -28,7 +28,7 @@ GM_EndScreen:
     xor     a
     ldh     [rVBK],a
 
-	ldfar	hl,Pal_EndScreen
+	ldfar	hl,Pal_GameOver
     ld      b,6
     xor     a
 :   push    af
@@ -42,6 +42,9 @@ GM_EndScreen:
     call    ConvertPals
     call    PalFadeInWhite
     call	UpdatePalettes
+
+    ld      a,MUS_GAME_OVER
+    farcall DS_Init
 
 	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
 	ldh		[rLCDC],a
@@ -66,9 +69,9 @@ GM_EndScreen:
 
 ; ================
 
-section "End screen GFX",romx
+section "Game over screen GFX",romx
 
-EndScreenTiles:	incbin	"GFX/Screens/EndScreen.2bpp.wle"
-EndScreenMap:	incbin	"GFX/Screens/EndScreen.til.wle"
-EndScreenAttr:  incbin  "GFX/Screens/EndScreen.atr.wle"
-Pal_EndScreen:  incbin  "GFX/Screens/EndScreen.pal"
+GameOverTiles:  incbin	"GFX/Screens/GameOver.2bpp.wle"
+GameOverMap:	incbin	"GFX/Screens/GameOver.til.wle"
+GameOverAttr:   incbin  "GFX/Screens/GameOver.atr.wle"
+Pal_GameOver:   incbin  "GFX/Screens/GameOver.pal"

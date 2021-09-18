@@ -182,12 +182,12 @@ Metasprite_PressStart:
     
 section "Title screen + menu GFX",romx
 
-Pal_TitleScreen:        incbin  "GFX/TitleScreen.pal"
+Pal_TitleScreen:        incbin  "GFX/Screens/TitleScreen.pal"
 
-TitleScreenTiles1:      incbin  "GFX/TitleScreen_Block1.2bpp.wle"
-TitleScreenTiles2:      incbin  "GFX/TitleScreen_Block2.2bpp.wle"
-TitleScreenMap:         incbin  "GFX/TitleScreen.til.wle"
-TitleScreenAttr:        incbin  "GFX/TitleScreen.atr.wle"
+TitleScreenTiles1:      incbin  "GFX/Screens/TitleScreen_Block1.2bpp.wle"
+TitleScreenTiles2:      incbin  "GFX/Screens/TitleScreen_Block2.2bpp.wle"
+TitleScreenMap:         incbin  "GFX/Screens/TitleScreen.til.wle"
+TitleScreenAttr:        incbin  "GFX/Screens/TitleScreen.atr.wle"
 
 Title_PressStartTiles:  incbin  "GFX/Sprites/PressStart.2bpp"   ; storing this uncompressed because the WLE "packer" decided to inflate it by 3 bytes instead
 .end

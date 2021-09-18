@@ -85,13 +85,32 @@ GM_SplashScreens:
 	ld		hl,DevEdPresentsMap
 	ld		de,sys_TilemapBuffer
 	call	DecodeWLE
-
 	ld		hl,sys_TilemapBuffer
 	call	LoadTilemapScreen
+    
+    ld      a,1
+    ldh     [rVBK],a
+    
+	ld		hl,DevEdPresentsAttr
+	ld		de,sys_TilemapBuffer
+	call	DecodeWLE
+	ld		hl,sys_TilemapBuffer
+	call	LoadTilemapScreen
+    
+    xor     a
+    ldh     [rVBK],a
 
 	ldfar	hl,Pal_DevEdPresents
-	xor		a
-	call	LoadPal
+    ld      b,6
+    xor     a
+:   push    af
+    push    bc
+    call    LoadPal
+    pop     bc
+    pop     af
+    inc     a
+    dec     b
+    jr      nz,:-
     call    ConvertPals
     call    PalFadeInWhite
     call	UpdatePalettes
@@ -131,22 +150,18 @@ SplashScreensLoop:
 
 section "Splash screen GFX",romx
 
-; too lazy to properly convert the palette :V
+LicenseScreenMap:	incbin	"GFX/Screens/LicenseScreen.til.wle"
+LicenseScreenTiles:	incbin	"GFX/Screens/LicenseScreen.2bpp.wle"
+
 Pal_GBCompo2021:
 	RGB	 (32>>3), (70>>3), (49>>3)
 	RGB	(103>>3),(158>>3), (71>>3)
 	RGB	(174>>3),(196>>3), (64>>3)
 	RGB	(215>>3),(232>>3),(148>>3)
-Pal_DevEdPresents:
-    RGB (255>>3),(255>>3),(255>>3)
-    RGB (  0>>3),(116>>3),(224>>3)
-    RGB ( 32>>3),( 69>>3),(108>>3)
-    RGB (  0>>3),(  0>>3),(  0>>3)
+GBCompo2021Tiles:	incbin	"GFX/Screens/GBCompo2021.2bpp.wle"
+GBCompo2021Map:		incbin	"GFX/Screens/GBCompo2021.til.wle"
 
-LicenseScreenTiles:	incbin	"GFX/LicenseScreen.2bpp.wle"
-GBCompo2021Tiles:	incbin	"GFX/GBCompo2021.2bpp.wle"
-DevEdPresentsTiles:	incbin	"GFX/DevEdPresents.2bpp.wle"
-
-LicenseScreenMap:	incbin	"GFX/LicenseScreen.til.wle"
-GBCompo2021Map:		incbin	"GFX/GBCompo2021.til.wle"
-DevEdPresentsMap:	incbin	"GFX/DevEdPresents.til.wle"
+DevEdPresentsTiles:	incbin	"GFX/Screens/DevEdPresents.2bpp.wle"
+DevEdPresentsMap:	incbin	"GFX/Screens/DevEdPresents.til.wle"
+DevEdPresentsAttr:  incbin  "GFX/Screens/DevEdPresents.atr.wle"
+Pal_DevEdPresents:  incbin  "GFX/Screens/DevEdPresents.pal"

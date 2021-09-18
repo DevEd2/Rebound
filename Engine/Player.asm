@@ -1167,7 +1167,7 @@ Player_Respawn:
     ld      a,[Player_LifeCount]
     and     a
     jr      nz,:+
-    jp      GM_TitleAndMenus
+    jp      GM_GameOver
 :   dec     a
     ld      [Player_LifeCount],a
     ; restore stack

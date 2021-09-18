@@ -412,6 +412,10 @@ include "Engine/GameModes/EndScreen.asm"
 
 ; ================================
 
+include "Engine/GameModes/GameOverScreen.asm"
+
+; ================================
+
 ; ==================
 ; Interrupt handlers
 ; ==================
