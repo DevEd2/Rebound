@@ -83,7 +83,8 @@ TitleLoop:
     PlaySFX menuselect
     call    PalFadeOutWhite
     ; wait for fade to finish
-:   halt
+:   call    Title_AnimateText
+    halt
     ld      a,[sys_FadeState]
     bit     0,a
     jr      nz,:-
@@ -91,7 +92,8 @@ TitleLoop:
     call    UpdatePalettes
     
     ; wait for SFX to finish
-:   halt
+:   call    Title_AnimateText
+    halt
     ld      a,[VGMSFX_Flags]
     and     a
     jr      nz,:-
@@ -105,6 +107,12 @@ TitleLoop:
     jp      GM_Level
 
 .skip
+    call    Title_AnimateText
+
+    halt
+    jr      TitleLoop
+    
+Title_AnimateText:
     ; "PRESS START!" text movement
     ld      a,[sys_CurrentFrame]
     add     a
@@ -135,8 +143,7 @@ TitleLoop:
     ld      hl,Metasprite_PressStart
     ld      b,(Metasprite_PressStart.end-Metasprite_PressStart)/4
     call    BeginSprites
-:
-    push    bc
+:   push    bc
     ld      a,[hl+]
     ld      d,a
     ld      a,[Title_PressStartY]
@@ -157,10 +164,7 @@ TitleLoop:
     pop     bc
     dec     b
     jr      nz,:-
-    call    EndSprites
-
-    halt
-    jp      TitleLoop
+    jp      EndSprites
     
 Metasprite_PressStart:
     db  $00,$00,$27,%00001000
