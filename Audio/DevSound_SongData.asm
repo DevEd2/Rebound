@@ -18,6 +18,7 @@
     const   MUS_BOSS
     const   MUS_GAME_OVER
     const   MUS_BONUS
+    const   MUS_GALLERY
     const   MUS_CREDITS
 
 NUM_SONGS   equ const_value
@@ -38,6 +39,7 @@ SongSpeedTable:
     db  4,4 ; boss battle
     db  4,3 ; game over
     db  3,3 ; bonus stage
+    db  5,4 ; gallery
     db  3,3 ; credits
 
 SongPointerTable:
@@ -52,6 +54,7 @@ SongPointerTable:
     dw  PT_Boss
     dw  PT_GameOver
     dw  PT_Bonus
+    dw  PT_Gallery
     dw  PT_Credits
 
 ; =================================================================
@@ -2891,6 +2894,10 @@ PT_Temple:
 ; =================================================================
 
 PT_Bonus:
+
+; =================================================================
+
+PT_Gallery:
 
 ; =================================================================
 

@@ -92,11 +92,11 @@ TitleLoop:
     call    UpdatePalettes
     
     ; wait for SFX to finish
-:   call    Title_AnimateText
-    halt
+:   halt
     ld      a,[VGMSFX_Flags]
     and     a
     jr      nz,:-
+    ld      b,b
     xor     a
     ldh     [rLCDC],a
     

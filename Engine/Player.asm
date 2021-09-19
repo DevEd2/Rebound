@@ -123,7 +123,7 @@ InitPlayer:
     ldfar   hl,Pal_Player
     ld      a,8
     call    LoadPal
-    ldfar   hl,Anim_Player_Idle
+    ld      hl,Anim_Player_Idle
     call    Player_SetAnimation
     resbank
     ret
@@ -191,6 +191,7 @@ ProcessPlayer:
 	ld		a,[sys_FadeState]
 	bit		0,a
     jr      nz,:-
+    
     xor     a
     ldh     [rLCDC],a
     ld      a,[Engine_LevelID]

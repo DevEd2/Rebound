@@ -339,6 +339,7 @@ SoundTest_SongNames:
     db  "   Down 'n  Dirty               "
     db  "     Game  Over                 "
     db  "    Bonus  Time!                "
+    db  "       Museum                   "
     db  "     Staff Roll                 "
 ;        -##################-------------
 .end

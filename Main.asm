@@ -416,6 +416,10 @@ include "Engine/GameModes/GameOverScreen.asm"
 
 ; ================================
 
+include "Engine/GameModes/Gallery.asm"
+
+; ================================
+
 ; ==================
 ; Interrupt handlers
 ; ==================
