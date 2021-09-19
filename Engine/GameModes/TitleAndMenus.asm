@@ -96,7 +96,6 @@ TitleLoop:
     ld      a,[VGMSFX_Flags]
     and     a
     jr      nz,:-
-    ld      b,b
     xor     a
     ldh     [rLCDC],a
     
