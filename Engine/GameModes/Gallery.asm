@@ -75,12 +75,16 @@ Pal_Gallery:            incbin  "GFX/Screens/NYI.pal"
 
 section "Gallery text",romx
 
+GalleryText_Help1:          string  "L/R - Select"
+GalleryText_Help2:          string  "SEL - Hide text"
+GalleryText_Help3:          string  "B - Exit"
+
 GalleryText_Title1_Name:    string  "Title screen 1"
 GalleryText_Title2_Name:    string  "Title screen 2"
 GalleryText_TitleCard_Name: string  "Title card"
-GalleryText_City1_Name:     string  "City world concept 1"
-GalleryText_City2_Name:     string  "City world concept 2"
-GalleryText_Boss2_Name:     string  "City world boss"
+GalleryText_City1_Name:     string  "City concept 1"
+GalleryText_City2_Name:     string  "City concept 2"
+GalleryText_Boss2_Name:     string  "City boss concept"
 
 GalleryText_Title1_Desc:    string  "A proposed title screen image by Twoflower. This was used as the basis for the demo's title screen."
 GalleryText_Title2_Desc:    string  "A second proposed title screen image by Twoflower. This design was eventually rejected."

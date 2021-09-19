@@ -535,10 +535,10 @@ DevSound_Play:
     rra                         ; check if A is odd
     jr      c,.odd              ; if a is odd, jump
 .even
-    ld      a,[DS_GlobalSpeed1]
+    ld      a,[DS_GlobalSpeed2]
     jr      .setTimer
 .odd
-    ld      a,[DS_GlobalSpeed2]
+    ld      a,[DS_GlobalSpeed1]
 .setTimer
     ld      [DS_GlobalTimer],a  ; store timer value
     jr      DS_UpdateCH1        ; continue ahead

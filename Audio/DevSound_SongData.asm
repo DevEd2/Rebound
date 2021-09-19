@@ -28,11 +28,11 @@ NUM_SONGS   equ const_value
 ; =================================================================
 
 SongSpeedTable:
-    db  4,3 ; menu
+    db  3,4 ; menu
     db  6,6 ; plains
     db  3,3 ; city
     db  8,8 ; forest
-    db  4,5 ; pyramid
+    db  5,4 ; pyramid
     db  3,3 ; cave
     db  3,3 ; temple
     db  6,6 ; stage clear
@@ -216,6 +216,21 @@ vol_ForestPercussionVC: db  $c,TableWait,7,3,$ff
 vol_ForestPercussionVD: db  $d,TableWait,7,4,$ff
 vol_ForestPercussionVE: db  $e,TableWait,7,4,$ff
 
+; ========
+
+vol_GalleryEcho1:       db  $31,$ff
+vol_GalleryEcho2:       db  $32,$ff
+vol_GalleryEcho3:       db  $33,$ff
+vol_GalleryEcho4:       db  $34,$ff
+vol_GalleryEcho5:       db  $35,$ff
+vol_GalleryEcho6:       db  $36,$ff
+vol_GalleryEcho7:       db  $37,$ff
+vol_GalleryEcho8:       db  $38,$ff
+vol_GalleryEcho9:       db  $39,$ff
+vol_GalleryEchoA:       db  $3a,$ff
+
+vol_GalleryLead:        db  $3a,TableWait,17,$74,$ff
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
@@ -341,6 +356,7 @@ WaveTable:
     dw      wave_SoftSquare
     dw      wave_BossTom
     dw      wave_BossBass
+    dw      wave_GalleryBass
 
 wave_PyramidLead:       db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
 wave_PyramidSquare:     db  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
@@ -353,6 +369,7 @@ wave_CityLead:          db  $bb,$cc,$cd,$dd,$dd,$ba,$29,$54,$56,$76,$55,$43,$24,
 wave_SoftSquare:        db  $ab,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$00,$00,$00,$00,$00,$00,$00,$12
 wave_BossTom:           db  $ac,$cc,$cc,$cc,$cc,$cc,$cc,$ca,$20,$00,$00,$00,$00,$00,$00,$02
 wave_BossBass:          db  $66,$60,$6c,$cc,$66,$60,$66,$60,$00,$06,$06,$66,$60,$00,$60,$00
+wave_GalleryBass:       db  $00,$11,$23,$45,$66,$78,$89,$aa,$bb,$cc,$cc,$cc,$a9,$89,$bc,$cc
 
 waveseq_Tri:            db  0,$ff
 waveseq_PyramidLead:    db  1,$ff
@@ -366,6 +383,7 @@ waveseq_WaveBuffer:     db  $fd,$ff
 waveseq_SoftSquare:     db  9,$ff
 waveseq_BossTom:        db  10,$ff
 waveseq_BossBass:       db  11,$ff
+waveseq_GalleryBass:    db  12,$ff
 
 ; =================================================================
 ; Instruments
@@ -458,6 +476,20 @@ InstrumentTable:
     dins    ForestPercussionVC
     dins    ForestPercussionVD
     dins    ForestPercussionVE
+    
+    dins    GalleryEcho1
+    dins    GalleryEcho2
+    dins    GalleryEcho3
+    dins    GalleryEcho4
+    dins    GalleryEcho5
+    dins    GalleryEcho6
+    dins    GalleryEcho7
+    dins    GalleryEcho8
+    dins    GalleryEcho9
+    dins    GalleryEchoA
+    dins    GalleryBack
+    dins    GalleryLead
+    dins    GalleryBass
 
 ; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
 ; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
@@ -545,6 +577,20 @@ ins_ForestPercussionVB: Instrument  0,ForestPercussionVB,ForestPercussion1,_,_
 ins_ForestPercussionVC: Instrument  0,ForestPercussionVC,ForestPercussion1,_,_
 ins_ForestPercussionVD: Instrument  0,ForestPercussionVD,ForestPercussion1,_,_
 ins_ForestPercussionVE: Instrument  0,ForestPercussionVE,ForestPercussion1,_,_
+
+ins_GalleryEcho1:       Instrument  0,GalleryEcho1,_,Pulse125,_
+ins_GalleryEcho2:       Instrument  0,GalleryEcho2,_,Pulse125,_
+ins_GalleryEcho3:       Instrument  0,GalleryEcho3,_,Pulse125,_
+ins_GalleryEcho4:       Instrument  0,GalleryEcho4,_,Pulse125,_
+ins_GalleryEcho5:       Instrument  0,GalleryEcho5,_,Pulse125,_
+ins_GalleryEcho6:       Instrument  0,GalleryEcho6,_,Pulse125,_
+ins_GalleryEcho7:       Instrument  0,GalleryEcho7,_,Pulse125,_
+ins_GalleryEcho8:       Instrument  0,GalleryEcho8,_,Pulse125,_
+ins_GalleryEcho9:       Instrument  0,GalleryEcho9,_,Pulse125,_
+ins_GalleryEchoA:       Instrument  0,GalleryEchoA,_,Pulse125,_
+ins_GalleryBack:        Instrument  0,GalleryLead,Pluck,Pulse125,ForestPluck
+ins_GalleryLead:        Instrument  0,GalleryLead,PluckDelay,Pulse50,CityLead
+ins_GalleryBass:        Instrument  0,Bass1,PlainsBass,GalleryBass,ForestPluck
 
 ; =================================================================
 
@@ -2882,6 +2928,155 @@ Forest_CH4:
     Drum    ForestPercussionVA,2
     dbw     Loop,:-
     dbw     Goto,Forest_CH4
+
+; =================================================================
+
+PT_Gallery: dw  Gallery_CH1,Gallery_CH2,Gallery_CH3,Gallery_CH4
+
+Gallery_CH1:
+    dbw     CallSection,.block1
+    dbw     CallSection,.block1
+:   dbw     CallSection,.block1
+    dbw     CallSection,.block1
+    dbw     CallSection,.block2
+    dbw     CallSection,.block2
+    dbw     Goto,:-
+    
+.block1
+    db      SetInstrument,_GalleryEchoA,D_5,1
+    db      SetInstrument,_GalleryEcho4,D_5,1
+    db      SetInstrument,_GalleryEchoA,E_5,1
+    db      SetInstrument,_GalleryEcho4,D_5,1
+    db      SetInstrument,_GalleryEchoA,G_5,1
+    db      SetInstrument,_GalleryEcho4,E_5,1
+    db      SetInstrument,_GalleryEcho9,D_5,1
+    db      SetInstrument,_GalleryEcho4,G_5,1
+    db      SetInstrument,_GalleryEcho8,E_5,1
+    db      SetInstrument,_GalleryEcho3,D_5,1
+    db      SetInstrument,_GalleryEcho7,G_5,1
+    db      SetInstrument,_GalleryEcho3,E_5,1
+    db      SetInstrument,_GalleryEcho6,D_5,1
+    db      SetInstrument,_GalleryEcho2,G_5,1
+    db      SetInstrument,_GalleryEcho5,E_5,1
+    db      SetInstrument,_GalleryEcho2,D_5,1
+    db      SetInstrument,_GalleryEcho4,G_5,1
+    db      SetInstrument,_GalleryEcho1,E_5,1
+    db      SetInstrument,_GalleryEcho3,D_5,1
+    db      SetInstrument,_GalleryEcho1,G_5,1
+    db      SetInstrument,_GalleryEcho2,E_5,2
+    db      SetInstrument,_GalleryEcho1,G_5,10
+    db      SetInstrument,_GalleryBack
+    db      C_3,6
+    db      E_3,6
+    db      G_3,20
+    ret
+.block2
+    db      SetInstrument,_GalleryEchoA,E_5,1
+    db      SetInstrument,_GalleryEcho4,E_5,1
+    db      SetInstrument,_GalleryEchoA,F#5,1
+    db      SetInstrument,_GalleryEcho4,E_5,1
+    db      SetInstrument,_GalleryEchoA,A_5,1
+    db      SetInstrument,_GalleryEcho4,F#5,1
+    db      SetInstrument,_GalleryEcho9,E_5,1
+    db      SetInstrument,_GalleryEcho4,A_5,1
+    db      SetInstrument,_GalleryEcho8,F#5,1
+    db      SetInstrument,_GalleryEcho3,E_5,1
+    db      SetInstrument,_GalleryEcho7,A_5,1
+    db      SetInstrument,_GalleryEcho3,F#5,1
+    db      SetInstrument,_GalleryEcho6,E_5,1
+    db      SetInstrument,_GalleryEcho2,A_5,1
+    db      SetInstrument,_GalleryEcho5,F#5,1
+    db      SetInstrument,_GalleryEcho2,E_5,1
+    db      SetInstrument,_GalleryEcho4,A_5,1
+    db      SetInstrument,_GalleryEcho1,F#5,1
+    db      SetInstrument,_GalleryEcho3,E_5,1
+    db      SetInstrument,_GalleryEcho1,A_5,1
+    db      SetInstrument,_GalleryEcho2,F#5,2
+    db      SetInstrument,_GalleryEcho1,A_5,10
+    db      SetInstrument,_GalleryBack
+    db      D_3,6
+    db      F#3,6
+    db      A_3,20
+    ret
+
+Gallery_CH2:
+    db      SetInstrument,_GalleryLead
+    db      rest,128
+.loop
+    db      C_5,8
+    db      C_5,4
+    db      G_4,4
+    db      A#4,4
+    db      G_4,8
+    db      F_4,8
+    db      G_4,92
+    db      D_5,8
+    db      D_5,4
+    db      A_4,4
+    db      C_5,4
+    db      A_4,8
+    db      G_4,8
+    db      A_4,92
+    dbw     Goto,.loop
+
+Gallery_CH3:
+    db      SetInstrument,_GalleryBass
+    db      LoopCount,3
+:
+    db      C_3,32
+    db      C_3,6
+    db      C_4,4
+    db      C_3,2
+    db      C_4,4
+    db      C_3,8
+    db      G_3,4
+    db      G_2,4
+    dbw     Loop,:-
+    db      C_3,32
+    db      C_3,6
+    db      C_4,4
+    db      C_3,2
+    db      C_4,4
+    db      C_3,8
+    db      C_3,4
+    db      C#3,4
+    db      D_3,32
+    db      D_3,6
+    db      D_4,4
+    db      D_3,2
+    db      D_4,4
+    db      D_3,8
+    db      A_3,4
+    db      A_2,4
+    db      D_3,32
+    db      D_3,6
+    db      D_4,4
+    db      D_3,2
+    db      D_4,4
+    db      D_3,8
+    db      D_3,4
+    db      C#3,4
+    db      LoopCount,1
+    dbw     Goto,:-
+    
+Gallery_CH4:
+    Drum    Kick,2
+    Drum    CHH,2
+    Drum    CHH,2
+    Drum    CHH,2
+    Drum    Snare,2
+    Drum    CHH,2
+    Drum    CHH,2
+    Drum    Kick,2
+    Drum    CHH,2
+    Drum    CHH,2
+    Drum    Kick,2
+    Drum    CHH,2
+    Drum    Snare,2
+    Drum    CHH,2
+    Drum    CHH,2
+    Drum    CHH,2
+    dbw     Goto,Gallery_CH4
     
 ; =================================================================
 
@@ -2894,10 +3089,6 @@ PT_Temple:
 ; =================================================================
 
 PT_Bonus:
-
-; =================================================================
-
-PT_Gallery:
 
 ; =================================================================
 
