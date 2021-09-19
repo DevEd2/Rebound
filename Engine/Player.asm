@@ -123,6 +123,8 @@ InitPlayer:
     ldfar   hl,Pal_Player
     ld      a,8
     call    LoadPal
+    ldfar   hl,Anim_Player_Idle
+    call    Player_SetAnimation
     resbank
     ret
 
@@ -1377,42 +1379,14 @@ AnimatePlayer:
 ; XX = Frame ID / command (if bit 7 set)
 ; YY = Wait time (one byte) / command parameter (can be more than one byte)
 
-    defanim Player_Left2
-    db      F_Player_Left2,-1
+;   defanim Player_Left2
+;   db      F_Player_Left2,-1
     
-    defanim Player_Left1
-    db      F_Player_Left1,-1
+;   defanim Player_Left1
+;   db      F_Player_Left1,-1
 
     defanim Player_Idle
-    db      F_Player_Idle,-1
-
-    defanim Player_Right1
-    db      F_Player_Right1,-1
-    
-    defanim Player_Right2
-    db      F_Player_Right2,-1
-    
-    defanim Player_Left2Blink
-    db      F_Player_Left2_Blink1,1
-    db      F_Player_Left2_Blink2,1
-    db      F_Player_Left2_Blink3,1
-    db      F_Player_Left2_Blink4,4
-    db      F_Player_Left2_Blink3,1
-    db      F_Player_Left2_Blink2,1
-    db      F_Player_Left2_Blink1,1
-    dbw     C_SetAnim,Anim_Player_Left2
-    
-    defanim Player_Left1Blink
-    db      F_Player_Left1_Blink1,1
-    db      F_Player_Left1_Blink2,1
-    db      F_Player_Left1_Blink3,1
-    db      F_Player_Left1_Blink4,4
-    db      F_Player_Left1_Blink3,1
-    db      F_Player_Left1_Blink2,1
-    db      F_Player_Left1_Blink1,1
-    dbw     C_SetAnim,Anim_Player_Left1
-    
-    defanim Player_IdleBlink
+    db      F_Player_Idle,254
     db      F_Player_Idle_Blink1,1
     db      F_Player_Idle_Blink2,1
     db      F_Player_Idle_Blink3,1
@@ -1420,58 +1394,77 @@ AnimatePlayer:
     db      F_Player_Idle_Blink3,1
     db      F_Player_Idle_Blink2,1
     db      F_Player_Idle_Blink1,1
+    db      F_Player_Idle,192
+    db      F_Player_Idle_Blink1,1
+    db      F_Player_Idle_Blink2,1
+    db      F_Player_Idle_Blink3,1
+    db      F_Player_Idle_Blink4,4
+    db      F_Player_Idle_Blink3,1
+    db      F_Player_Idle_Blink2,1
+    db      F_Player_Idle_Blink1,1
+    db      F_Player_Idle,56
+    db      F_Player_Idle_Blink1,1
+    db      F_Player_Idle_Blink2,1
+    db      F_Player_Idle_Blink3,1
+    db      F_Player_Idle_Blink4,4
+    db      F_Player_Idle_Blink3,1
+    db      F_Player_Idle_Blink2,1
+    db      F_Player_Idle_Blink1,1
+    db      F_Player_Idle,254
+    db      F_Player_Idle,254
     dbw     C_SetAnim,Anim_Player_Idle
     
-    defanim Player_Right1Blink
-    db      F_Player_Right1_Blink1,1
-    db      F_Player_Right1_Blink2,1
-    db      F_Player_Right1_Blink3,1
-    db      F_Player_Right1_Blink4,4
-    db      F_Player_Right1_Blink3,1
-    db      F_Player_Right1_Blink2,1
-    db      F_Player_Right1_Blink1,1
-    dbw     C_SetAnim,Anim_Player_Right1
+
+;   defanim Player_Right1
+;   db      F_Player_Right1,-1
     
-    defanim Player_Right2Blink
-    db      F_Player_Right2_Blink1,1
-    db      F_Player_Right2_Blink2,1
-    db      F_Player_Right2_Blink3,1
-    db      F_Player_Right2_Blink4,4
-    db      F_Player_Right2_Blink3,1
-    db      F_Player_Right2_Blink2,1
-    db      F_Player_Right2_Blink1,1
-    dbw     C_SetAnim,Anim_Player_Right2
+;   defanim Player_Right2
+;   db      F_Player_Right2,-1
+    
+;   defanim Player_Left2Blink
+;   db      F_Player_Left2_Blink1,1
+;   db      F_Player_Left2_Blink2,1
+;   db      F_Player_Left2_Blink3,1
+;   db      F_Player_Left2_Blink4,4
+;   db      F_Player_Left2_Blink3,1
+;   db      F_Player_Left2_Blink2,1
+;   db      F_Player_Left2_Blink1,1
+;   dbw     C_SetAnim,Anim_Player_Left2
+    
+;   defanim Player_Left1Blink
+;   db      F_Player_Left1_Blink1,1
+;   db      F_Player_Left1_Blink2,1
+;   db      F_Player_Left1_Blink3,1
+;   db      F_Player_Left1_Blink4,4
+;   db      F_Player_Left1_Blink3,1
+;   db      F_Player_Left1_Blink2,1
+;   db      F_Player_Left1_Blink1,1
+;   dbw     C_SetAnim,Anim_Player_Left1
+    
+;   defanim Player_Right1Blink
+;   db      F_Player_Right1_Blink1,1
+;   db      F_Player_Right1_Blink2,1
+;   db      F_Player_Right1_Blink3,1
+;   db      F_Player_Right1_Blink4,4
+;   db      F_Player_Right1_Blink3,1
+;   db      F_Player_Right1_Blink2,1
+;   db      F_Player_Right1_Blink1,1
+;   dbw     C_SetAnim,Anim_Player_Right1
+    
+;   defanim Player_Right2Blink
+;   db      F_Player_Right2_Blink1,1
+;   db      F_Player_Right2_Blink2,1
+;   db      F_Player_Right2_Blink3,1
+;   db      F_Player_Right2_Blink4,4
+;   db      F_Player_Right2_Blink3,1
+;   db      F_Player_Right2_Blink2,1
+;   db      F_Player_Right2_Blink1,1
+;   dbw     C_SetAnim,Anim_Player_Right2
     
     defanim Player_Hurt
     db      F_Player_Hurt1,6
     db      F_Player_Hurt2,6
     dbw     C_SetAnim,Anim_Player_Hurt
-    
-    defanim Player_SMH
-    db      F_Player_Left1,2
-    db      F_Player_Left2,2
-    db      F_Player_Left1,2
-    db      F_Player_Idle,2
-    db      F_Player_Right1,2
-    db      F_Player_Right2,2
-    db      F_Player_Right1,2
-    db      F_Player_Idle,2
-    db      F_Player_Left1,2
-    db      F_Player_Left2,2
-    db      F_Player_Left1,2
-    db      F_Player_Idle,2
-    db      F_Player_Right1,2
-    db      F_Player_Right2,2
-    db      F_Player_Right1,2
-    db      F_Player_Idle,2
-    db      F_Player_Left1,2
-    db      F_Player_Left2,2
-    db      F_Player_Left1,2
-    db      F_Player_Idle,2
-    db      F_Player_Right1,2
-    db      F_Player_Right2,2
-    db      F_Player_Right1,2
-    dbw     C_SetAnim,Anim_Player_Idle
 
 ; ================================
 
