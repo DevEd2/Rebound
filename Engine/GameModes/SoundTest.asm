@@ -618,19 +618,19 @@ Pal_SoundTest:
     RGB     31,31,31
     
     RGB      0, 0, 0
-    RGB      0,15, 0
+    RGB      0,20, 0
     RGB      0,31, 0
     RGB     31,31, 0
-
-    RGB      0, 0, 0
-    RGB     15,15, 0
-    RGB     31,31, 0
-    RGB     31,31,31
     
     RGB      0, 0, 0
-    RGB     15, 0, 0
-    RGB     31, 0, 0
+    RGB     15, 7, 0
     RGB     31,15, 0
+    RGB     31,31, 0
+    
+    RGB      0, 0, 0
+    RGB     10, 0, 0
+    RGB     20, 0, 0
+    RGB     31, 0, 0
 
 Pal_SoundTestOBJ:
     RGB     31, 0,31
