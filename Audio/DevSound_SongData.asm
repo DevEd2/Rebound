@@ -516,13 +516,13 @@ ins_MenuLead:           Instrument  0,MenuLead,Pluck,MenuLead,BeachLead
 ins_MenuOctave:         Instrument  0,MenuOctave,Oct2,MenuTri,_
 ins_MenuOctaveEcho:     Instrument  0,MenuOctaveEcho,Oct2,MenuTri,_
 ins_MenuBass:           Instrument  0,MenuBass,Pluck,Pulse25,_
-ins_MenuArp027:         Instrument  0,MenuArp,MenuArp027,MenuArp,_
-ins_MenuArp037:         Instrument  0,MenuArp,MenuArp037,MenuArp,_
-ins_MenuArp047:         Instrument  0,MenuArp,MenuArp047,MenuArp,_
-ins_MenuArp057:         Instrument  0,MenuArp,MenuArp057,MenuArp,_
-ins_MenuArp038:         Instrument  0,MenuArp,MenuArp038,MenuArp,_
-ins_MenuArp059:         Instrument  0,MenuArp,MenuArp059,MenuArp,_
-ins_MenuArp05A:         Instrument  0,MenuArp,MenuArp05A,MenuArp,_
+ins_MenuArp027:         Instrument  0,MenuArp,MenuArp027,CityArp,_
+ins_MenuArp037:         Instrument  0,MenuArp,MenuArp037,CityArp,_
+ins_MenuArp047:         Instrument  0,MenuArp,MenuArp047,CityArp,_
+ins_MenuArp057:         Instrument  0,MenuArp,MenuArp057,CityArp,_
+ins_MenuArp038:         Instrument  0,MenuArp,MenuArp038,CityArp,_
+ins_MenuArp059:         Instrument  0,MenuArp,MenuArp059,CityArp,_
+ins_MenuArp05A:         Instrument  0,MenuArp,MenuArp05A,CityArp,_
 ins_MenuTom:            Instrument  0,MenuArp,MenuTom,Pulse50,_
 
 ins_PlainsBass:         Instrument  0,PlainsBass,PlainsBass,PlainsBass,_
