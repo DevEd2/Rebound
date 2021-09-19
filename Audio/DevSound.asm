@@ -201,6 +201,7 @@ DS_CH1VibPos::          db
 DS_CH1VibDelay::        db
 DS_CH1Tick::            db
 DS_CH1Reset::           db
+DS_CH1Vol::             db
 DS_CH1Note::            db
 DS_CH1Transpose::       db
 DS_CH1FreqOffset::      db
@@ -228,6 +229,7 @@ DS_CH2VibPos::          db
 DS_CH2VibDelay::        db
 DS_CH2Tick::            db
 DS_CH2Reset::           db
+DS_CH2Vol::             db
 DS_CH2Note::            db
 DS_CH2Transpose::       db
 DS_CH2FreqOffset::      db
@@ -254,10 +256,10 @@ DS_CH3VibPos::          db
 DS_CH3VibDelay::        db
 DS_CH3Tick::            db
 DS_CH3Reset::           db
+DS_CH3Vol::             db
 DS_CH3Note::            db
 DS_CH3Transpose::       db
 DS_CH3FreqOffset::      db
-DS_CH3Vol::             db
 DS_CH3Wave::            db
 DS_CH3Pan::             db
 DS_CH3NoteCount::       db
@@ -278,6 +280,7 @@ DS_CH4NoisePos::        db
 DS_CH4Mode::            db
 DS_CH4Tick::            db
 DS_CH4Reset::           db
+DS_CH4Vol::             db
 DS_CH4Transpose::       db
 DS_CH4Pan::             db
 DS_CH4NoteCount::       db
@@ -287,6 +290,10 @@ DS_CH4Ins2::            db
 DS_CH4LoopCount::       db
 DS_CH4VolTableTimer::   db
 DS_CH4ArpTableTimer::   db
+
+DS_CH1Retrig::          db
+DS_CH2Retrig::          db
+DS_CH4Retrig::          db
 
 DS_WaveBuffer::         ds  16
 DS_WavePos::            db
@@ -522,6 +529,11 @@ DevSound_Play:
     ret
     
 .doUpdate
+    xor     a
+    ld      [DS_CH1Retrig],a
+    ld      [DS_CH2Retrig],a
+    ld      [DS_CH4Retrig],a
+
     push    bc
     push    de
     push    hl
@@ -570,7 +582,7 @@ DS_CH1_CheckByte:
     cp      $ff             ; if $ff...
     jr      z,.endChannel
     cp      $c9             ; if $c9...
-    jr      z,.retSection
+    jp      z,.retSection
     bit     7,a             ; if command...
     jr      nz,.getCommand
     ; if we have a note...
@@ -591,6 +603,7 @@ DS_CH1_CheckByte:
     bit     bSFX_CH1,a
     jr      nz,.noupdate
     ldh     [rNR12],a
+    ld      [DS_CH1Vol],a
 .noupdate
     ld      hl,DS_CH1VibPtr
     ld      a,[hl+]
@@ -854,7 +867,7 @@ DS_CH2_CheckByte:
     cp      $ff             ; if $ff...
     jr      z,.endChannel
     cp      $c9             ; if $c9...
-    jr      z,.retSection
+    jp      z,.retSection
     bit     7,a             ; if command...
     jr      nz,.getCommand
     ; if we have a note...
@@ -875,6 +888,7 @@ DS_CH2_CheckByte:
     bit     bSFX_CH2,a
     jr      nz,.noupdate
     ldh     [rNR22],a
+    ld      [DS_CH2Vol],a
 .noupdate
     ld      hl,DS_CH2VibPtr
     ld      a,[hl+]
@@ -1460,6 +1474,7 @@ DS_CH4_CheckByte:
     bit     bSFX_CH4,a
     jr      nz,.noupdate
     ldh     [rNR42],a
+    ld      [DS_CH4Vol],a
 .noupdate
     ld      a,[DS_CH4NoteCount]
     inc     a
@@ -1780,9 +1795,11 @@ DS_CH1_UpdateRegisters:
     jr      nz,.norest
     xor     a
     ldh     [rNR12],a
+    ld      [DS_CH1Vol],a
     ldh     a,[rNR14]
     or      %10000000
     ldh     [rNR14],a
+    ld      [DS_CH1Retrig],a
     jp      .done
 .norest
 
@@ -2018,9 +2035,11 @@ DS_CH1_UpdateRegisters:
     jr      z,.noreset3
     ld      a,b
     ldh     [rNR12],a
+    ld      [DS_CH1Vol],a
     ld      a,e
     or      $80
     ldh     [rNR14],a
+    ld      [DS_CH1Retrig],a
 .noreset3
     ld      a,[DS_CH1VolPos]
     inc     a
@@ -2048,9 +2067,11 @@ DS_CH2_UpdateRegisters:
     jr      nz,.norest
     xor     a
     ldh     [rNR22],a
+    ld      [DS_CH2Vol],a
     ldh     a,[rNR24]
     or      %10000000
     ldh     [rNR24],a
+    ld      [DS_CH2Retrig],a
     jp      .done
 .norest
 
@@ -2285,9 +2306,11 @@ DS_CH2_UpdateRegisters:
     jr      z,.noreset3
     ld      a,b
     ldh     [rNR22],a
+    ld      [DS_CH2Vol],a
     ld      a,e
     or      $80
     ldh     [rNR24],a
+    ld      [DS_CH2Retrig],a
 .noreset3
     ld      a,[DS_CH2VolPos]
     inc     a
@@ -2623,9 +2646,11 @@ DS_CH4_UpdateRegisters:
     jr      nz,.norest
     xor     a
     ldh     [rNR42],a
+    ld      [DS_CH4Vol],a
     ldh     a,[rNR44]
     or      %10000000
     ldh     [rNR44],a
+    ld      [DS_CH4Retrig],a
     jp      .done
 .norest
 
@@ -2746,9 +2771,11 @@ DS_CH4_UpdateRegisters:
     jr      z,.noreset3
     ld      a,b
     ldh     [rNR42],a
+    ld      [DS_CH4Vol],a
     ld      a,e
     or      $80
     ldh     [rNR44],a
+    ld      [DS_CH4Retrig],a
 .noreset3
     ld      a,[DS_CH4VolPos]
     inc     a

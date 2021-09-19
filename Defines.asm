@@ -185,6 +185,10 @@ PlaySFX:    macro
     ld      hl,SFX_\1
     call    VGMSFX_Init
 endm
+
+tmcoord:    macro
+    ld      hl,sys_TilemapBuffer + ((\2*20) | \1)
+    endm
     
 ; === Project-specific macros ===
 

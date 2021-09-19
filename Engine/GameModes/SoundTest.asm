@@ -5,6 +5,14 @@ SoundTest_MarqueeScroll:    db
 SoundTest_MarqueePos:       db
 SoundTest_DoFade:           db
 
+SoundTest_CH1Vol:           db
+SoundTest_CH2Vol:           db
+SoundTest_CH3Vol:           db
+SoundTest_CH4Vol:           db
+SoundTest_CH1DecayTime:     db
+SoundTest_CH2DecayTime:     db
+SoundTest_CH4DecayTime:     db
+
 ; ================
 
 section "Sound test routines",rom0
@@ -50,11 +58,14 @@ GM_SoundTest:
     call    _CopyRAM
 
     ld      hl,Pal_SoundTest
-    xor     a
+    ld      a,0
     call    LoadPal
     ld      a,1
     call    LoadPal
-    ; hl = Pal_SoundTestCursor
+    ld      a,2
+    call    LoadPal
+    ld      a,3
+    call    LoadPal
     ld      a,8
     call    LoadPal
     call    ConvertPals
@@ -75,12 +86,40 @@ GM_SoundTest:
     ld      [SoundTest_MarqueeScroll],a
     ld      [SoundTest_MarqueePos],a
     ld      [SoundTest_SongID],a
+    ld      [SoundTest_CH1Vol],a
+    ld      [SoundTest_CH2Vol],a
+    ld      [SoundTest_CH4Vol],a
+    ld      [SoundTest_CH1DecayTime],a
+    ld      [SoundTest_CH2DecayTime],a
+    ld      [SoundTest_CH4DecayTime],a
     push    af
     farcall DS_Init
     pop     af
     call    SoundTest_DrawSongName
 
 SoundTestLoop:
+    
+    ld      hl,sys_TilemapBuffer+103
+    ld      de,$98a3
+    ld      b,8
+    ld      c,$14
+:
+    WaitForVRAM
+    ld      a,[hl+]
+    ld      [de],a
+    inc     de
+    dec     c
+    jr      nz,:-
+    ld      c,$14
+    ld      a,e
+    add     $C
+    jr      nc,:+
+    inc     d
+:
+    ld      e,a
+    dec     b
+    jr      nz,:--
+
     ld      a,[sys_btnPress]
     bit     btnB,a
     jp      nz,.exit
@@ -134,6 +173,102 @@ SoundTestLoop:
     jp      GM_DebugMenu
 
 .continue
+    ; update visualizer vars
+    ; ch1
+    ld      a,[DS_CH1Retrig]
+    and     a
+    jr      z,:+
+    ld      a,[DS_CH1Vol]
+    and     $f0
+    swap    a
+    ld      [SoundTest_CH1Vol],a
+    ld      a,[DS_CH1Vol]
+    and     $f
+    ld      [SoundTest_CH1DecayTime],a
+    jr      :+++
+:   ld      a,[SoundTest_CH1DecayTime]
+    dec     a
+    ld      [SoundTest_CH1DecayTime],a
+    jr      nz,:++
+    ld      a,[DS_CH1Vol]
+    and     $f
+    ld      [SoundTest_CH1DecayTime],a
+    ld      a,[SoundTest_CH1Vol]
+    sub     1   ; dec a doesn't set carry
+    jr      nc,:+
+    xor     a
+:   ld      [SoundTest_CH1Vol],a
+:
+    ; ch2
+    ld      a,[DS_CH2Retrig]
+    and     a
+    jr      z,:+
+    ld      a,[DS_CH2Vol]
+    and     $f0
+    swap    a
+    ld      [SoundTest_CH2Vol],a
+    ld      a,[DS_CH2Vol]
+    and     $f
+    ld      [SoundTest_CH2DecayTime],a
+    jr      :+++
+:   ld      a,[SoundTest_CH2DecayTime]
+    dec     a
+    ld      [SoundTest_CH2DecayTime],a
+    jr      nz,:++
+    ld      a,[DS_CH2Vol]
+    and     $f
+    ld      [SoundTest_CH2DecayTime],a
+    ld      a,[SoundTest_CH2Vol]
+    sub     1   ; dec a doesn't set carry
+    jr      nc,:+
+    xor     a
+:   ld      [SoundTest_CH2Vol],a
+:
+    ; ch3 (TODO)
+    ld      a,[DS_CH3Vol]
+    and     a
+    jr      z,.setvol3
+    cp      $20
+    jr      nz,:+
+    ld      a,$f
+    jr      .setvol3
+:   cp      $40
+    jr      nz,:+
+    ld      a,$8
+    jr      .setvol3
+:   cp      $60
+    jr      nz,:+
+    ld      a,$4
+    ; fall through
+.setvol3
+    ld      [SoundTest_CH3Vol],a
+:   ; ch4
+    ld      a,[DS_CH4Retrig]
+    and     a
+    jr      z,:+
+    ld      a,[DS_CH4Vol]
+    and     $f0
+    swap    a
+    ld      [SoundTest_CH4Vol],a
+    ld      a,[DS_CH4Vol]
+    and     $f
+    ld      [SoundTest_CH4DecayTime],a
+    jr      :+++
+:   ld      a,[SoundTest_CH4DecayTime]
+    dec     a
+    ld      [SoundTest_CH4DecayTime],a
+    jr      nz,:++
+    ld      a,[DS_CH4Vol]
+    and     $f
+    ld      [SoundTest_CH4DecayTime],a
+    ld      a,[SoundTest_CH4Vol]
+    sub     1   ; dec a doesn't set carry
+    jr      nc,:+
+    xor     a
+:   ld      [SoundTest_CH4Vol],a
+:
+    
+    ; update cursor
     ld      hl,OAMBuffer
     ; left cursor Y pos
     ld      a,144
@@ -171,14 +306,124 @@ SoundTestLoop:
     ; left cursor attributes
     xor     a
     ld      [hl+],a
+    
+    tmcoord 3,5
+    ld      b,160
+    xor     a
+    call    _FillRAMSmall
 
+    ; CH1 volume meter
+.v1
+    ld      a,[SoundTest_CH1Vol]
+    inc     a
+    ld      c,a
+    tmcoord 3,12
+    ld      b,16
+.v1a
+    ld      a,8
+    ld      [hl+],a
+    ld      [hl-],a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      z,:+
+.v1b
+    ld      a,9
+    ld      [hl+],a
+    ld      [hl-],a
+    ld      a,l
+    sub     20
+    ld      l,a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      nz,.v1a
+:   ; CH2 volume meter
+.v2
+    ld      a,[SoundTest_CH2Vol]
+    inc     a
+    ld      c,a
+    tmcoord 7,12
+    ld      b,16
+.v2a
+    ld      a,8
+    ld      [hl+],a
+    ld      [hl-],a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      z,:+
+.v2b
+    ld      a,9
+    ld      [hl+],a
+    ld      [hl-],a
+    ld      a,l
+    sub     20
+    ld      l,a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      nz,.v2a
+:   ; CH3 volume meter
+.v3
+    ld      a,[SoundTest_CH3Vol]
+    inc     a
+    ld      c,a
+    tmcoord 11,12
+    ld      b,16
+.v3a
+    ld      a,8
+    ld      [hl+],a
+    ld      [hl-],a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      z,:+
+.v3b
+    ld      a,9
+    ld      [hl+],a
+    ld      [hl-],a
+    ld      a,l
+    sub     20
+    ld      l,a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      nz,.v3a
+:    ; CH4 volume meter
+.v4
+    ld      a,[SoundTest_CH4Vol]
+    inc     a
+    ld      c,a
+    tmcoord 15,12
+    ld      b,16
+.v4a
+    ld      a,8
+    ld      [hl+],a
+    ld      [hl-],a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      z,:+
+.v4b
+    ld      a,9
+    ld      [hl+],a
+    ld      [hl-],a
+    ld      a,l
+    sub     20
+    ld      l,a
+    dec     c
+    jr      z,:+
+    dec     b
+    jr      nz,.v4a
+:
 .wait
     rst     WaitLCDC
     call    SoundTest_RunMarquee
     
 :   rst     WaitVBlank
     xor     a
-    ldh     [rSCX],a
+    ldh     [rSCX],a    
     jp      SoundTestLoop
 
 SoundTest_CursorOscillationTable:
@@ -358,104 +603,6 @@ SoundTest_MarqueeScrollTable::
     db      $DA,$DC,$DE,$E0,$E2,$E4,$E6,$E8,$EA,$EC,$ED,$EF,$F0,$F2,$F3,$F5
     db      $F6,$F7,$F8,$F9,$FA,$FB,$FC,$FC,$FD,$FE,$FE,$FF,$FF,$FF,$FF,$FF
 
-section "Sound test - Gradient data",romx
-
-Gradient_VolumeMeterLimit:
-    db      1
-    RGB     31, 0, 0
-    RGB     31, 2, 0
-    RGB     31, 4, 0
-    RGB     31, 6, 0
-    RGB     31, 8, 0
-    RGB     31,10, 0
-    RGB     31,12, 0
-    RGB     31,14, 0
-    RGB     31,16, 0
-    RGB     31,18, 0
-    RGB     31,20, 0
-    RGB     31,22, 0
-    RGB     31,24, 0
-    RGB     31,26, 0
-    RGB     31,28, 0
-    RGB     31,30, 0
-    RGB     31,31, 0
-    RGB     30,31, 0
-    RGB     28,31, 0
-    RGB     26,31, 0
-    RGB     24,31, 0
-    RGB     22,31, 0
-    RGB     20,31, 0
-    RGB     18,31, 0
-    RGB     16,31, 0
-    RGB     14,31, 0
-    RGB     12,31, 0
-    RGB     10,31, 0
-    RGB      8,31, 0
-    RGB      6,31, 0
-    RGB      4,31, 0
-    RGB      2,31, 0
-    RGB      0,31, 0
-.end
-
-Gradient_GlassSurface:
-    db      0
-    RGB      1, 1, 1
-    RGB      2, 2, 2
-    RGB      3, 3, 3
-    RGB      4, 4, 4
-    RGB      5, 5, 5
-    RGB      6, 6, 6
-    RGB      7, 7, 7
-    RGB      8, 8, 8
-    RGB      9, 9, 9
-    RGB     10,10,10
-    RGB     11,11,11
-    RGB     12,12,12
-    RGB     13,13,13
-    RGB     14,14,14
-    RGB     15,15,15
-    RGB     16,16,16
-
-Gradient_GlassReflect:
-    db      0
-    RGB      8, 8, 8
-    RGB      8, 8, 8
-    RGB      7, 7, 7
-    RGB      7, 7, 7
-    RGB      6, 6, 6
-    RGB      6, 6, 6
-    RGB      5, 5, 5
-    RGB      5, 5, 5
-    RGB      4, 4, 4
-    RGB      4, 4, 4
-    RGB      3, 3, 3
-    RGB      3, 3, 3
-    RGB      2, 2, 2
-    RGB      2, 2, 2
-    RGB      1, 1, 1
-    RGB      1, 1, 1
-    RGB      0, 0, 0
-
-Gradient_VolumeMeterReflect:
-    db      1
-    RGB      0, 8, 0
-    RGB      0, 8, 0
-    RGB      0, 7, 0
-    RGB      0, 7, 0
-    RGB      0, 6, 0
-    RGB      0, 6, 0
-    RGB      0, 5, 0
-    RGB      0, 5, 0
-    RGB      0, 4, 0
-    RGB      0, 4, 0
-    RGB      0, 3, 0
-    RGB      0, 3, 0
-    RGB      0, 2, 0
-    RGB      0, 2, 0
-    RGB      0, 1, 0
-    RGB      0, 1, 0
-    RGB      0, 0, 0
-
 ; ================
 
 section "Sound test GFX",romx
@@ -469,35 +616,46 @@ Pal_SoundTest:
     RGB     15,15,15
     RGB     28,28,28
     RGB     31,31,31
-
+    
     RGB      0, 0, 0
+    RGB      0,15, 0
     RGB      0,31, 0
     RGB     31,31, 0
-    RGB     31,31,31
 
-Pal_SoundTestCursor:
+    RGB      0, 0, 0
+    RGB     15,15, 0
+    RGB     31,31, 0
+    RGB     31,31,31
+    
+    RGB      0, 0, 0
+    RGB     15, 0, 0
+    RGB     31, 0, 0
+    RGB     31,15, 0
+
+Pal_SoundTestOBJ:
     RGB     31, 0,31
     RGB      5, 5, 5
     RGB     10,10,10
     RGB     15,15,15
 
+
 SoundTest_AttributeMap:
     db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
     db      8,8,8,8,8,8,8,8,8,8,0,0,0,0,0,0,0,0,0,0,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
-    db      1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$23,$03,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$22,$02,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
+    db      $21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$21,$01,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff
     db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     db      8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
 .end
