@@ -27,6 +27,41 @@ Pal_Player:
     RGB  0, 0, 0
     RGB  0,15,31
     RGB 31,31,31
+Pal_PlainsObjects:
+    RGB 31, 0,31
+    RGB  0, 0, 0
+    RGB  0,31, 0
+    RGB 31,31,31
+    
+    RGB 31, 0,31
+    RGB  0, 0, 0
+    RGB 31, 0, 0
+    RGB 31,31,31
+
+    RGB 31, 0,31
+    RGB  0, 0, 0
+    RGB 20,20,20
+    RGB 31,31,31
+    
+    RGB 31, 0,31
+    RGB  0, 0, 0
+    RGB  0, 0,31
+    RGB  0,31,31
+    
+    RGB 31, 0,31
+    RGB 31, 0, 0
+    RGB 31,31, 0
+    RGB 31,31,31
+    
+    RGB 31, 0,31
+    RGB 31, 0, 0
+    RGB 31,15, 0
+    RGB 31,31, 0
+    
+    RGB 31, 0,31
+    RGB  0, 0, 0
+    RGB 10,10,10
+    RGB 20,20,20
     
 Pal_TestMap:
     RGB  0, 0, 0

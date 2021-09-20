@@ -40,7 +40,24 @@ GM_Level:
     ; initialize player object
     call    InitPlayer
     
-	; TODO: Load the actual map data
+    ; load palettes
+    ldfar   hl,Pal_PlainsObjects
+    ld      a,9
+    call    LoadPal
+    ld      a,10
+    call    LoadPal
+    ld      a,11
+    call    LoadPal
+    ld      a,12
+    call    LoadPal
+    ld      a,13
+    call    LoadPal
+    ld      a,14
+    call    LoadPal
+    ld      a,15
+    call    LoadPal
+    resbank
+
     pop     hl
     call    LoadMap
     
@@ -73,7 +90,7 @@ GM_Level:
     ldfar   hl,ParticleTiles
     ld      de,$8040
     call    DecodeWLE
-    
+
     ; setup registers
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
     ldh     [rLCDC],a
