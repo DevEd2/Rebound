@@ -395,17 +395,17 @@ Monster_Fish_Circ:
     push    bc
     ld      a,[sys_CurrentFrame]
     call    GetSine
-    ld      a,d
+    ld      a,e
     and     %10000000
     ld      b,a
-    sra     d
-    sra     d
+    sra     e
+    sra     e
     or      b
     pop     bc
     ld      hl,Monster_InitYPos
     add     hl,bc
     ld      a,[hl]
-    add     d
+    add     e
     ld      hl,Monster_YPosition
     add     hl,bc
     ld      [hl],a
@@ -414,17 +414,17 @@ Monster_Fish_Circ:
     push    bc
     ld      a,[sys_CurrentFrame]
     call    GetSine
-    ld      a,e
+    ld      a,d
     and     %10000000
     ld      b,a
-    sra     e
-    sra     e
+    sra     d
+    sra     d
     or      b
     pop     bc
     ld      hl,Monster_InitXPos
     add     hl,bc
     ld      a,[hl]
-    add     e
+    add     d
     ld      hl,Monster_XPosition
     add     hl,bc
     ld      [hl],a
