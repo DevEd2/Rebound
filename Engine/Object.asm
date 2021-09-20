@@ -36,6 +36,9 @@ MONSTER_NULL                equ 0
 MONSTER_TEST                equ 1
 MONSTER_TEST2               equ 2
 COLLECTABLE_1UP             equ 3
+MONSTER_FISH_LR             equ 4
+MONSTER_FISH_UD             equ 5
+MONSTER_FISH_CIRC           equ 6
 
 Monster_ID:                 ds  MONSTER_COUNT
 Monster_WRAMPointer:        ds  MONSTER_COUNT
@@ -56,6 +59,8 @@ Monster_AnimPtrLo:          ds  MONSTER_COUNT
 Monster_AnimTimer:          ds  MONSTER_COUNT
 Monster_ListIndex:          ds  MONSTER_COUNT
 Monster_TileIndex:          ds  MONSTER_COUNT
+Monster_InitXPos:           ds  MONSTER_COUNT
+Monster_InitYPos:           ds  MONSTER_COUNT
 
 RESPAWN_LIST_SIZE           equ 16
 Respawn_Index:              ds  RESPAWN_LIST_SIZE ; -1 = Empty
@@ -124,6 +129,9 @@ ObjectInit:
     minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1 ; MONSTER_TEST
     minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk ; MONSTER_TEST2
     minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_LR
+    minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_UD
+    minit   -$000, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_CIRC
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
@@ -132,6 +140,9 @@ ObjectGraphics:
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MOSNTER_TEST
     mgraphic    bank(GoonyTiles),GoonyTiles         ; MONSTER_TEST2
     mgraphic    bank(OneUpTiles),OneUpTiles         ; COLLECTABLE_1UP
+    mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_LR
+    mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_UD
+    mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_CIRC
     
 ; Object animations
 section "Object Animation Data",romx
@@ -158,6 +169,11 @@ Anim_GoonyWalk:
 Anim_GoonyKill:
     db  8,1
     dbw $80,Anim_GoonyKill
+    
+Anim_Fish_Swim:
+    db  0,8
+    db  1,8
+    dbw $80,Anim_Fish_Swim
 
 ; Monster Behavior functions and behavior jump table
 ; All behavior functions must preserve bc
@@ -168,6 +184,9 @@ BehaviorTable:
     dw      Monster_MoveLeftRight   ; MONSTER_TEST
     dw      Monster_MoveLeftRight   ; MONSTER_TEST2
     dw      Collectable_ExtraLife   ; COLLECTABLE_1UP
+    dw      Monster_Fish_LR         ; MONSTER_FISH_LR
+    dw      Monster_Fish_UD         ; MONSTER_FISH_UD
+    dw      Monster_Fish_Circ       ; MONSTER_FISH_CIRC
 
 BehaviorDispatch:
     bit     7,h
@@ -245,7 +264,7 @@ Monster_MoveLeftRight:
 :
     bit     MONSTER_COLLISION_PLAYER,e
     ld      de,Anim_GoonyKill
-    jr      nz,Monster_CheckKill
+    jp      nz,Monster_CheckKill
     ; death animation flipping
     ld      hl,Monster_Flags
     add     hl,bc
@@ -257,6 +276,157 @@ Monster_MoveLeftRight:
     ret     nz
     ld      a,[hl]
     xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+    ret
+    
+Monster_Fish_LR:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    add     1
+    push    af
+    ld      [hl],a
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    pop     af
+    ld      a,[hl]
+    cpl
+    adc     0
+    ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+:
+    bit     MONSTER_COLLISION_PLAYER,[hl]
+    call    nz,KillPlayer
+    
+    ; vertical bob
+    ld      a,[sys_CurrentFrame]
+    add     a
+    add     a
+    push    bc
+    call    GetSine
+    ld      a,e
+    and     %10000000
+    ld      b,a
+    sra     e
+    sra     e
+    sra     e
+    sra     e
+    sra     e
+    sra     e
+    or      b
+    pop     bc
+    ld      hl,Monster_InitYPos
+    add     hl,bc
+    ld      a,[hl]
+    add     e
+    ld      hl,Monster_YPosition
+    add     hl,bc
+    ld      [hl],a
+    ret
+    
+Monster_Fish_UD:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    add     1
+    push    af
+    ld      [hl],a
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    pop     af
+    ld      a,[hl]
+    cpl
+    adc     0
+    ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+:
+    ld      a,e
+    and     MONSTER_COLLISION_VERT
+    jr      z,:+
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    add     1
+    push    af
+    ld      [hl],a
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    pop     af
+    ld      a,[hl]
+    cpl
+    adc     0
+    ld      [hl],a
+:    
+    ld      hl,Monster_Collision
+    add     hl,bc
+    bit     MONSTER_COLLISION_PLAYER,[hl]
+    jp      nz,KillPlayer
+    ret
+
+Monster_Fish_Circ:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    bit     MONSTER_COLLISION_PLAYER,[hl]
+    call    nz,KillPlayer
+    
+    push    bc
+    ld      a,[sys_CurrentFrame]
+    call    GetSine
+    ld      a,d
+    and     %10000000
+    ld      b,a
+    sra     d
+    sra     d
+    or      b
+    pop     bc
+    ld      hl,Monster_InitYPos
+    add     hl,bc
+    ld      a,[hl]
+    add     d
+    ld      hl,Monster_YPosition
+    add     hl,bc
+    ld      [hl],a
+    
+
+    push    bc
+    ld      a,[sys_CurrentFrame]
+    call    GetSine
+    ld      a,e
+    and     %10000000
+    ld      b,a
+    sra     e
+    sra     e
+    or      b
+    pop     bc
+    ld      hl,Monster_InitXPos
+    add     hl,bc
+    ld      a,[hl]
+    add     e
+    ld      hl,Monster_XPosition
+    add     hl,bc
     ld      [hl],a
     ret
     
@@ -624,10 +794,16 @@ InitMonster:
   add hl,bc
   ldh a,[TempX]         ; Restore X Position
   ld  [hl],a            ; Set X Position
+  ld  hl,Monster_InitXPos
+  add hl,bc
+  ld  [hl],a            ; Set Initial X Position
   ld  hl,Monster_YPosition
   add hl,bc
   ldh a,[TempY]         ; Restore Y Position
   ld  [hl],a            ; Set Y Position
+  ld  hl,Monster_InitYPos
+  add hl,bc
+  ld  [hl],a            ; Set Initial Y Position
   ld  hl,Monster_ListIndex
   add hl,bc
   ld  a,d               ; Get current list index
