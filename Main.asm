@@ -435,10 +435,13 @@ DoVBlank::
     ld  [sys_VBlankFlag],a      ; set VBlank flag
     
     call    UpdatePalettes
-
+    ld      a,[sys_PauseGame]
+    and     a
+    jr      nz,:+
     ld  a,[sys_CurrentFrame]
     inc a
     ld  [sys_CurrentFrame],a    ; increment current frame
+:
     call    CheckInput
     
 :   ; setup HDMA for parallax GFX transfer
