@@ -357,10 +357,6 @@ Level_TransitionUp:
 
     PlaySFX transitionup
     
-    call    ClearMonsters
-	call	ClearParticles
-	call	RenderMonsters
-	call	RenderParticles
     ld      b,16
 .loop
     push    bc
@@ -375,12 +371,18 @@ Level_TransitionUp:
     ld      a,[Engine_CameraY]
     sub     SCRN_Y/16
     ld      [Engine_CameraY],a
+    call    BeginSprites
     call    DrawPlayer
+    call    RenderMonsters
+    call    RenderParticles
+    call    EndSprites
     pop     bc
 
     halt
     dec     b
     jr      nz,.loop
+    call    ClearMonsters
+    call    ClearParticles
     jp      InitSpawnMonsters
 :
     xor     a
@@ -408,10 +410,6 @@ Level_TransitionDown:
     ld      [Engine_CurrentSubarea],a
     PlaySFX transitiondown
     
-    call    ClearMonsters
-	call	ClearParticles
-	call	RenderMonsters
-	call	RenderParticles
     ld      b,16
 .loop
     push    bc
@@ -429,7 +427,11 @@ Level_TransitionDown:
     ld      a,[Engine_CameraY]
     add     SCRN_Y/16
     ld      [Engine_CameraY],a
+    call    BeginSprites
     call    DrawPlayer
+    call    RenderMonsters
+    call    RenderParticles
+    call    EndSprites
     pop     bc
 
     halt
@@ -439,6 +441,8 @@ Level_TransitionDown:
     ld		[Player_LastBounceY],a
     ld		a,[Engine_CameraY]
     ld		[Engine_CameraTargetY],a
+    call  ClearMonsters
+    call  ClearParticles
     jp    InitSpawnMonsters  
 
 ; ================================================================
