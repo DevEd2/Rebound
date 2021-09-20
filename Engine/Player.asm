@@ -916,22 +916,7 @@ Player_WallBounce:
 
     ld      a,[sys_btnHold]
     bit     btnA,a
-    jr      nz,.highbounce
-    bit     btnB,a
-    ret     nz
-.normalbounce
-    ld      a,high(Player_WallBounceHeight)
-    ld      [Player_YVelocity],a
-    ld      a,low(Player_WallBounceHeight)
-    ld      [Player_YVelocityS],a
-    ret
-.lowbounce
-    ld      a,high(Player_LowWallBounceHeight)
-    ld      [Player_YVelocity],a
-    ld      a,low(Player_LowWallBounceHeight)
-    ld      [Player_YVelocityS],a
-    ret
-.highbounce
+    ret     z
     ld      a,high(Player_HighWallBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighWallBounceHeight)
