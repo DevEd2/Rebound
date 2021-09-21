@@ -131,7 +131,7 @@ ObjectInit:
     minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default
     minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_LR
     minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_UD
-    minit   -$000, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_CIRC
+    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_CIRC
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
@@ -405,12 +405,22 @@ Monster_Fish_Circ:
     ld      hl,Monster_InitYPos
     add     hl,bc
     ld      a,[hl]
+    ld      d,a
     add     e
     ld      hl,Monster_YPosition
     add     hl,bc
     ld      [hl],a
-    
-
+    cp      d
+    jr      nc,:+
+    ld      hl,Monster_Flags
+    add     hl,bc
+    res     MONSTER_FLAG_FLIPH,[hl]
+    jr      :++
+:
+    ld      hl,Monster_Flags
+    add     hl,bc
+    set     MONSTER_FLAG_FLIPH,[hl]
+:
     push    bc
     ld      a,[sys_CurrentFrame]
     call    GetSine
