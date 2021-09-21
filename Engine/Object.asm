@@ -53,6 +53,7 @@ Monster_XVelocity:          ds  MONSTER_COUNT
 Monster_XVelocityS:         ds  MONSTER_COUNT
 Monster_YVelocity:          ds  MONSTER_COUNT
 Monster_YVelocityS:         ds  MONSTER_COUNT
+Monster_Palette:            ds  MONSTER_COUNT
 Monster_AnimBank:           ds  MONSTER_COUNT
 Monster_AnimPtrHi:          ds  MONSTER_COUNT
 Monster_AnimPtrLo:          ds  MONSTER_COUNT
@@ -114,6 +115,7 @@ minit:  macro
     dw  \1,\2
     db  \3,\4
     dw  \5
+    db  \6
     endm
     
 mgraphic: macro
@@ -122,16 +124,16 @@ mgraphic: macro
     endm
 
 ; Monster type init data
-; Format: XVelocity, YVelocity, Flags, Anim Bank, Anim Pointer
+; Format: XVelocity, YVelocity, Flags, Anim Bank, Anim Pointer, Palette ID
 ; Anim Pointer of -1 = No Animation
 section "Object Init Data",romx
 ObjectInit:
-    minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1 ; MONSTER_TEST
-    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk ; MONSTER_TEST2
-    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default
-    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_LR
-    minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_UD
-    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim ; MONSTER_FISH_CIRC
+    minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1,0 ; MONSTER_TEST
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk,2 ; MONSTER_TEST2
+    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default,0
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_LR
+    minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_UD
+    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_CIRC
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
@@ -820,10 +822,13 @@ InitMonster:
   ld  [hl],a            ; Set list index
   push  de
   ldh a,[TempID]        ; Get Object ID
+  ; TODO - Make this calculation 16 bit
   dec a                 ; Init data starts at Object 1
+  ld  e,a
   sla a                 ; ID * 2
   sla a                 ; ID * 4
   sla a                 ; ID * 8
+  add a,e               ; ID * 9
   push  bc
   ldfar de,ObjectInit   ; Load fields from object type init data
   pop bc
@@ -876,6 +881,11 @@ InitMonster:
   ld  a,1
 :
   ld  hl,Monster_AnimTimer
+  add hl,bc
+  ld  [hl],a
+  inc de
+  ld  a,[de]
+  ld  hl,Monster_Palette
   add hl,bc
   ld  [hl],a
   pop de
@@ -1655,6 +1665,9 @@ RenderMonsters:
   ld  a,[hl]
   and %01100000
   or  %00001000
+  ld  hl,Monster_Palette
+  add hl,bc
+  or  [hl]
   push  bc
   ld  c,a
   ldh a,[Temp0]
