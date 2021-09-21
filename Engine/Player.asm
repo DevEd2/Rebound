@@ -156,55 +156,6 @@ ProcessPlayer:
     jp      z,Player_Respawn
     jp      .moveair2
 .notdead
-    bit     bPlayerVictory,a
-    jr      z,.notvictory
-    
-    call    Player_AccelerateRight
-    ld      a,[Player_XVelocity]
-    ld      h,a
-    ld      a,[Player_XVelocityS]
-    ld      l,a
-    ld      a,[Player_XPos]
-    ld      d,a
-    ld      a,[Player_XSubpixel]
-    ld      e,a
-    add     hl,de
-    ld      a,h
-    ld      [Player_XPos],a
-    ld      a,l
-    ld      [Player_XSubpixel],a
-    ld      a,h
-    cp      $80
-    jp      nc,.moveair
-    cp      32
-    jp      c,.moveair
-    
-    ld      a,MUS_STAGE_CLEAR
-    farcall DS_Init
-    ld      b,0
-:   halt
-    dec     b
-    jr      nz,:-
-    call	PalFadeOutWhite
-    ; wait for fade to finish
-:   halt
-	ld		a,[sys_FadeState]
-	bit		0,a
-    jr      nz,:-
-    
-    xor     a
-    ldh     [rLCDC],a
-    ld      a,[Engine_LevelID]
-    inc     a
-    cp      NUM_LEVELS
-    jp      z,GM_EndScreen
-    ld      [Engine_LevelID],a
-    ; restore stack pointer
-    pop     hl
-    pop     hl
-    jp      GM_Level
-    
-.notvictory
     lb      bc,0,1
     ld      a,[sys_btnHold]
     bit     btnLeft,a
@@ -308,15 +259,15 @@ ProcessPlayer:
     jr      .decel
     
 .checkgoal
-    cp      COLLISION_GOAL
-    jr      nz,.checkkill
-.dogoal
-    ld      a,1
-    ld      [Engine_LockCamera],a
-    ld      a,[Player_MovementFlags]
-    set     bPlayerVictory,a
-    ld      [Player_MovementFlags],a
-    jp      .moveair
+;   cp      COLLISION_GOAL
+;   jr      nz,.checkkill
+;.dogoal
+;   ld      a,1
+;   ld      [Engine_LockCamera],a
+;   ld      a,[Player_MovementFlags]
+;   set     bPlayerVictory,a
+;   ld      [Player_MovementFlags],a
+;   jp      .moveair
     
 .checkkill
     cp      COLLISION_KILL
@@ -411,7 +362,45 @@ ProcessPlayer:
     cp      b
     ld      a,b
     pop     bc
-    jr      z,.xMoveDone
+    jr      nz,.notvictory
+    ld      hl,Player_MovementFlags
+    set     bPlayerVictory,[hl]
+    
+    ld      a,1
+    ld      [Engine_LockCamera],a
+    ld      a,MUS_STAGE_CLEAR
+    farcall DS_Init
+    ld      b,0
+:   halt
+    ld      a,[Player_XPos]
+    cp      16
+    jr      nc,:+
+    push    bc
+    call    Player_AccelerateRight
+    call    ProcessPlayer
+    call    DrawPlayer
+    pop     bc
+:   dec     b
+    jr      nz,:--
+    call	PalFadeOutWhite
+    ; wait for fade to finish
+:   halt
+	ld		a,[sys_FadeState]
+	bit		0,a
+    jr      nz,:-
+    
+    xor     a
+    ldh     [rLCDC],a
+    ld      a,[Engine_LevelID]
+    inc     a
+    cp      NUM_LEVELS
+    jp      z,GM_EndScreen
+    ld      [Engine_LevelID],a
+    ; restore stack pointer
+    pop     hl
+    pop     hl
+    jp      GM_Level
+.notvictory
     inc     a
     or      b
     ld      [Engine_CurrentScreen],a
@@ -717,9 +706,6 @@ ProcessPlayer:
     jp      nz,.yCollideEnd
 :
     ; Collision with ceiling
-    ld      a,[Player_MovementFlags]
-    bit     bPlayerVictory,a
-    jr      nz,.bottomCollision
     ; Clear Velocity
     xor     a
     ld      [Player_YVelocity],a
@@ -1257,6 +1243,9 @@ Player_Splash:
 ; INPUT: a = current Y position
 ;        b = previous Y position
 Player_CheckSubscreenBoundary:
+    ld      hl,Player_MovementFlags
+    bit     bPlayerVictory,[hl]
+    ret     nz
     ld      e,a
     ld      a,[Player_YVelocity]
     bit     7,a
