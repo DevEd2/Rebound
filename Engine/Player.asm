@@ -337,7 +337,7 @@ ProcessPlayer:
     ld      a,[Player_XVelocity]
     bit     7,a
     jr      z,:+
-    jr      c,.xMoveDone
+    jp      c,.xMoveDone
     ; Left edge crossed, decrement current screen
     ld      a,[Engine_CurrentScreen]
     and     $30
@@ -377,6 +377,12 @@ ProcessPlayer:
     jr      nc,:+
     push    bc
     call    Player_AccelerateRight
+    ld      b,b
+    ld      a,[Player_YPos]
+    ld      b,a
+    ld      a,[Player_LastBounceY]
+    cp      b
+    call    c,Player_Bounce
     call    ProcessPlayer
     call    DrawPlayer
     pop     bc
