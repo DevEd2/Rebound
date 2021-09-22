@@ -372,13 +372,14 @@ ProcessPlayer:
     jr      nz,.notvictory
     ld      hl,Player_MovementFlags
     set     bPlayerVictory,[hl]
-    
+    ld      b,b
     ld      a,1
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
     ld      b,0
 :   halt
+    push    bc
     ld      a,16
     ld      a,[Player_XPos]
     ld      a,[Player_YPos]
