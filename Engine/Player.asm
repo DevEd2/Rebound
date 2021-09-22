@@ -376,17 +376,7 @@ ProcessPlayer:
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
-    
-    xor     a
-    ld      [OAMBuffer],a
-    ld      [OAMBuffer+1],a
-    ld      [OAMBuffer+2],a
-    ld      [OAMBuffer+3],a
-    ld      [OAMBuffer+4],a
-    ld      [OAMBuffer+5],a
-    ld      [OAMBuffer+6],a
-    ld      [OAMBuffer+7],a
-    ld      b,a
+    ld      b,0
 :   halt
     dec     b
     jr      nz,:-

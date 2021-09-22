@@ -21,7 +21,6 @@ LevelPointers:
     addlevel    Plains4
 	addlevel	Plains5
     addlevel    Plains6
-;   addlevel    Plains7
 ;   addlevel    PlainsBoss
         
 ;   addlevel    City1
@@ -30,7 +29,6 @@ LevelPointers:
 ;   addlevel    City4
 ;	addlevel	City5
 ;   addlevel    City6
-;   addlevel    City7
 ;   addlevel    CityBoss
         
 ;   addlevel    Forest1
@@ -39,7 +37,6 @@ LevelPointers:
 ;   addlevel    Forest4
 ;	addlevel	Forest5
 ;   addlevel    Forest6
-;   addlevel    Forest7
 ;   addlevel    ForestBoss
         
 ;   addlevel    Pyramid1
@@ -48,7 +45,6 @@ LevelPointers:
 ;   addlevel    Pyramid4
 ;	addlevel	Pyramid5
 ;   addlevel    Pyramid6
-;   addlevel    Pyramid7
 ;   addlevel    PyramidBoss
         
 ;   addlevel    Cave1
@@ -57,7 +53,6 @@ LevelPointers:
 ;   addlevel    Cave4
 ;	addlevel	Cave5
 ;   addlevel    Cave6
-;   addlevel    Cave7
 ;   addlevel    CaveBoss
         
 ;   addlevel    Temple1
@@ -66,5 +61,4 @@ LevelPointers:
 ;   addlevel    Temple4
 ;	addlevel	Temple5
 ;   addlevel    Temple6
-;   addlevel    Temple7
 ;   addlevel    TempleBoss

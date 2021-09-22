@@ -313,7 +313,9 @@ Monster_Fish_LR:
     call    nz,KillPlayer
     
     ; vertical bob
-    ld      a,[sys_CurrentFrame]
+    ld      hl,Monster_Lifetime
+    add     hl,bc
+    ld      a,[hl]
     add     a
     add     a
     push    bc

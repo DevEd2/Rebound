@@ -22,6 +22,8 @@ GM_SoundTest:
     ; LY = 149 on entry (may change)
     xor     a
     ldh     [rLCDC],a
+    
+    call    ClearScreen
 
     ldfar   hl,SoundTestTiles
     ld      de,$8000
@@ -122,11 +124,11 @@ SoundTestLoop:
 
     ld      a,[sys_btnPress]
     bit     btnB,a
-    jp      nz,.exit
+    jr      nz,.exit
     ld      e,a
     ld      a,[SoundTest_MarqueeScroll]
     and     a
-    jr      nz,.continue
+    jp      nz,.continue
     ld      a,e
     bit     btnLeft,a
     jr      nz,.prevsong
@@ -165,12 +167,31 @@ SoundTestLoop:
     jr      .continue
     
 .exit
-    farcall DS_Stop
-    halt
+    call    DevSound_Stop
+    PlaySFX menuback
+    call    PalFadeOutWhite
+    ; wait for fade to finish
+:   halt
+    ld      a,[sys_FadeState]
+    bit     0,a
+    jr      nz,:-
+    call    AllPalsWhite
+    call    UpdatePalettes
+    
+    ; wait for SFX to finish
+:   halt
+    ld      a,[VGMSFX_Flags]
+    and     a
+    jr      nz,:-
+    
     xor     a
     ldh     [rLCDC],a
     call    ClearScreen
-    jp      GM_DebugMenu
+    if      DebugMode
+        jp      GM_DebugMenu
+    else
+        jp      GM_TitleAndMenus
+    endc
 
 .continue
     ; update visualizer vars

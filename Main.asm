@@ -3,7 +3,7 @@
 ; =======================
 
 ; If set to 1, enable debugging features.
-DebugMode   = 1
+DebugMode   = 0
 
 ; Defines
 include "Defines.asm"
@@ -371,8 +371,9 @@ SkipGBCScreen:
     ld      [Player_CoinCount+1],a
     
     call    DoubleSpeed
-    
-    jp      GM_DebugMenu
+    if      !DebugMode
+        jp  GM_SplashScreens
+    endc
     
 ; ================================
 

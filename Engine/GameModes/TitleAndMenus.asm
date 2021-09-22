@@ -106,6 +106,30 @@ TitleLoop:
     jp      GM_Level
 
 .skip
+    bit     btnSelect,a
+    jr      z,.skip2
+    call    DevSound_Stop
+    PlaySFX menuselect
+    call    PalFadeOutWhite
+    ; wait for fade to finish
+:   call    Title_AnimateText
+    halt
+    ld      a,[sys_FadeState]
+    bit     0,a
+    jr      nz,:-
+    call    AllPalsWhite
+    call    UpdatePalettes
+    
+    ; wait for SFX to finish
+:   halt
+    ld      a,[VGMSFX_Flags]
+    and     a
+    jr      nz,:-
+    xor     a
+    ldh     [rLCDC],a
+    
+    jp      GM_SoundTest
+.skip2
     call    Title_AnimateText
 
     halt
