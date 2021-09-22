@@ -411,7 +411,6 @@ Level_InitHUD:
     ld      [_SCRN1+36],a
     ld      [_SCRN1+37],a
     ld      [_SCRN1+38],a
-    ld      [_SCRN1+39],a
     ld      a,SCRN_Y-16
     ldh     [rWY],a
     ld      a,SCRN_X-48
