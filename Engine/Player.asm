@@ -345,7 +345,7 @@ ProcessPlayer:
     ld      a,[Engine_CurrentScreen]
     and     $f
     sub     1
-    jr      c,.xMoveDone
+    jp      c,.xMoveDone
     or      b
     ld      [Engine_CurrentScreen],a
     jr      .xMoveDone
@@ -356,12 +356,19 @@ ProcessPlayer:
     and     $30
     ld      b,a
     ld      a,[Engine_CurrentScreen]
+    and     $f
     push    bc
     ld      b,a
     ld      a,[Engine_NumScreens]
     cp      b
     ld      a,b
     pop     bc
+    push    af
+    inc     a
+    or      b
+    ld      e,a
+    pop     af
+    ld      a,e   
     jr      nz,.notvictory
     ld      hl,Player_MovementFlags
     set     bPlayerVictory,[hl]
@@ -372,17 +379,9 @@ ProcessPlayer:
     farcall DS_Init
     ld      b,0
 :   halt
+    ld      a,16
     ld      a,[Player_XPos]
-    cp      16
-    jr      nc,:+
-    push    bc
-    call    Player_AccelerateRight
-    ld      b,b
     ld      a,[Player_YPos]
-    ld      b,a
-    ld      a,[Player_LastBounceY]
-    cp      b
-    call    c,Player_Bounce
     call    ProcessPlayer
     call    DrawPlayer
     pop     bc
@@ -407,8 +406,6 @@ ProcessPlayer:
     pop     hl
     jp      GM_Level
 .notvictory
-    inc     a
-    or      b
     ld      [Engine_CurrentScreen],a
 .xMoveDone:
 

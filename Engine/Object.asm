@@ -130,10 +130,10 @@ section "Object Init Data",romx
 ObjectInit:
     minit    $100, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,0,-1,0 ; MONSTER_TEST
     minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_GoonyWalk),Anim_GoonyWalk,2 ; MONSTER_TEST2
-    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default,0
-    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_LR
-    minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_UD
-    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,0 ; MONSTER_FISH_CIRC
+    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default,0 ; COLLECTABLE_1UP
+    minit   -$080, $000,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,1 ; MONSTER_FISH_LR
+    minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,1 ; MONSTER_FISH_UD
+    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,1 ; MONSTER_FISH_CIRC
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
