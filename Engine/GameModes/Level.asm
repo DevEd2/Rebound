@@ -650,7 +650,7 @@ LoadMap:
     farcall DevSound_Init
     pop     hl
     resbank
-    ldh     [sys_TempBank],a
+    ldh     [sys_TempBank3],a
 
 	; get tileset pointer
     ld		a,[hl+]
@@ -692,7 +692,7 @@ LoadMap:
     inc     e
     dec     b
     jr      nz,:-
-    ldh     a,[sys_TempBank]
+    ldh     a,[sys_TempBank3]
     ld      b,a
     call    _Bankswitch
     pop		hl

@@ -133,10 +133,6 @@ InitPlayer:
 ProcessPlayer:
     ld      hl,Player_MovementFlags
     res     bPlayerHitEnemy,[hl]
-    ; Player Input
-    ld      a,[sys_btnPress]
-    bit     btnSelect,a
-    call    nz,KillPlayer
     
     ld      a,[Player_MovementFlags]
     bit     bPlayerIsDead,a
@@ -169,10 +165,14 @@ ProcessPlayer:
     ld      d,a
     jp      .noaccel
 .accelLeft
-    call    Player_AccelerateLeft
+    ld      a,[sys_FadeState]
+    bit     0,a
+    call    z,Player_AccelerateLeft
     jr      .continue
 .accelRight
-    call    Player_AccelerateRight
+    ld      a,[sys_FadeState]
+    bit     0,a
+    call    z,Player_AccelerateRight
     
 .continue
     ld      a,c
@@ -825,6 +825,10 @@ Player_Bounce:
     ld      a,[Player_MovementFlags]
     bit     bPlayerIsUnderwater,a
     jr      nz,.water
+    
+    ld      a,[sys_FadeState]
+    bit     0,a
+    jr      nz,.normalbounce
 
     ld      a,[sys_btnHold]
     bit     btnA,a
@@ -851,6 +855,10 @@ Player_Bounce:
     ret
     
 .water
+    ld      a,[sys_FadeState]
+    bit     0,a
+    jr      nz,.normalbouncewater
+
     ld      a,[sys_btnHold]
     bit     btnA,a
     jr      nz,.highbouncewater
