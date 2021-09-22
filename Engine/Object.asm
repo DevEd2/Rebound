@@ -62,6 +62,7 @@ Monster_ListIndex:          ds  MONSTER_COUNT
 Monster_TileIndex:          ds  MONSTER_COUNT
 Monster_InitXPos:           ds  MONSTER_COUNT
 Monster_InitYPos:           ds  MONSTER_COUNT
+Monster_Lifetime:           ds  MONSTER_COUNT ; Incremented each frame
 
 RESPAWN_LIST_SIZE           equ 16
 Respawn_Index:              ds  RESPAWN_LIST_SIZE ; -1 = Empty
@@ -395,7 +396,9 @@ Monster_Fish_Circ:
     call    nz,KillPlayer
     
     push    bc
-    ld      a,[sys_CurrentFrame]
+    ld      hl,Monster_Lifetime
+    add     hl,bc
+    ld      a,[hl]
     call    GetSine
     ld      a,e
     and     %10000000
@@ -424,7 +427,9 @@ Monster_Fish_Circ:
     set     MONSTER_FLAG_FLIPH,[hl]
 :
     push    bc
-    ld      a,[sys_CurrentFrame]
+    ld      hl,Monster_Lifetime
+    add     hl,bc
+    ld      a,[hl]
     call    GetSine
     ld      a,d
     and     %10000000
@@ -908,6 +913,9 @@ InitMonster:
   ld  hl,Monster_Collision
   add hl,bc
   ld  [hl],a
+  ld  hl,Monster_Lifetime
+  add hl,bc
+  ld  [hl],a
   resbank
   ret
   
@@ -925,6 +933,10 @@ UpdateMonsters:
   ld  a,[hl]          ; Get ID
   or  a
   jp  z,.nextMonster  ; 0 = No Monster
+  
+  ld  hl,Monster_Lifetime
+  add hl,bc
+  inc [hl]
   
   ; Type Specific Update
   ldfar hl,BehaviorTable
