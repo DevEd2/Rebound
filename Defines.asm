@@ -221,6 +221,7 @@ sys_EmuCheck:           db
 
 sys_EnableHDMA:         db
 sys_TilemapBuffer:      ds  20*18
+sys_StringBuffer:       ds  32
 
 ; project-specific
 

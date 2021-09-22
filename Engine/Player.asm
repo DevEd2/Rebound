@@ -376,17 +376,16 @@ ProcessPlayer:
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
-    ld      b,0
+    
+    xor     a
+    ld      [OAMBuffer],a
+    ld      [OAMBuffer+1],a
+    ld      [OAMBuffer+2],a
+    ld      [OAMBuffer+3],a
+    ld      b,a
 :   halt
-    push    bc
-    ld      a,16
-    ld      a,[Player_XPos]
-    ld      a,[Player_YPos]
-    call    ProcessPlayer
-    call    DrawPlayer
-    pop     bc
-:   dec     b
-    jr      nz,:--
+    dec     b
+    jr      nz,:-
     call	PalFadeOutWhite
     ; wait for fade to finish
 :   halt

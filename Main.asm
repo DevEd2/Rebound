@@ -914,29 +914,6 @@ include "Engine/Parallax.asm"
 include "Engine/Player.asm"
 include "Engine/Object.asm"
 
-; Reverse the bits in a byte.
-; INPUT:   a = byte
-; OUTPUT:  b = bit-reversed byte
-; TRASHES: a
-;ReverseBits:
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   rra
-;   rl      b
-;   ret
-
 ; Calculate a sine wave.
 ; INPUT:    a = angle
 ; OUTPUT:   d = cosine
@@ -967,6 +944,61 @@ Compare16:
     cp  e
     ret
 
+; INPUT:                  a = hexadecimal number
+; OUTPUT:  sys_StringBuffer = converted number
+; TRASHES: bc, hl
+; Adapted from https://wikiti.brandonw.net/index.php?title=Z80_Routines:Other:DispA
+Hex2Dec8:
+    ld      hl,sys_StringBuffer
+    ld      c,-100
+    call    :+
+    ld      c,-10
+    call    :+
+    ld      c,-1
+:   ld      b,-1
+:   inc     b
+    add     c
+    jr      c,:-
+    sub     c
+    push    af
+    ld      a,b
+    ld      [hl+],a
+    pop     af
+    ret
+    
+; INPUT:                 hl = decimal number
+; OUTPUT:  sys_StringBuffer = hexadecimal number
+; TRASHES: a, bc, de, hl
+; Adapted from https://wikiti.brandonw.net/index.php?title=Z80_Routines:Other:DispHL
+Hex2Dec16:
+    ld      de,sys_StringBuffer
+    ld      bc,-10000
+    call    :+
+    ld      bc,-1000
+    call    :+
+    ld      bc,-100
+    call    :+
+    ld      bc,-10
+    call    :+
+    ld      c,b
+:   ld      a,-1
+:   inc     a
+    ; add hl,bc doesn't set flags on SM83 >:C
+    add     hl,bc
+    jr      c,:-
+    ldh     [sys_TempCounter],a
+    ; equivalent to sbc hl,bc, thanks to ISSOtm for this!
+    ld      a,l
+    sub     c ; or `sbc c` for `sbc hl, bc` instead of `sub hl, bc`
+    ld      l,a
+    ld      a,h
+    sbc     b
+    ld      h,a
+    ldh     a,[sys_TempCounter]
+    ld      [de],a
+    inc     de
+    ret
+    
 ; ==========
 ; Sound data
 ; ==========
@@ -979,15 +1011,17 @@ include "Audio/DevSound.asm"
 ; =============
 
 section "Font",romx
-Font::              incbin  "GFX/Font.bin.wle"
+Font::          incbin  "GFX/Font.bin.wle"
 
 include	"GFX/Sprites/Goony/Goony.inc"
 include "GFX/Sprites/Fish.inc"
 include "GFX/Sprites/1up.inc"
 
 section "Particle tiles",romx
-ParticleTiles:
-    incbin  "GFX/Particles.2bpp.wle"
+ParticleTiles:  incbin  "GFX/Particles.2bpp.wle"
+    
+section "HUD graphics",romx
+HUDTiles:       incbin  "GFX/HUD.2bpp.wle"
 
 section "Palette data",romx
 include "Data/Palettes.asm"

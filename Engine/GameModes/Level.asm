@@ -90,9 +90,14 @@ GM_Level:
     ldfar   hl,ParticleTiles
     ld      de,$8040
     call    DecodeWLE
+    ldfar   hl,HUDTiles
+    ld      de,$8100
+    call    DecodeWLE
+    
+    call    Level_InitHUD
 
     ; setup registers
-    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJ16 | LCDCF_OBJON | LCDCF_BGON | LCDCF_WINON | LCDCF_WIN9C00
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
@@ -321,6 +326,7 @@ LevelLoop::
     call    RenderMonsters
     call    RenderParticles
     call    EndSprites
+    call    Level_UpdateHUD
 
     ; pause game if Start is pressed
     ld      a,[sys_btnPress]
@@ -342,6 +348,126 @@ LevelLoop::
     call    Level_PauseLoop
 :   halt
     jp      LevelLoop
+    
+Level_InitHUD:
+    xor     a
+    ldh     [rVBK],a
+    ld      de,_SCRN1
+    ld      a,$10
+    ld      [de],a
+    inc     e
+    ld      a,$12
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    ld      de,_SCRN1+32
+    ld      a,$11
+    ld      [de],a
+    inc     e
+    ld      a,$12
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    inc     e
+    ld      a,$1d
+    ld      [de],a
+    ld      a,1
+    ldh     [rVBK],a
+    ld      a,$8f
+    ld      [_SCRN1],a
+    ld      [_SCRN1+1],a
+    ld      [_SCRN1+2],a
+    ld      [_SCRN1+3],a
+    ld      [_SCRN1+4],a
+    ld      [_SCRN1+5],a
+    ld      [_SCRN1+6],a
+    ld      [_SCRN1+32],a
+    ld      [_SCRN1+33],a
+    ld      [_SCRN1+34],a
+    ld      [_SCRN1+35],a
+    ld      [_SCRN1+36],a
+    ld      [_SCRN1+37],a
+    ld      [_SCRN1+38],a
+    ld      [_SCRN1+39],a
+    ld      a,SCRN_Y-16
+    ldh     [rWY],a
+    ld      a,SCRN_X-48
+    ldh     [rWX],a
+    ret
+    
+Level_UpdateHUD:
+    xor     a
+    ldh     [rVBK],a
+    ld      a,[Player_LifeCount]
+    call    Hex2Dec8
+    ld      hl,sys_StringBuffer
+    ld      de,_SCRN1+4
+    ld      a,[hl+]
+    ld      c,a
+    ld      b,a
+    and     a
+    jr      z,:+
+    WaitForVRAM
+    ld      a,c
+    add     $13
+    ld      [de],a
+:   inc     e
+    ld      a,[hl+]
+    ld      c,a
+    and     a
+    jr      z,:++
+:   WaitForVRAM
+    ld      a,c
+    add     $13
+    ld      [de],a
+    jr      :++
+:   cp      b
+    jr      nz,:--
+:   inc     e
+    WaitForVRAM
+    ld      a,[hl]
+    add     $13
+    ld      [de],a
+    
+    ld      hl,Player_CoinCount
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    call    Hex2Dec16
+    ld      hl,sys_StringBuffer
+    ld      de,_SCRN1+34
+    ld      b,5
+:   WaitForVRAM
+    ld      a,[hl+]
+    add     $13
+    ld      [de],a
+    inc     e
+    dec     b
+    jr      nz,:-
+    ret
     
 Level_PauseLoop:
     halt
