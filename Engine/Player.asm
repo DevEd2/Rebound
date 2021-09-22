@@ -382,6 +382,10 @@ ProcessPlayer:
     ld      [OAMBuffer+1],a
     ld      [OAMBuffer+2],a
     ld      [OAMBuffer+3],a
+    ld      [OAMBuffer+4],a
+    ld      [OAMBuffer+5],a
+    ld      [OAMBuffer+6],a
+    ld      [OAMBuffer+7],a
     ld      b,a
 :   halt
     dec     b
