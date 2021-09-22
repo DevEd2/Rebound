@@ -97,6 +97,9 @@ LevelSelectLoop:
     ldh     [rLCDC],a
     ld      a,PLAYER_LIVES
     ld      [Player_LifeCount],a
+    xor     a
+    ld      [Player_CoinCount],a
+    ld      [Player_CoinCount+1],a
     ld      a,[Debug_MenuPos]
     jp      GM_Level
 
