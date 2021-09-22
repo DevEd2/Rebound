@@ -372,7 +372,6 @@ ProcessPlayer:
     jr      nz,.notvictory
     ld      hl,Player_MovementFlags
     set     bPlayerVictory,[hl]
-    ld      b,b
     ld      a,1
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
