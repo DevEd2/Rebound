@@ -1,7 +1,9 @@
 section "Title screen + menu RAM",wram0
 
-Title_PressStartX:  db
-Title_PressStartY:  db
+Title_PressStartX:      db
+Title_PressStartY:      db
+Title_CheatProgress:    db
+sys_EnableDebug:        db
 
 TITLE_PRESS_START_X = 52
 TITLE_PRESS_START_Y = 144
@@ -66,6 +68,8 @@ GM_TitleAndMenus:
 
     xor     a   ; MUS_MENU
     ldh     [rVBK],a
+    ld      [Title_CheatProgress],a
+    ld      [sys_EnableDebug],a
     farcall DevSound_Init
 
     ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON |LCDCF_OBJON
@@ -79,7 +83,7 @@ TitleLoop:
     bit     btnStart,a
     jr      z,.skip
 
-    call    DevSound_Stop
+    farcall DevSound_Stop
     PlaySFX menuselect
     call    PalFadeOutWhite
     ; wait for fade to finish
@@ -99,8 +103,15 @@ TitleLoop:
     xor     a
     ldh     [rLCDC],a
     
+    ld      a,[sys_EnableDebug]
+    and     a
+    jp      nz,GM_DebugMenu
+    
     ld      a,PLAYER_LIVES
     ld      [Player_LifeCount],a
+    xor     a
+    ld      [Player_CoinCount],a
+    ld      [Player_CoinCount+1],a
     
     ld      a,MapID_Plains1
     jp      GM_Level
@@ -108,7 +119,7 @@ TitleLoop:
 .skip
     bit     btnSelect,a
     jr      z,.skip2
-    call    DevSound_Stop
+    farcall DevSound_Stop
     PlaySFX menuselect
     call    PalFadeOutWhite
     ; wait for fade to finish
@@ -130,10 +141,39 @@ TitleLoop:
     
     jp      GM_SoundTest
 .skip2
+    ; process cheat
+    ld      a,[sys_EnableDebug]
+    and     a
+    jr      nz,:+
+    ld      hl,Title_DebugCombo
+    ld      a,[Title_CheatProgress]
+    add     l
+    ld      l,a
+    ld      a,[sys_btnPress]
+    and     a
+    jr      z,:+
+    cp      [hl]
+    jr      nz,.reset
+    ld      a,[Title_CheatProgress]
+    inc     a
+    ld      [Title_CheatProgress],a
+    inc     hl
+    ld      a,[hl]
+    cp      $ff
+    jr      nz,:+
+    PlaySFX 1up
+    ld      a,1
+    ld      [sys_EnableDebug],a
+    jr      :+
+.reset
+    xor     a
+    ld      [Title_CheatProgress],a
+:
+    
     call    Title_AnimateText
-
+    
     halt
-    jr      TitleLoop
+    jp      TitleLoop
     
 Title_AnimateText:
     ; "PRESS START!" text movement
@@ -200,6 +240,9 @@ Metasprite_PressStart:
     db  $00,$38,$2E,%00001000
     db  $00,$40,$2F,%00001000
 .end
+
+Title_DebugCombo:
+    db  _Up,_Up,_Down,_Down,_Right,_Left,_Up,_Down,$ff,0
     
 ; ================================================================
     

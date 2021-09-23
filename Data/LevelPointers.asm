@@ -5,6 +5,7 @@ include "Levels/\1.inc"
     levelptr    \1
 endm
 
+section fragment "Level pointers",rom0
 levelptr:       macro
 section fragment "Level pointers",rom0
 MapID_\1 = NUM_LEVELS
