@@ -52,7 +52,7 @@ bPlayerIsUnderwater         = 1
 bPlayerIsDead               = 2
 bPlayerVictory              = 3
 bPlayerHitEnemy             = 4
-bPlayerUnused5              = 5
+bPlayerBounceCancel         = 5
 bPlayerUnused6              = 6
 bPlayerDirection            = 7
 
@@ -138,6 +138,7 @@ ProcessPlayer:
     bit     bPlayerIsDead,a
     jr      z,.notdead
     
+    
     ld      a,[Player_YVelocity]
     bit     7,a ; is player falling?
     jp      nz,.moveair2
@@ -152,6 +153,20 @@ ProcessPlayer:
     jp      z,Player_Respawn
     jp      .moveair2
 .notdead
+    ld      a,[sys_btnRelease]
+    bit     btnA,a
+    jr      z,:+
+    ld      a,[Player_YVelocity]
+    bit     7,a
+    jr      z,:+
+    scf
+    rra
+    ld      [Player_YVelocity],a
+    ld      a,[Player_YVelocityS]
+    rra
+    ld      [Player_YVelocityS],a
+:
+    
     lb      bc,0,1
     ld      a,[sys_btnHold]
     bit     btnLeft,a

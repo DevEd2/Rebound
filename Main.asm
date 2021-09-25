@@ -61,36 +61,42 @@ IRQ_Joypad::    jp  DoJoypad
 ; ================================================================
 
 CheckInput:
-    ld  a,P1F_5
-    ld  [rP1],a
-    ld  a,[rP1]
-    ld  a,[rP1]
+    ld      a,[sys_btnHold]
+    ld      c,a
+    ld      a,P1F_5
+    ldh     [rP1],a
+    ldh     a,[rP1]
+    ldh     a,[rP1]
     cpl
-    and a,$f
+    and     $f
     swap    a
-    ld  b,a
+    ld      b,a
     
-    ld  a,P1F_4
-    ld  [rP1],a
-    ld  a,[rP1]
-    ld  a,[rP1]
-    ld  a,[rP1]
-    ld  a,[rP1]
-    ld  a,[rP1]
-    ld  a,[rP1]
+    ld      a,P1F_4
+    ldh     [rP1],a
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
     cpl
-    and a,$f
-    or  a,b
-    ld  b,a
+    and     $f
+    or      b
+    ld      b,a
     
-    ld  a,[sys_btnHold]
-    xor a,b
-    and a,b
-    ld  [sys_btnPress],a
-    ld  a,b
-    ld  [sys_btnHold],a
-    ld  a,P1F_5|P1F_4
-    ld  [rP1],a
+    ld      a,[sys_btnHold]
+    xor     b
+    and     b
+    ld      [sys_btnPress],a
+    ld      e,a
+    ld      a,b
+    ld      [sys_btnHold],a
+    xor     c
+    xor     e
+    ld      [sys_btnRelease],a
+    ld      a,P1F_5|P1F_4
+    ld      [rP1],a
     ret
 
 ; ================================================================
@@ -417,7 +423,7 @@ include "Engine/GameModes/GameOverScreen.asm"
 
 ; ================================
 
-include "Engine/GameModes/Gallery.asm"
+; include "Engine/GameModes/Gallery.asm"
 
 ; ================================
 

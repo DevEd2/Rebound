@@ -473,10 +473,9 @@ Collectable_ExtraLife:
 
 ; INPUT: de = animation pointer for death animation
 Monster_CheckKill:
-    ld      a,[sys_btnHold]
-    bit     btnA,a  ; is A held?
-    jr      nz,.dokill
-    jp      KillPlayer
+    ld      a,[Player_YVelocity]
+    bit     7,a ; is player falling?
+    jp      nz,KillPlayer
 
 .dokill
     ; check if player has killed an enemy this frame

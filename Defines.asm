@@ -206,6 +206,7 @@ sys_ResetTimer:         db
 sys_CurrentFrame:       db  ; incremented each frame, used for timing
 sys_btnPress:           db  ; buttons pressed this frame
 sys_btnHold:            db  ; buttons held
+sys_btnRelease:         db  ; buttons released this frame
 
 sys_VBlankFlag:         db
 sys_LCDCFlag:           db
