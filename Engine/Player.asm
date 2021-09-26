@@ -631,7 +631,6 @@ ProcessPlayer:
     
     xor     a
     ldh     [rLCDC],a
-    call    ClearScreen
     ld      a,[Engine_LevelID]
     inc     a
     cp      NUM_LEVELS
