@@ -98,72 +98,6 @@ CheckInput:
     ld      a,P1F_5|P1F_4
     ld      [rP1],a
     ret
-
-; ================================================================
-; Draw hexadecimal number A at HL
-; ================================================================
-
-DrawHex:
-    push    af
-    swap    a
-    call    .loop1
-    pop af
-.loop1
-    and $f
-    cp  $a
-    jr  c,.loop2
-    add a,$7
-.loop2
-    add a,$10
-    push    af
-    ldh a,[rSTAT]
-    and 2
-    jr  nz,@-4
-    pop af
-    ld  [hl+],a
-    ret
-    
-DrawHexDigit:
-    and $f
-    cp  $a
-    jr  c,.carry
-    add a,$7
-.carry
-    add a,$10
-    push    af
-    ldh a,[rSTAT]
-    and 2
-    jr  nz,@-4
-    pop af
-    ld  [hl+],a
-    ret
-    
-; ================================================================  
-; Draw binary number A at HL
-; ================================================================
-
-DrawBin:
-    ld  c,a
-    ld  a,l
-    add 7
-    ld  l,a
-    jr  nc,.nocarry
-    inc h
-.nocarry
-    ld  b,8
-    ld  a,c
-.loop
-    rra
-    jr  c,.one
-    ld  [hl],"0"-32
-.chkloop
-    dec hl
-    dec b
-    jr  nz,.loop
-    ret
-.one
-    ld  [hl],"1"-32
-    jr  .chkloop
     
 ; ================================================================
 ; Call HL
@@ -172,7 +106,7 @@ DrawBin:
 _CallHL:
     ld      a,h
     bit     7,a
-    ret     nz
+    jp      nz,@    ; trap
 .skip
     jp      hl
 
@@ -990,7 +924,6 @@ Hex2Dec16:
     ld      c,b
 :   ld      a,-1
 :   inc     a
-    ; add hl,bc doesn't set flags on SM83 >:C
     add     hl,bc
     jr      c,:-
     ldh     [sys_TempCounter],a
@@ -1023,6 +956,7 @@ Font::          incbin  "GFX/Font.bin.wle"
 include	"GFX/Sprites/Goony/Goony.inc"
 include "GFX/Sprites/Fish.inc"
 include "GFX/Sprites/1up.inc"
+include "GFX/Sprites/StageClear.inc"
 
 section "Particle tiles",romx
 ParticleTiles:  incbin  "GFX/Particles.2bpp.wle"

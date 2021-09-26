@@ -19,6 +19,16 @@ Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
 Player_CurrentFrame::       db  ; current animation frame being displayed
 
+StageClear_Offset1::        db
+StageClear_Offset2::        db
+StageClear_Offset3::        db
+StageClear_Offset4::        db
+StageClear_Offset5::        db
+StageClear_Delay2::         db
+StageClear_Delay3::         db
+StageClear_Delay4::         db
+StageClear_Delay5::         db
+
 PlayerRAM_End:
 ; the following are part of the player RAM but are not to be cleared after each level
 Player_CoinCount::          dw
@@ -363,9 +373,9 @@ ProcessPlayer:
     jp      c,.xMoveDone
     or      b
     ld      [Engine_CurrentScreen],a
-    jr      .xMoveDone
+    jp      .xMoveDone
 :
-    jr      nc,.xMoveDone
+    jp      nc,.xMoveDone
     ; Right edge crosses, increment current screen
     ld      a,[Engine_CurrentScreen]
     and     $30
@@ -384,17 +394,283 @@ ProcessPlayer:
     ld      e,a
     pop     af
     ld      a,e   
-    jr      nz,.notvictory
+    jp      nz,.notvictory
     ld      hl,Player_MovementFlags
     set     bPlayerVictory,[hl]
     ld      a,1
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
+    call    EndSprites
+
+    ldfar   hl,StageClearTiles
+    ld      a,$20
     ld      b,0
-:   halt
+    call    LoadSpriteTiles
+    xor     a
+    ld      [StageClear_Offset1],a
+    ld      [StageClear_Offset2],a
+    ld      [StageClear_Offset3],a
+    ld      [StageClear_Offset4],a
+    ld      [StageClear_Offset5],a
+    ld      b,a
+    ld      a,6
+    ld      [StageClear_Delay2],a
+    add     6
+    ld      [StageClear_Delay3],a
+    add     6
+    ld      [StageClear_Delay4],a
+    add     6
+    ld      [StageClear_Delay5],a
+.stageclearloop
+    halt
+    push    bc
+    
+    ; process "STAGE CLEAR" card
+    call    BeginSprites
+
+    
+    ld      a,[sys_CurrentFrame]
+    call    .getYSine
+    ldfar   hl,StageClear_Scroll1
+    ld      b,$20   ; S
+    ld      c,%00001000
+    ld      a,[StageClear_Offset1]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    call    AddSprite
+    
+    
+    ld      a,[sys_CurrentFrame]
+    add     8
+    call    .getYSine
+    ld      hl,StageClear_Scroll2
+    ld      b,$22   ; T
+    ld      c,%00001000
+    ld      a,[StageClear_Offset2]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    add     16
+    call    .getYSine
+    ld      hl,StageClear_Scroll3
+    ld      b,$24   ; A
+    ld      c,%00001000
+    ld      a,[StageClear_Offset3]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    add     24
+    call    .getYSine
+    ld      hl,StageClear_Scroll4
+    ld      b,$26   ; G
+    ld      c,%00001000
+    ld      a,[StageClear_Offset4]
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl]
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    add     32
+    call    .getYSine
+    ld      hl,StageClear_Scroll5
+    ld      b,$28   ; E
+    ld      c,%00001000
+    ld      a,[StageClear_Offset5]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    call    AddSprite
+ 
+    ld      a,[sys_CurrentFrame]
+    add     32
+    call    .getYSine2
+    ldfar   hl,StageClear_Scroll1
+    ld      b,$2e   ; R
+    ld      c,%00001000
+    ld      a,[StageClear_Offset1]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    ld      a,SCRN_X+6
+    sub     e
+    ld      e,a
+    call    AddSprite
+    
+ 
+    ld      a,[sys_CurrentFrame]
+    add     24
+    call    .getYSine2
+    ld      hl,StageClear_Scroll2
+    ld      b,$24   ; A
+    ld      c,%00001000
+    ld      a,[StageClear_Offset2]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    ld      a,SCRN_X+6
+    sub     e
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    add     16
+    call    .getYSine2
+    ld      hl,StageClear_Scroll3
+    ld      b,$28   ; E
+    ld      c,%00001000
+    ld      a,[StageClear_Offset3]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    ld      a,SCRN_X+6
+    sub     e
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    add     8
+    call    .getYSine2
+    ld      hl,StageClear_Scroll4
+    ld      b,$2c   ; L
+    ld      c,%00001000
+    ld      a,[StageClear_Offset4]
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl]
+    ld      e,a
+    ld      a,SCRN_X+6
+    sub     e
+    ld      e,a
+    call    AddSprite
+    
+    ld      a,[sys_CurrentFrame]
+    call    .getYSine2
+    ld      hl,StageClear_Scroll5
+    ld      b,$2a   ; C
+    ld      c,%00001000
+    ld      a,[StageClear_Offset5]
+    add     l
+    ld      l,a
+    ld      a,[hl]
+    ld      e,a
+    ld      a,SCRN_X+6
+    sub     e
+    ld      e,a
+    call    AddSprite
+    jr      :+
+    
+.getYSine:
+    add     a
+    add     a
+    call    GetSine
+    resbank
+    ld      a,d
+    sra     a   ; /2
+    sra     a   ; /4
+    sra     a   ; /8
+    sra     a   ; /16
+    sra     a   ; /32
+    sra     a   ; /64
+    add     56+16
+    ld      d,a
+    ret
+    
+.getYSine2:
+    add     a
+    add     a
+    call    GetSine
+    resbank
+    ld      a,e
+    sra     a   ; /2
+    sra     a   ; /4
+    sra     a   ; /8
+    sra     a   ; /16
+    sra     a   ; /32
+    sra     a   ; /64
+    add     72+16
+    ld      d,a
+    ret
+    
+    ; ========
+    
+    ; update offsets + delays
+:
+    ld      a,[StageClear_Offset1]
+    inc     a
+    cp      64
+    jr      nc,:+
+    ld      [StageClear_Offset1],a
+:
+    ld      a,[StageClear_Delay2]
+    dec     a
+    jr      nz,:+
+    ld      [StageClear_Delay2],a   
+    ld      a,[StageClear_Offset2]
+    inc     a
+    cp      64
+    jr      nc,:+
+    ld      [StageClear_Offset2],a
+    ld      a,1
+:   ld      [StageClear_Delay2],a
+    ld      a,[StageClear_Delay3]
+    dec     a
+    jr      nz,:+
+    ld      [StageClear_Delay3],a   
+    ld      a,[StageClear_Offset3]
+    inc     a
+    cp      64
+    jr      nc,:+
+    ld      [StageClear_Offset3],a
+    ld      a,1
+:   ld      [StageClear_Delay3],a
+    ld      a,[StageClear_Delay4]
+    dec     a
+    jr      nz,:+
+    ld      [StageClear_Delay4],a   
+    ld      a,[StageClear_Offset4]
+    inc     a
+    cp      64
+    jr      nc,:+
+    ld      [StageClear_Offset4],a
+    ld      a,1
+:   ld      [StageClear_Delay4],a
+    ld      a,[StageClear_Delay5]
+    dec     a
+    jr      nz,:+
+    ld      [StageClear_Delay5],a   
+    ld      a,[StageClear_Offset5]
+    inc     a
+    cp      64
+    jr      nc,:+
+    ld      [StageClear_Offset5],a
+    ld      a,1
+:   ld      [StageClear_Delay5],a
+
+    pop     bc
+
     dec     b
-    jr      nz,:-
+    jp      nz,.stageclearloop
     call	PalFadeOutWhite
     ; wait for fade to finish
 :   halt
@@ -404,6 +680,7 @@ ProcessPlayer:
     
     xor     a
     ldh     [rLCDC],a
+    call    ClearScreen
     ld      a,[Engine_LevelID]
     inc     a
     cp      NUM_LEVELS
@@ -1465,3 +1742,12 @@ AnimatePlayer:
 section "Player tiles",romx,align[8]
 PlayerTiles:
     incbin  "GFX/PlayerTiles.2bpp"
+
+; ================================
+
+section "Stage clear sequence - Scroll data",romx,align[6]
+StageClear_Scroll1: db  0,1,3,5,6,8,9,11,13,14,16,18,19,21,22,24,26,27,29,30,32,33,34,36,37,39,40,41,43,44,45,46,48,49,50,51,52,53,54,55,56,57,58,59,59,60,61,62,62,63,64,64,65,65,65,66,66,66,67,67,67,67,67,67,68
+StageClear_Scroll2: db  0,1,3,5,7,9,11,12,14,16,18,20,22,23,25,27,29,30,32,34,35,37,39,40,42,43,45,46,48,49,51,52,53,55,56,57,58,59,61,62,63,64,65,66,67,67,68,69,70,70,71,72,72,73,73,74,74,74,75,75,75,75,75,75,76
+StageClear_Scroll3: db  0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,35,37,39,41,43,44,46,48,50,51,53,54,56,57,59,60,62,63,64,66,67,68,69,70,72,73,74,75,75,76,77,78,79,79,80,80,81,81,82,82,83,83,83,83,83,83,84
+StageClear_Scroll4: db  0,2,4,6,9,11,13,15,17,20,22,24,26,28,30,33,35,37,39,41,43,45,47,49,51,52,54,56,58,60,61,63,65,66,68,69,71,72,73,75,76,77,78,80,81,82,83,84,84,85,86,87,88,88,89,89,90,90,91,91,91,91,91,91,92
+StageClear_Scroll5: db  0,2,4,7,9,12,14,17,19,21,24,26,29,31,33,35,38,40,42,44,47,49,51,53,55,57,59,61,63,65,67,68,70,72,74,75,77,78,80,81,83,84,85,87,88,89,90,91,92,93,94,94,95,96,97,97,98,98,98,99,99,99,99,99,100
