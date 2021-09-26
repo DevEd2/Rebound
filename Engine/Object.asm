@@ -525,13 +525,21 @@ Monster_CheckKill:
     add     hl,bc
     ld      [hl],1
     ; make player bounce
+    ld      a,[sys_btnHold]
+    bit     btnA,a
+    jr      nz,.highbounce
+    ld      a,high(Player_BounceHeight)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_BounceHeight)
+    ld      [Player_YVelocityS],a
+    jr      :+
+.highbounce
     ld      a,high(Player_HighBounceHeight)
     ld      [Player_YVelocity],a
     ld      a,low(Player_HighBounceHeight)
     ld      [Player_YVelocityS],a
-    ; prevent monster from respawning
-    call  KillMonster
-    ret
+:   ; prevent monster from respawning
+    jp      KillMonster
 
 section "Object System Routines",rom0
 
