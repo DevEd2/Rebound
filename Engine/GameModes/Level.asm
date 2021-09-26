@@ -34,6 +34,7 @@ GM_Level:
     call    GetLevel
     push    hl
     ; initialize variables
+    call    ClearScreen
     xor     a
     ld      [Engine_CurrentScreen],a
     ld      [Engine_LastRow],a

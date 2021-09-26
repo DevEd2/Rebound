@@ -429,130 +429,97 @@ ProcessPlayer:
     ; process "STAGE CLEAR" card
     call    BeginSprites
 
-    
     ld      a,[sys_CurrentFrame]
     call    .getYSine
     ldfar   hl,StageClear_Scroll1
-    ld      b,$20   ; S
     ld      c,%00001000
     ld      a,[StageClear_Offset1]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    call    AddSprite
-    
+    call    .getOffset1    
     
     ld      a,[sys_CurrentFrame]
     add     8
     call    .getYSine
     ld      hl,StageClear_Scroll2
     ld      b,$22   ; T
-    ld      c,%00001000
     ld      a,[StageClear_Offset2]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    call    AddSprite
+    call    .getOffset1
     
     ld      a,[sys_CurrentFrame]
     add     16
     call    .getYSine
     ld      hl,StageClear_Scroll3
     ld      b,$24   ; A
-    ld      c,%00001000
     ld      a,[StageClear_Offset3]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    call    AddSprite
+    call    .getOffset1
     
     ld      a,[sys_CurrentFrame]
     add     24
     call    .getYSine
     ld      hl,StageClear_Scroll4
     ld      b,$26   ; G
-    ld      c,%00001000
     ld      a,[StageClear_Offset4]
-    add     l
-    ld      l,a
-    jr      nc,:+
-    inc     h
-:   ld      a,[hl]
-    ld      e,a
-    call    AddSprite
+    call    .getOffset1
     
     ld      a,[sys_CurrentFrame]
     add     32
     call    .getYSine
     ld      hl,StageClear_Scroll5
     ld      b,$28   ; E
-    ld      c,%00001000
     ld      a,[StageClear_Offset5]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    call    AddSprite
+    call    .getOffset1
  
     ld      a,[sys_CurrentFrame]
     add     32
     call    .getYSine2
     ldfar   hl,StageClear_Scroll1
     ld      b,$2e   ; R
-    ld      c,%00001000
     ld      a,[StageClear_Offset1]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    ld      a,SCRN_X+6
-    sub     e
-    ld      e,a
-    call    AddSprite
+    call    .getOffset2
     
- 
     ld      a,[sys_CurrentFrame]
     add     24
     call    .getYSine2
     ld      hl,StageClear_Scroll2
     ld      b,$24   ; A
-    ld      c,%00001000
     ld      a,[StageClear_Offset2]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    ld      a,SCRN_X+6
-    sub     e
-    ld      e,a
-    call    AddSprite
+    call    .getOffset2
     
     ld      a,[sys_CurrentFrame]
     add     16
     call    .getYSine2
     ld      hl,StageClear_Scroll3
     ld      b,$28   ; E
-    ld      c,%00001000
     ld      a,[StageClear_Offset3]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    ld      a,SCRN_X+6
-    sub     e
-    ld      e,a
-    call    AddSprite
-    
+    call    .getOffset2
+        
     ld      a,[sys_CurrentFrame]
     add     8
     call    .getYSine2
     ld      hl,StageClear_Scroll4
     ld      b,$2c   ; L
-    ld      c,%00001000
     ld      a,[StageClear_Offset4]
+    call    .getOffset2
+    
+    ld      a,[sys_CurrentFrame]
+    call    .getYSine2
+    ld      hl,StageClear_Scroll5
+    ld      b,$2a   ; C
+    ld      a,[StageClear_Offset5]
+    call    .getOffset2
+    jr      :+
+
+.getOffset1
+    ld      c,%00001000
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl]
+    ld      e,a
+    jp      AddSprite
+    
+.getOffset2
+    ld      c,%00001000
     add     l
     ld      l,a
     jr      nc,:+
@@ -562,23 +529,7 @@ ProcessPlayer:
     ld      a,SCRN_X+6
     sub     e
     ld      e,a
-    call    AddSprite
-    
-    ld      a,[sys_CurrentFrame]
-    call    .getYSine2
-    ld      hl,StageClear_Scroll5
-    ld      b,$2a   ; C
-    ld      c,%00001000
-    ld      a,[StageClear_Offset5]
-    add     l
-    ld      l,a
-    ld      a,[hl]
-    ld      e,a
-    ld      a,SCRN_X+6
-    sub     e
-    ld      e,a
-    call    AddSprite
-    jr      :+
+    jp      AddSprite
     
 .getYSine:
     add     a

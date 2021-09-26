@@ -456,7 +456,9 @@ SoundTest_CursorOscillationTable:
 ; a = song ID
 ; b = offset
 SoundTest_DrawSongNameChar:
-    ld      de,SoundTest_SongNames
+    push    bc
+    ldfar   de,SoundTest_SongNames
+    pop     bc
     ld      l,a
     ld      h,0
     add     hl,hl   ; x2
@@ -489,7 +491,7 @@ SoundTest_DrawSongNameChar:
 ; a = song ID
 SoundTest_DrawSongName:
     ld      de,$9a00
-    ld      hl,SoundTest_SongNames
+    ldfar   hl,SoundTest_SongNames
     add     a   ; x2
     add     a   ; x4
     add     a   ; x8
@@ -592,6 +594,22 @@ SoundTest_RunMarquee:
     ld      a,[SoundTest_SongID]
     jp      SoundTest_DrawSongNameChar
 
+; ================
+
+section "Sound test - Marquee scroll table",romx,align[8]
+
+SoundTest_MarqueeScrollTable::
+    db      $00,$00,$00,$00,$00,$00,$01,$01,$02,$03,$03,$04,$05,$06,$07,$08
+    db      $09,$0A,$0C,$0D,$0F,$10,$12,$13,$15,$17,$19,$1B,$1D,$1F,$21,$23
+    db      $25,$27,$2A,$2C,$2E,$31,$33,$36,$38,$3B,$3E,$40,$43,$46,$49,$4C
+    db      $4F,$51,$54,$57,$5A,$5D,$60,$63,$67,$6A,$6D,$70,$73,$76,$79,$7C
+    db      $80,$83,$86,$89,$8C,$8F,$92,$95,$98,$9C,$9F,$A2,$A5,$A8,$AB,$AE
+    db      $B0,$B3,$B6,$B9,$BC,$BF,$C1,$C4,$C7,$C9,$CC,$CE,$D1,$D3,$D5,$D8
+    db      $DA,$DC,$DE,$E0,$E2,$E4,$E6,$E8,$EA,$EC,$ED,$EF,$F0,$F2,$F3,$F5
+    db      $F6,$F7,$F8,$F9,$FA,$FB,$FC,$FC,$FD,$FE,$FE,$FF,$FF,$FF,$FF,$FF
+
+section "Sound test - Song names",romx
+
 SoundTest_SongNames:
 ;        -##################-------------
     db  "     Main Theme                 "
@@ -609,20 +627,6 @@ SoundTest_SongNames:
     db  "     Staff Roll                 "
 ;        -##################-------------
 .end
-
-; ================
-
-section "Sound test - Marquee scroll table",romx,align[8]
-
-SoundTest_MarqueeScrollTable::
-    db      $00,$00,$00,$00,$00,$00,$01,$01,$02,$03,$03,$04,$05,$06,$07,$08
-    db      $09,$0A,$0C,$0D,$0F,$10,$12,$13,$15,$17,$19,$1B,$1D,$1F,$21,$23
-    db      $25,$27,$2A,$2C,$2E,$31,$33,$36,$38,$3B,$3E,$40,$43,$46,$49,$4C
-    db      $4F,$51,$54,$57,$5A,$5D,$60,$63,$67,$6A,$6D,$70,$73,$76,$79,$7C
-    db      $80,$83,$86,$89,$8C,$8F,$92,$95,$98,$9C,$9F,$A2,$A5,$A8,$AB,$AE
-    db      $B0,$B3,$B6,$B9,$BC,$BF,$C1,$C4,$C7,$C9,$CC,$CE,$D1,$D3,$D5,$D8
-    db      $DA,$DC,$DE,$E0,$E2,$E4,$E6,$E8,$EA,$EC,$ED,$EF,$F0,$F2,$F3,$F5
-    db      $F6,$F7,$F8,$F9,$FA,$FB,$FC,$FC,$FD,$FE,$FE,$FF,$FF,$FF,$FF,$FF
 
 ; ================
 
