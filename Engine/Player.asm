@@ -402,6 +402,7 @@ ProcessPlayer:
     ld      a,MUS_STAGE_CLEAR
     farcall DS_Init
     call    EndSprites
+    
 
     ldfar   hl,StageClearTiles
     ld      a,$20
@@ -432,7 +433,7 @@ ProcessPlayer:
     ld      a,[sys_CurrentFrame]
     call    .getYSine
     ldfar   hl,StageClear_Scroll1
-    ld      c,%00001000
+    ld      b,$20   ; S
     ld      a,[StageClear_Offset1]
     call    .getOffset1    
     
@@ -506,7 +507,7 @@ ProcessPlayer:
     ld      b,$2a   ; C
     ld      a,[StageClear_Offset5]
     call    .getOffset2
-    jr      :+
+    jr      .setoffsets
 
 .getOffset1
     ld      c,%00001000
@@ -566,7 +567,7 @@ ProcessPlayer:
     ; ========
     
     ; update offsets + delays
-:
+.setoffsets
     ld      a,[StageClear_Offset1]
     inc     a
     cp      64
