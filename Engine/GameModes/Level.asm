@@ -62,7 +62,7 @@ GM_Level:
     pop     hl
     call    LoadMap
     
-    ld      a,$80
+    ld      a,high(_VRAM)
     ld      [Engine_ParallaxDest],a
     
     ; initialize camera
@@ -240,7 +240,7 @@ LevelLoop::
     ld      a,$01
     
 .dohoriz
-    call    Parallax_ShiftHorizontal
+    farcall Parallax_ShiftHorizontal
 
 .skipX
     pop     de
@@ -251,7 +251,7 @@ LevelLoop::
     cpl
     inc     a
     ld      c,1
-    call    Parallax_ShiftVertical
+    farcall Parallax_ShiftVertical
 .skipY
 
 .nocamera

@@ -12,7 +12,7 @@ include "Defines.asm"
 ; Reset vectors
 ; =============
 section "Reset $00",rom0[$00]
-Trap00::        jp  Trap00
+Trap00::        jr  @
     
 section "Reset $08",rom0[$08]
 FillRAM::       jp  _FillRAM
@@ -30,7 +30,7 @@ section "Reset $30",rom0[$30]
 DoOAMDMA::      jp  $ff80
 
 section "Reset $38",rom0[$38]
-Trap::          jr  Trap
+Trap::          jr  @
     
     
 ; ==================
@@ -55,49 +55,6 @@ IRQ_Joypad::    jp  DoJoypad
 ; ===============
 ; System routines
 ; ===============
-
-; ================================================================
-; Check joypad input
-; ================================================================
-
-CheckInput:
-    ld      a,[sys_btnHold]
-    ld      c,a
-    ld      a,P1F_5
-    ldh     [rP1],a
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    cpl
-    and     $f
-    swap    a
-    ld      b,a
-    
-    ld      a,P1F_4
-    ldh     [rP1],a
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    ldh     a,[rP1]
-    cpl
-    and     $f
-    or      b
-    ld      b,a
-    
-    ld      a,[sys_btnHold]
-    xor     b
-    and     b
-    ld      [sys_btnPress],a
-    ld      e,a
-    ld      a,b
-    ld      [sys_btnHold],a
-    xor     c
-    xor     e
-    ld      [sys_btnRelease],a
-    ld      a,P1F_5|P1F_4
-    ld      [rP1],a
-    ret
     
 ; ================================================================
 ; Call HL
@@ -106,7 +63,7 @@ CheckInput:
 _CallHL:
     ld      a,h
     bit     7,a
-    jp      nz,@    ; trap
+    jr      nz,@    ; trap
 .skip
     jp      hl
 
@@ -141,12 +98,13 @@ section fragment "Program code",rom0[$150]
 ProgramStart::
     di
     ld      sp,$d000
+    ; preserve A and B for later to determine console type
     push    bc
     push    af
 
-    ; wait for VBlank
+    ; wait for VBlank before disabling LCD
     ld      hl,rLY
-    ld      a,144
+    ld      a,SCRN_Y
 .wait
     cp      [hl]
     jr      nz,.wait
@@ -159,12 +117,7 @@ ProgramStart::
 
     farcall DevSound_Stop   ; prevent glitch music from playing
     
-; init memory
-;   ld      hl,$c000    ; start of WRAM
-;   ld      bc,$1ffa    ; don't clear stack
-;   xor     a
-;   rst     FillRAM
-        
+    ; clear HRAM    
     ld      bc,$7f80
     xor     a
 .loop
@@ -187,8 +140,8 @@ ProgramStart::
     add     b       ; b = 1 if on GBA
     ld      [sys_GBType],a
     ; spoof check!
-    ld      hl,$8000
-    ld      a,$56
+    ; makes use of a register that only exists in CGB mode (namely the VRAM bank register)
+    ld      hl,_VRAM
     ld      [hl],a
     ld      b,a
     ld      a,1
@@ -198,18 +151,14 @@ ProgramStart::
     jr      z,GBCOnlyScreen
     xor     a
     ld      [rVBK],a
-    ; emu check!
-    ; layer 1: echo RAM
-    ld      a,$56
-    ld      [sys_EmuCheck],a
-    ld      b,a
-    ld      a,[sys_EmuCheck+$2000]  ; read from echo RAM
-    cp      b
-    jp      z,SkipGBCScreen
-EmuScreen:
-    ; since we're on an emulator we don't need to wait for VBlank before disabling the LCD  
-    xor     a
-    ldh     [rLCDC],a   ; disable LCD
+    ; emulator check!
+    ; uses echo RAM - any write to WRAM will reflect in echo RAM and vice versa
+    ld      a,b
+    ld      [sys_EmuCheck],a        ; store value
+    ld      a,[sys_EmuCheck+$2000]  ; read value back from echo RAM
+    cp      b                       ; do they match?
+    jp      z,SkipGBCScreen         ; if yes, emulator check passed
+EmuScreen:                          ; otherwise, emulator check failed
     ldfar   hl,Pal_DebugScreen
     xor     a
     call    LoadPal
@@ -227,8 +176,7 @@ EmuScreen:
     ldh     [rIE],a
     ei
 EmuLoop:
-    halt
-    jr      EmuLoop
+    jr      @   ; infinite loop
 GBCOnlyScreen:
     xor     a
     ld      [sys_GBType],a
@@ -247,12 +195,12 @@ GBCOnlyScreen:
     ldh     [rIE],a
     
 GBCOnlyLoop:
-    jr      GBCOnlyLoop
+    jr      @   ; infinite loop
 
 section	"DMG and emulator lockout screen text",romx
 GBCOnlyText:    ; 20x18 char tilemap
     db  "                    "
-    db  "                    "
+    db  "    - REBOUND! -    "
     db  "                    "
     db  "   THIS GAME WILL   "
     db  "   ONLY WORK ON A   "
@@ -271,6 +219,7 @@ GBCOnlyText:    ; 20x18 char tilemap
     db  "                    "
 EmuText:
     db  "                    "
+    db  "    - REBOUND! -    "
     db  "                    "
     db  "                    "
     db  "                    "
@@ -283,7 +232,6 @@ EmuText:
     db  " SUCH AS SAMEBOY OR "
     db  "  BGB TO PLAY THIS  "
     db  "        GAME.       "
-    db  "                    "
     db  "                    "
     db  "                    "
     db  "                    "
@@ -314,6 +262,7 @@ SkipGBCScreen:
     if      !DebugMode
         jp  GM_SplashScreens
     endc
+    ; if debug mode is enabled, fall through to GM_DebugMenu
     
 ; ================================
 
@@ -377,18 +326,54 @@ DoVBlank::
     
     call    UpdatePalettes
     ld      a,[sys_PauseGame]
-    and     a
-    jr      nz,:+
+    and     a                   ; is game paused?
+    jr      nz,:+               ; if yes, skip frame counter tick
     ld  a,[sys_CurrentFrame]
     inc a
-    ld  [sys_CurrentFrame],a    ; increment current frame
+    ld  [sys_CurrentFrame],a    ; tick frame counter
 :
-    call    CheckInput
+    ; check input
+    ld      a,[sys_btnHold]
+    ld      c,a
+    ld      a,P1F_5
+    ldh     [rP1],a
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    cpl
+    and     $f
+    swap    a
+    ld      b,a
+    
+    ld      a,P1F_4
+    ldh     [rP1],a
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    ldh     a,[rP1]
+    cpl
+    and     $f
+    or      b
+    ld      b,a
+    
+    ld      a,[sys_btnHold]
+    xor     b
+    and     b
+    ld      [sys_btnPress],a    ; store buttons pressed this frame
+    ld      e,a
+    ld      a,b
+    ld      [sys_btnHold],a     ; store held buttons
+    xor     c
+    xor     e
+    ld      [sys_btnRelease],a  ; store buttons released this frame
+    ld      a,P1F_5|P1F_4
+    ld      [rP1],a
     
 :   ; setup HDMA for parallax GFX transfer
     ld      a,[sys_EnableHDMA]
     and     a
-    jr      z,.skiphdma
+    jr      z,.skiphdma ; skip ahead if HDMA is disabled
     xor     a
     ldh     [rVBK],a
     ld      a,high(Engine_ParallaxBuffer)
@@ -402,7 +387,7 @@ DoVBlank::
     ld      a,%00001111
     ldh     [rHDMA5],a  ; HDMA length + type (length 256, hblank wait)
 .skiphdma
-
+    ; set camera position
     ld      a,[Engine_CameraX]
     ldh     [rSCX],a
     ld      a,[Engine_CameraY]
@@ -411,7 +396,7 @@ DoVBlank::
 
     ; A+B+Start+Select restart sequence
     ld      a,[sys_btnHold]
-    cp      _A+_B+_Start+_Select    ; is A+B+Start+Select pressed
+    cp      _A+_B+_Start+_Select    ; is A+B+Start+Select pressed?
     jr      nz,.noreset             ; if not, skip
     ld      a,[sys_ResetTimer]      ; get reset timer
     inc     a
@@ -443,42 +428,45 @@ DoVBlank::
     ld      [sys_ResetTimer],a      ; reset timer
 .continue                           ; done
     
-    ; don't update music if game is paused
+    ; sound update
     ld      a,[sys_PauseGame]
     and     a
-    jr      nz,:+
+    jr      nz,:+                   ; don't update music if game is paused
     farcall DevSound_Play
-:   call    VGMSFX_Update
+:   call    VGMSFX_Update           ; *do* update SFX while game is paused (for pause sound)
    
-    call    Pal_DoFade
+    call    Pal_DoFade              ; do palette fading
 
     pop     hl
     pop     de
     pop     bc
     pop     af
-    reti
-    
+    reti                            ; done!
+   
 DoStat::
     push    af
     ld      a,1
     ld      [sys_LCDCFlag],a
     pop     af
     reti
-    
+
+; Currently not used
 DoTimer::
     push    af
     ld      a,1
     ld      [sys_TimerFlag],a
     pop     af
     reti
-    
+
+; Currently not used
 DoSerial::
     push    af
     ld      a,1
     ld      [sys_SerialFlag],a
     pop     af
     reti
-    
+
+; Currently not used
 DoJoypad::
     push    af
     ld      a,1
@@ -524,7 +512,7 @@ _WaitLCDC::
     pop     af
     ret
 
-; Wait for timer interrupt.
+; Wait for timer interrupt. (Currently unused)
 _WaitTimer::
     push    af
     ldh     a,[rIE]
@@ -541,7 +529,7 @@ _WaitTimer::
     pop     af
     ret
 
-; Wait for serial transfer interrupt.
+; Wait for serial transfer interrupt. (Currently unused)
 _WaitSerial::
     push    af
     ldh     a,[rIE]
@@ -558,8 +546,8 @@ _WaitSerial::
     pop     af
     ret
 
-; Wait for joypad interrupt.
-_WaitJoypad:
+; Wait for joypad interrupt. (Currently unused)
+_WaitJoypad: 
     push    af
     ldh     a,[rIE]
     bit     4,a
@@ -579,7 +567,7 @@ _WaitJoypad:
 ; Graphics routines
 ; =================
 
-include "Engine/PerFade.asm"
+include "Engine/PerFade.asm"    ; Palette routines
 
 ; =========
 
@@ -590,8 +578,8 @@ ClearScreen:
     ; clear VRAM bank 0
     xor     a
     ldh     [rVBK],a
-    ld      hl,$8000
-    ld      bc,$2000
+    ld      hl,_VRAM        ; clear from start of VRAM...
+    ld      bc,_SRAM-_VRAM   ; ...to end of VRAM.
     rst     FillRAM
     
     ; clear VRAM bank 1
@@ -599,8 +587,8 @@ ClearScreen:
     ldh     [rVBK],a
     ldh     [sys_TempSVBK],a
     xor     a
-    ld      hl,$8000
-    ld      bc,$2000
+    ld      hl,_VRAM        ; clear from start of VRAM...
+    ld      bc,_SRAM-_VRAM   ; ...to end of VRAM.
     rst     FillRAM
     xor     a
     ldh     [rVBK],a
@@ -633,8 +621,7 @@ ClearScreen:
 ; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
 LoadTilemapScreen:
     ld  de,_SCRN0
-    ld  b,$12
-    ld  c,$14
+    lb  bc,$12,$14
 .loop
     ld  a,[hl+]
     ld  [de],a
@@ -643,7 +630,7 @@ LoadTilemapScreen:
     jr  nz,.loop
     ld  c,$14
     ld  a,e
-    add $C
+    add $c
     jr  nc,.continue
     inc d
 .continue
@@ -658,8 +645,7 @@ LoadTilemapScreen:
 ; RESTRICTIONS: Must run during VBlank or while VRAM is accessible, otherwise written data will be corrupted
 LoadTilemapText:
     ld  de,_SCRN0
-    ld  b,$12
-    ld  c,$14
+    lb  bc,$12,$14
 .loop
     ld  a,[hl+]
     sub " "
@@ -684,8 +670,8 @@ LoadTilemapText:
 PrintString:
     WaitForVRAM
     ld      a,[hl+]
-    and     a
-    ret     z
+    and     a           ; terminator byte reached?
+    ret     z           ; if yes, return
     sub     " "
     ld      [de],a
     inc     de
@@ -696,6 +682,7 @@ PrintString:
 ; ============
 
 ; Copies OAM DMA routine to HRAM.
+; Called once during startup sequence.
 ; TRASHES: a, bc, hl
 CopyDMARoutine::
     ld  bc,low(OAM_DMA) + ((_OAM_DMA_End-_OAM_DMA) << 8)
@@ -708,7 +695,8 @@ CopyDMARoutine::
     jr  nz,.loop
     ret
 
-; OAM DMA routine. This is copied to HRAM by CopyDMARoutine and run from there.
+; OAM DMA routine.
+; This is copied to HRAM by CopyDMARoutine and run from there.
 ; TRASHES: a
 _OAM_DMA::
     ld  a,high(OAMBuffer)
@@ -720,7 +708,7 @@ _OAM_DMA::
     ret
 _OAM_DMA_End:
 
-include "Engine/Sprite.asm"
+include "Engine/Sprite.asm" ; Sprite routines
 
 ; =============
 ; Misc routines
@@ -735,10 +723,10 @@ include "Engine/Sprite.asm"
 _Bankswitch:
     push    af
     ldh     a,[sys_CurrentBank]
-    ldh     [sys_LastBank],a
+    ldh     [sys_LastBank],a        ; preserve old ROM bank
     ld      a,b
-    ldh     [sys_CurrentBank],a
-    ld      [rROMB0],a
+    ldh     [sys_CurrentBank],a     ; set new ROM bank
+    ld      [rROMB0],a              ; perform bankswitch
     pop     af
     ret
     
@@ -771,6 +759,8 @@ _FillRAMSmall::
     dec b
     jr  nz,.loop
     ret
+
+; ================
     
 ; Copy up to 65536 bytes to RAM.
 ; INPUT:   hl = source
@@ -786,8 +776,6 @@ _CopyRAM::
     or  c
     jr  nz,_CopyRAM
     ret
-
-; ================
     
 ; Copy up to 256 bytes to RAM.
 ; INPUT:   hl = source
@@ -823,6 +811,22 @@ include "Engine/WLE_Decode.asm"
 ; Misc routines
 ; =============
 
+; Calculate a sine wave.
+; INPUT:    a = angle
+; OUTPUT:   d = cosine
+;           e = sine
+; TRASHES:  bc, hl, flags, ROM bank
+GetSine:
+	ldfar	hl,SineTable
+	ld		c,a
+	ld		b,0
+	add		hl,bc
+	ld		d,[hl]
+    ld      hl,CosineTable
+	add		hl,bc
+	ld		e,[hl]
+	ret
+
 section "Sine table",romx
 SineTable:
     db         0,   3,   6,   9,  12,  16,  19,  22,  25,  28,  31,  34,  37,  40,  43,  46
@@ -854,22 +858,6 @@ include "Engine/Metatile.asm"
 include "Engine/Parallax.asm"
 include "Engine/Player.asm"
 include "Engine/Object.asm"
-
-; Calculate a sine wave.
-; INPUT:    a = angle
-; OUTPUT:   d = cosine
-;           e = sine
-; TRASHES:  bc, hl, flags, ROM bank
-GetSine:
-	ldfar	hl,SineTable
-	ld		c,a
-	ld		b,0
-	add		hl,bc
-	ld		d,[hl]
-    ld      hl,CosineTable
-	add		hl,bc
-	ld		e,[hl]
-	ret
 	
 ; 16-bit Compare
 ; INPUT:   bc = value 1
@@ -892,9 +880,9 @@ Compare16:
 Hex2Dec8:
     ld      hl,sys_StringBuffer
     ld      c,-100
-    call    :+
+    call    :+      ; hundreds place
     ld      c,-10
-    call    :+
+    call    :+      ; tens place
     ld      c,-1
 :   ld      b,-1
 :   inc     b
@@ -914,34 +902,35 @@ Hex2Dec8:
 Hex2Dec16:
     ld      de,sys_StringBuffer
     ld      bc,-10000
-    call    :+
+    call    :+          ; ten-thousands place
     ld      bc,-1000
-    call    :+
+    call    :+          ; thousands place
     ld      bc,-100
-    call    :+
+    call    :+          ; hundreds place
     ld      bc,-10
-    call    :+
+    call    :+          ; tens place
     ld      c,b
 :   ld      a,-1
 :   inc     a
     add     hl,bc
     jr      c,:-
     ldh     [sys_TempCounter],a
-    ; equivalent to sbc hl,bc, thanks to ISSOtm for this!
+    ; equivalent to sbc hl,bc - thanks to ISSOtm for this!
     ld      a,l
     sub     c ; or `sbc c` for `sbc hl, bc` instead of `sub hl, bc`
     ld      l,a
     ld      a,h
     sbc     b
     ld      h,a
+    ; end of sbc hl,bc
     ldh     a,[sys_TempCounter]
     ld      [de],a
     inc     de
     ret
     
-; ==========
-; Sound data
-; ==========
+; ==============
+; Sound routines
+; ==============
 
 include "Audio/VGMSFX.asm"
 include "Audio/DevSound.asm"

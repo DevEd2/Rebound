@@ -6,7 +6,7 @@ Engine_ParallaxTemp2:		db
 Engine_ParallaxTemp3:		db
 Engine_ParallaxTemp4:		db
 
-section "Parallax routines",rom0
+section "Parallax routines",romx
 ; INPUT: a = amount to shift by
 Parallax_ShiftHorizontal::
 	push	de

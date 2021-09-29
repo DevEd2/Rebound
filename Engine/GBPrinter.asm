@@ -39,7 +39,6 @@ GBPrinter_TestPrint:
     call    GBPrinter_Detect
     ret     nz
     ; TODO
-    ld      b,b
     ret
 
 ; INPUT:  A = data
