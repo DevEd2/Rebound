@@ -514,6 +514,7 @@ Level_TransitionUp:
     ld      a,[Engine_CameraY]
     sub     SCRN_Y/16
     ld      [Engine_CameraY],a
+    call    TransitionUpdateMonsters
     call    BeginSprites
     call    DrawPlayer
     call    RenderMonsters
@@ -570,6 +571,7 @@ Level_TransitionDown:
     ld      a,[Engine_CameraY]
     add     SCRN_Y/16
     ld      [Engine_CameraY],a
+    call    TransitionUpdateMonsters
     call    BeginSprites
     call    DrawPlayer
     call    RenderMonsters

@@ -2,9 +2,6 @@
 ; Object System
 ; ==============
 
-; TODO
-; - Object Behaviors
-
 section "Object Memory",wram0
 
 MONSTER_COUNT               equ 16  ; maximum number of monster slots
@@ -1506,6 +1503,33 @@ UpdateMonsters:
   jp  z,.updateLoop
   ldh a,[Temp0]
   ld  [Engine_CurrentScreen],a
+  ret
+  
+TransitionUpdateMonsters:
+  ld  b,0
+  ld  c,MONSTER_COUNT-1
+  ld  a,[Engine_CameraY]
+  ld  d,a
+.updateLoop:
+  ld  hl,Monster_ID
+  add hl,bc
+  ld  a,[hl]
+  or  a
+  jr  z,.nextMonster
+  ld  hl,Monster_YPosition
+  add hl,bc
+  ld  a,[hl]
+  cp  d
+  jr  c,.removeMonster
+  sub SCRN_Y
+  cp  d
+  jr  c,.nextMonster
+.removeMonster:
+  call  DeleteMonster
+.nextMonster:
+  dec c
+  bit 7,c
+  jr  nz,.updateLoop
   ret
   
 ; Update Monster animations
