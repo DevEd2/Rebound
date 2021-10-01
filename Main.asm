@@ -825,6 +825,7 @@ GetSine:
     ld      hl,CosineTable
 	add		hl,bc
 	ld		e,[hl]
+    resbank
 	ret
 
 section "Sine table",romx
