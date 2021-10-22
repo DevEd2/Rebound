@@ -1,5 +1,5 @@
 # ReboundGB
-Bouncing ball game for GBCompo 2021.
+Bouncing ball game for Game Boy Color.
 
 # Dependencies
 - RGBDS
