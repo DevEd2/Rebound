@@ -1302,9 +1302,7 @@ DrawPlayer:
     ld      a,1
     ldh     [rVBK],a
 .loadtiles
-    ldh     a,[rSTAT]
-    and     2
-    jr      nz,.loadtiles
+    WaitForVRAM
     ld      a,[hl+]
     ld      [de],a
     inc     e

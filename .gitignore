@@ -1,6 +1,7 @@
 # ROMs
 *.gb
 *.gbc
+*.pocket
 
 # emulator trashes
 *.sgm

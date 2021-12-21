@@ -98,7 +98,7 @@ endm
 ; Wait for VRAM accessibility.
 WaitForVRAM:            macro
     ldh     a,[rSTAT]
-    and     2
+    and     STATF_BUSY
     jr      nz,@-4
 endm
     

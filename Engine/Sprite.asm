@@ -93,9 +93,7 @@ LoadSpriteTiles:
   ld  a,1
   ldh [rVBK],a
 .loadLoop:
-  ldh a,[rSTAT]
-  and 2
-  jr  nz,.loadLoop
+  WaitForVRAM
   ld  a,[hl+]
   ld  [de],a
   inc de

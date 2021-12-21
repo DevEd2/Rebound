@@ -110,6 +110,7 @@ ProgramStart::
     jr      nz,.wait
     xor     a
     ldh     [rLCDC],a   ; disable LCD
+    
     ld      [sys_PauseGame],a
     ld      a,60
     ld      [sys_SleepModeTimer],a
@@ -163,39 +164,44 @@ EmuScreen:                          ; otherwise, emulator check failed
     xor     a
     call    LoadPal
     call    CopyPalettes
-
+    
     ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
+    
     ldfar   hl,EmuText
     call    LoadTilemapText
 
-    ld      a,%10010001
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
     ei
-EmuLoop:
-    jr      @   ; infinite loop
+
+:   halt    
+    jr      :-          ; infinite loop
+
 GBCOnlyScreen:
     xor     a
     ld      [sys_GBType],a
     
     ; GBC only screen
     SetDMGPal   rBGP,0,3,3,0
+    
     ldfar   hl,Font
     ld      de,$8000
     call    DecodeWLE
+    
     ldfar   hl,GBCOnlyText
     call    LoadTilemapText
     
-    ld      a,%10010001
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
     ldh     [rLCDC],a
     ld      a,IEF_VBLANK
     ldh     [rIE],a
-    
-GBCOnlyLoop:
-    jr      @   ; infinite loop
+
+:   halt    
+    jr      :-          ; infinite loop
 
 section	"DMG and emulator lockout screen text",romx
 GBCOnlyText:    ; 20x18 char tilemap
@@ -236,6 +242,7 @@ EmuText:
     db  "                    "
     db  "                    "
     db  "                    "
+endc
 
 section fragment "Program code",rom0
 
