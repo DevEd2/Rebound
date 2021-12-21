@@ -12,7 +12,7 @@ rgblink -p 255 -o %PROJECTNAME%.pocket -n %PROJECTNAME%.sym %PROJECTNAME%.obj
 if errorlevel 1 goto :BuildError
 
 echo Fixing...
-rgbfix -v -p 255 %PROJECTNAME%.pocket
+rgbfix -f hg -p 255 %PROJECTNAME%.pocket
 
 echo Cleaning up...
 del %PROJECTNAME%.obj

@@ -76,7 +76,14 @@ section "ROM header",rom0[$100]
 EntryPoint::
     nop
     jp  ProgramStart
+if !def(BUILD_POCKET)
 NintendoLogo:   ds  48,0                        ; Nintendo logo bitmap (handled by post-linking tool)
+else
+AnalogueLogo:   
+    db      $01,$10,$CE,$EF,$00,$00,$44,$AA,$00,$74,$00,$18,$11,$95,$00,$34
+    db      $00,$1A,$00,$D5,$00,$22,$00,$69,$6F,$F6,$F7,$73,$09,$90,$E1,$10
+    db      $44,$40,$9A,$90,$D5,$D0,$44,$30,$A9,$21,$5D,$48,$22,$E0,$F8,$60
+endc
 ROMTitle:       dbp "REBOUND",15,0              ; ROM title (15 bytes)
 GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80 = DMG/GBC, $C0 = GBC only)
 NewLicenseCode: db  "56"                        ; new license code (2 bytes)
@@ -242,7 +249,6 @@ EmuText:
     db  "                    "
     db  "                    "
     db  "                    "
-endc
 
 section fragment "Program code",rom0
 
