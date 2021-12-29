@@ -1516,11 +1516,11 @@ C_SetAnim   equ $80
 ; Animation macros
 ; ================
 
-NUM_ANIMS   set 0   ; no touchy!
+NUM_ANIMS       =   0   ; no touchy!
 
 defanim:        macro
 AnimID_\1       equ NUM_ANIMS
-NUM_ANIMS       set NUM_ANIMS+1
+NUM_ANIMS       =   NUM_ANIMS+1
 Anim_\1:
     endm
 

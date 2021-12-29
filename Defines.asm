@@ -2,9 +2,6 @@
 ; Project defines
 ; ===============
 
-if  !def(definesIncluded)
-definesIncluded set 1
-
 ; Hardware defines
 include "hardware.inc"
 
@@ -241,5 +238,3 @@ sys_TempBank2:          db
 sys_TempBank3:          db
 sys_TempCounter:        db
 sys_TempSVBK:           db
-
-endc

@@ -27,9 +27,6 @@
 ; DevSound defines
 ; ================================================================
 
-if !def(incDSDefines)
-incDSDefines    set 1
-
 ; ================================================================
 
 ; Note values
@@ -309,8 +306,6 @@ DSVarsEnd:
 arp_Buffer::            ds  8
 
 DS_RAMEnd:
-
-endc
 
 ; =====================
 
