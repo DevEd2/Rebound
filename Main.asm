@@ -3,7 +3,7 @@
 ; =======================
 
 ; If set to 1, enable debugging features.
-DebugMode   = 0
+DebugMode   = 1
 
 ; Defines
 include "Defines.asm"
@@ -274,8 +274,9 @@ SkipGBCScreen:
     call    DoubleSpeed
     if      !DebugMode
         jp  GM_SplashScreens
+    else
+        jp  GM_DebugMenu
     endc
-    ; if debug mode is enabled, fall through to GM_DebugMenu
     
 ; ================================
 
@@ -399,6 +400,26 @@ DoVBlank::
     ldh     [rHDMA4],a  ; HDMA dest low
     ld      a,%00001111
     ldh     [rHDMA5],a  ; HDMA length + type (length 256, hblank wait)
+    ; wait for transfer to finish
+:   ldh     a,[rHDMA5]
+    inc     a           ; rHDMA5 = $FF? (indicates HDMA transfer is finished)
+    jr      nz,:-       ; if not, wait until it is
+    ; setup HDMA for player GFX transfer    
+    ld      a,[sys_HDMABank]
+    ld      b,a
+    call    _Bankswitch
+    ld      a,1
+    ldh     [rVBK],a
+    ld      a,[sys_HDMA1]
+    ldh     [rHDMA1],a
+    ld      a,[sys_HDMA2]
+    ldh     [rHDMA2],a
+    ld      a,[sys_HDMA3]
+    ldh     [rHDMA3],a
+    ld      a,[sys_HDMA4]
+    ldh     [rHDMA4],a
+    ld      a,[sys_HDMA5]
+    ldh     [rHDMA5],a
 .skiphdma
     ; set camera position
     ld      a,[Engine_CameraX]

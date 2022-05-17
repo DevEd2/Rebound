@@ -238,3 +238,9 @@ sys_TempBank2:          db
 sys_TempBank3:          db
 sys_TempCounter:        db
 sys_TempSVBK:           db
+sys_HDMA1:              db
+sys_HDMA2:              db
+sys_HDMA3:              db
+sys_HDMA4:              db
+sys_HDMA5:              db
+sys_HDMABank:           db

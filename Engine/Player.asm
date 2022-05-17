@@ -1286,6 +1286,7 @@ Player_AccelerateRight:
     
 DrawPlayer:
     ; load correct frame in player VRAM area
+    ld      b,b
     ld      a,[Player_CurrentFrame]
     add     a
     add     a
@@ -1295,21 +1296,20 @@ DrawPlayer:
     add     hl,hl   ; x4
     add     hl,hl   ; x8
     add     hl,hl   ; x16
-    ldfar   de,PlayerTiles
+    ld      de,PlayerTiles
     add     hl,de
-    ld      b,$40
-    ld      de,$8000
-    ld      a,1
-    ldh     [rVBK],a
-.loadtiles
-    WaitForVRAM
-    ld      a,[hl+]
-    ld      [de],a
-    inc     e
-    dec     b
-    jr      nz,.loadtiles
+    ld      a,h
+    ldh     [sys_HDMA1],a
+    ld      a,l
+    ldh     [sys_HDMA2],a
+    ld      a,$80
+    ldh     [sys_HDMA3],a
     xor     a
-    ldh     [rVBK],a
+    ldh     [sys_HDMA4],a
+    ld      a,3
+    ldh     [sys_HDMA5],a
+    ld      a,bank(PlayerTiles)
+    ld      [sys_HDMABank],a
 
     ld      hl,OAMBuffer
     ld      a,[Engine_CameraY]
