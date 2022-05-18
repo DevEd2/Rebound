@@ -79,74 +79,74 @@ w3          =   %00100000
 ; is interpreted as a "loop" command, use initial volume $F +
 ; envelope length $0 instead.
 
-vol_Bass1:              db  w3,$ff
-vol_PulseBass:          db  $2f,TableWait,12,$38,TableWait,11,$44,TableWait,7,$27,$ff
+vol_Bass1:              db  w3,TableEnd
+vol_PulseBass:          db  $2f,TableWait,12,$38,TableWait,11,$44,TableWait,7,$27,TableEnd
 
-vol_Kick:               db  $1c,$1c,$18,$ff
-vol_Snare:              db  $1d,$ff
-vol_CHH:                db  $18,$ff
-vol_OHH:                db  $48,$ff
-vol_Cymbal:             db  $7e,$ff
+vol_Kick:               db  $1c,$1c,$18,TableEnd
+vol_Snare:              db  $1d,TableEnd
+vol_CHH:                db  $18,TableEnd
+vol_OHH:                db  $48,TableEnd
+vol_Cymbal:             db  $7e,TableEnd
 
-vol_Echo1:              db  8,$ff   
-vol_Echo2:              db  3,$ff
+vol_Echo1:              db  8,TableEnd   
+vol_Echo2:              db  3,TableEnd
 
-vol_PyramidArp:         db  w3,TableWait,4,w2,w2,TableWait,3,w1,$ff
+vol_PyramidArp:         db  w3,TableWait,4,w2,w2,TableWait,3,w1,TableEnd
 vol_PyramidLeadS:       db  w3,TableWait,4
 vol_PyramidLeadF:       db  w2,TableWait,4
-                        db  w1,$ff              
-vol_PyramidLeadL:       db  w3,TableWait,71,w2,TableWait,35,w1,$ff
+                        db  w1,TableEnd              
+vol_PyramidLeadL:       db  w3,TableWait,71,w2,TableWait,35,w1,TableEnd
         
 vol_TomEcho:            db  $1f,TableWait,8
                         db  $18,TableWait,8
                         db  $14,TableWait,8
                         db  $12,TableWait,8
                         db  $11,TableWait,8
-                        db  $ff
+                        db  TableEnd
 
 ; ========
 
-vol_MenuLead:           db  w3,TableWait,6,w2,w1,w2,TableWait,5,w1,$ff
+vol_MenuLead:           db  w3,TableWait,6,w2,w1,w2,TableWait,5,w1,TableEnd
 
-vol_MenuOctave:         db  w3,w3,w3,w2,w2,w1,$ff
-vol_MenuOctaveEcho:     db  w1,$ff
-vol_MenuBass:           db  $2c,TableWait,7,$38,$ff
-vol_MenuArp:            db  $1b,TableWait,3,$27,TableWait,9,$53,$ff
-
-; ========
-
-vol_PlainsBass:         db  w3,TableWait,6,w2,TableWait,6,w1,$ff
-vol_PlainsLead:         db  $5a,$ff
-vol_PlainsEcho:         db  2,$ff
-vol_PlainsHarmony:      db  $59,$ff
-vol_PlainsHarmonyR:     db  4,$ff
+vol_MenuOctave:         db  w3,w3,w3,w2,w2,w1,TableEnd
+vol_MenuOctaveEcho:     db  w1,TableEnd
+vol_MenuBass:           db  $2c,TableWait,7,$38,TableEnd
+vol_MenuArp:            db  $1b,TableWait,3,$27,TableWait,9,$53,TableEnd
 
 ; ========
 
-vol_CityArp:            db  $1b,TableWait,3,$48,$ff
-vol_CityLead:           db  w3,TableWait,9,w2,TableWait,4,w1,$ff
-vol_CityLead2:          db  w3,TableWait,12,w2,TableWait,5,w1,$ff
-vol_CityLeadL:          db  w3,TableWait,8,w2,TableWait,22,w1,$ff
+vol_PlainsBass:         db  w3,TableWait,6,w2,TableWait,6,w1,TableEnd
+vol_PlainsLead:         db  $5a,TableEnd
+vol_PlainsEcho:         db  2,TableEnd
+vol_PlainsHarmony:      db  $59,TableEnd
+vol_PlainsHarmonyR:     db  4,TableEnd
 
 ; ========
 
-vol_GameOverLead:       db  w3,TableWait,16,w2,TableWait,16,w1,$ff
-vol_GameOverGuitarA:    db  $7a,$ff
-vol_GameOverGuitarB:    db  $4a,$ff
+vol_CityArp:            db  $1b,TableWait,3,$48,TableEnd
+vol_CityLead:           db  w3,TableWait,9,w2,TableWait,4,w1,TableEnd
+vol_CityLead2:          db  w3,TableWait,12,w2,TableWait,5,w1,TableEnd
+vol_CityLeadL:          db  w3,TableWait,8,w2,TableWait,22,w1,TableEnd
 
 ; ========
 
-vol_BossIntro1a:        db  $3a,$ff
+vol_GameOverLead:       db  w3,TableWait,16,w2,TableWait,16,w1,TableEnd
+vol_GameOverGuitarA:    db  $7a,TableEnd
+vol_GameOverGuitarB:    db  $4a,TableEnd
+
+; ========
+
+vol_BossIntro1a:        db  $3a,TableEnd
 vol_BossKick:           ; fall through to next sequence
 vol_BossOHH:            ; fall through to next sequence
-vol_BossIntro1b:        db  $1a,$ff
-vol_BossIntro2a:        db  $46,$ff
-vol_BossIntro2b:        db  $16,$ff
-vol_BossLead:           db  $5a,$ff
-vol_BossTomKick:        db  w3,TableWait,3,w2,w1,w0,$ff
-vol_BossTomSnare:       db  w3,TableWait,7,w2,TableWait,7,w1,TableWait,7,w0,$ff
-vol_BossCHH:            db  $1a,TableWait,3,0,$ff
-vol_BossOHHRoll:        db  $1a,$1a,$1a,0,$1a,$1a,$1a,0,$1a,$1a,$1a,0,$ff
+vol_BossIntro1b:        db  $1a,TableEnd
+vol_BossIntro2a:        db  $46,TableEnd
+vol_BossIntro2b:        db  $16,TableEnd
+vol_BossLead:           db  $5a,TableEnd
+vol_BossTomKick:        db  w3,TableWait,3,w2,w1,w0,TableEnd
+vol_BossTomSnare:       db  w3,TableWait,7,w2,TableWait,7,w1,TableWait,7,w0,TableEnd
+vol_BossCHH:            db  $1a,TableWait,3,0,TableEnd
+vol_BossOHHRoll:        db  $1a,$1a,$1a,0,$1a,$1a,$1a,0,$1a,$1a,$1a,0,TableEnd
 
 ; ========
 
@@ -185,9 +185,9 @@ vol_ForestArp:
     db        2,TableWait,71
     db        1,TableWait,79
     db        0,TableEnd
-vol_ForestEcho1:    db  $3a,$ff
-vol_ForestEcho2:    db  $44,$ff
-vol_ForestBass:     db  w3,TableWait,15,w2,w1,$ff
+vol_ForestEcho1:    db  $3a,TableEnd
+vol_ForestEcho2:    db  $44,TableEnd
+vol_ForestBass:     db  w3,TableWait,15,w2,w1,TableEnd
 vol_ForestBassSustain   equ vol_Bass1
 vol_ForestBassDecay:
     db       w2,TableWait,56
@@ -208,61 +208,61 @@ vol_ForestPercussion3:
     db      $73,TableWait,31
     db      $71,TableWait,31
     db      TableEnd
-vol_ForestPercussionV8: db  $8,TableWait,7,2,$ff
-vol_ForestPercussionV9: db  $9,TableWait,7,2,$ff
-vol_ForestPercussionVA: db  $a,TableWait,7,3,$ff
-vol_ForestPercussionVB: db  $b,TableWait,7,3,$ff
-vol_ForestPercussionVC: db  $c,TableWait,7,3,$ff
-vol_ForestPercussionVD: db  $d,TableWait,7,4,$ff
-vol_ForestPercussionVE: db  $e,TableWait,7,4,$ff
+vol_ForestPercussionV8: db  $8,TableWait,7,2,TableEnd
+vol_ForestPercussionV9: db  $9,TableWait,7,2,TableEnd
+vol_ForestPercussionVA: db  $a,TableWait,7,3,TableEnd
+vol_ForestPercussionVB: db  $b,TableWait,7,3,TableEnd
+vol_ForestPercussionVC: db  $c,TableWait,7,3,TableEnd
+vol_ForestPercussionVD: db  $d,TableWait,7,4,TableEnd
+vol_ForestPercussionVE: db  $e,TableWait,7,4,TableEnd
 
 ; ========
 
-vol_GalleryEcho1:       db  $31,$ff
-vol_GalleryEcho2:       db  $32,$ff
-vol_GalleryEcho3:       db  $33,$ff
-vol_GalleryEcho4:       db  $34,$ff
-vol_GalleryEcho5:       db  $35,$ff
-vol_GalleryEcho6:       db  $36,$ff
-vol_GalleryEcho7:       db  $37,$ff
-vol_GalleryEcho8:       db  $38,$ff
-vol_GalleryEcho9:       db  $39,$ff
-vol_GalleryEchoA:       db  $3a,$ff
+vol_GalleryEcho1:       db  $31,TableEnd
+vol_GalleryEcho2:       db  $32,TableEnd
+vol_GalleryEcho3:       db  $33,TableEnd
+vol_GalleryEcho4:       db  $34,TableEnd
+vol_GalleryEcho5:       db  $35,TableEnd
+vol_GalleryEcho6:       db  $36,TableEnd
+vol_GalleryEcho7:       db  $37,TableEnd
+vol_GalleryEcho8:       db  $38,TableEnd
+vol_GalleryEcho9:       db  $39,TableEnd
+vol_GalleryEchoA:       db  $3a,TableEnd
 
-vol_GalleryLead:        db  $3a,TableWait,17,$74,$ff
+vol_GalleryLead:        db  $3a,TableWait,17,$74,TableEnd
 
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
 
 arp_PluckDelay:         db  0 ; fall through to next sequence
-arp_Pluck:              db  12,0,$ff
-arp_TomEcho:            db  22,20,18,16,14,12,10,9,7,$80,0
-arp_Oct2:               db  12,12,0,0,$80,0
+arp_Pluck:              db  12,0,TableEnd
+arp_TomEcho:            db  22,20,18,16,14,12,10,9,7,TableLoop,0
+arp_Oct2:               db  12,12,0,0,TableLoop,0
 
-arp_940:                db  9,9,4,4,0,0,$80,0
-arp_720:                db  7,7,2,2,0,0,$80,0
-arp_520:                db  5,5,2,2,0,0,$80,0
+arp_940:                db  9,9,4,4,0,0,TableLoop,0
+arp_720:                db  7,7,2,2,0,0,TableLoop,0
+arp_520:                db  5,5,2,2,0,0,TableLoop,0
 
-arp_MenuTom:            db  12,11,10,9,8,7,6,5,4,3,2,1,0,$80,12
+arp_MenuTom:            db  12,11,10,9,8,7,6,5,4,3,2,1,0,TableLoop,12
 
-arp_MenuArp027:         db  0,0,2,2,7,7,$80     ; last byte reads from next table
-arp_MenuArp037:         db  0,0,3,3,7,7,$80     ; last byte reads from next table
-arp_MenuArp047:         db  0,0,4,4,7,7,$80     ; last byte reads from next table
-arp_MenuArp057:         db  0,0,5,5,7,7,$80     ; last byte reads from next table
-arp_MenuArp038:         db  0,0,3,3,8,8,$80     ; last byte reads from next table
-arp_MenuArp059:         db  0,0,5,5,9,9,$80     ; last byte reads from next table
-arp_MenuArp05A:         db  0,0,5,5,10,10,$80,0
+arp_MenuArp027:         db  0,0,2,2,7,7,TableLoop     ; last byte reads from next table
+arp_MenuArp037:         db  0,0,3,3,7,7,TableLoop     ; last byte reads from next table
+arp_MenuArp047:         db  0,0,4,4,7,7,TableLoop     ; last byte reads from next table
+arp_MenuArp057:         db  0,0,5,5,7,7,TableLoop     ; last byte reads from next table
+arp_MenuArp038:         db  0,0,3,3,8,8,TableLoop     ; last byte reads from next table
+arp_MenuArp059:         db  0,0,5,5,9,9,TableLoop     ; last byte reads from next table
+arp_MenuArp05A:         db  0,0,5,5,10,10,TableLoop,0
 
-arp_PlainsBass:         db  12,12,0,$ff
+arp_PlainsBass:         db  12,12,0,TableEnd
 
-arp_BassOctave:         db  12,0,TableWait,9,12,$ff
+arp_BassOctave:         db  12,0,TableWait,9,12,TableEnd
 
-arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,$ff
-arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,$80,0
-arp_BossBass:           db  0,$80,0
+arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,TableEnd
+arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,TableLoop,0
+arp_BossBass:           db  0,TableLoop,0
 
-arp_ForestPluck:        db  1,0,$ff
+arp_ForestPluck:        db  1,0,TableEnd
 
 ; =================================================================
 ; Noise sequences
@@ -274,21 +274,21 @@ arp_ForestPluck:        db  1,0,$ff
 ; arpeggio macro and add s7.
 ; Example: db s7+32 = noise value 32 with step lengh 7
 ; Note that each arpseq must be terminated with a loop command
-; ($80) otherwise the noise value will reset!
+; (TableLoop) otherwise the noise value will reset!
 
 s7 = $2d
 
-arp_Kick:               db  s7+18,s7+18,43,$80,2
-arp_Snare:              db  s7+29,s7+23,s7+20,35,$80,3
+arp_Kick:               db  s7+18,s7+18,43,TableLoop,2
+arp_Snare:              db  s7+29,s7+23,s7+20,35,TableLoop,3
 arp_BossCHH:            ; fall through to next sequence
-arp_Hat:                db  43,$80,0
-arp_Cymbal:             db  35,40,43,$80,2
+arp_Hat:                db  43,TableLoop,0
+arp_Cymbal:             db  35,40,43,TableLoop,2
 
-arp_BossKick:           db  40,23,17,28,20,12,$80,5
-arp_BossOHH:            db  42,$80,0
+arp_BossKick:           db  40,23,17,28,20,12,TableLoop,5
+arp_BossOHH:            db  42,TableLoop,0
 
 arp_ForestPercussion1   equ arp_BossOHH
-arp_ForestPercussion2:  db  40,$80,0
+arp_ForestPercussion2:  db  40,TableLoop,0
 
 ; =================================================================
 ; Pulse sequences
@@ -296,24 +296,24 @@ arp_ForestPercussion2:  db  40,$80,0
 
 waveseq_PlainsHarmonyR:
 waveseq_Dummy:
-waveseq_Pulse125:       db  0,$ff
-waveseq_Pulse25:        db  1,$ff
+waveseq_Pulse125:       db  0,TableEnd
+waveseq_Pulse25:        db  1,TableEnd
 waveseq_Pulse50:
-waveseq_Square:         db  2,$ff
-waveseq_Pulse75:        db  3,$ff
+waveseq_Square:         db  2,TableEnd
+waveseq_Pulse75:        db  3,TableEnd
 
-waveseq_PyramidBass:    db  0,TableWait,3,1,TableWait,3,2,TableWait,3,3,TableWait,3,$80,0
+waveseq_PyramidBass:    db  0,TableWait,3,1,TableWait,3,2,TableWait,3,3,TableWait,3,TableLoop,0
 
 waveseq_MenuArp         equ waveseq_Pulse25
 
-waveseq_PlainsLead:     db  0,0,0,0,1,$ff
-waveseq_PlainsHarmony:  db  2,2,0,$ff
+waveseq_PlainsLead:     db  0,0,0,0,1,TableEnd
+waveseq_PlainsHarmony:  db  2,2,0,TableEnd
 
 waveseq_CityArp:
-    db  0,0,0,1,1,1,2,2,2,3,3,3,2,2,2,1,1,1,$80,0
+    db  0,0,0,1,1,1,2,2,2,3,3,3,2,2,2,1,1,1,TableLoop,0
 
 waveseq_GameOverGuitarA:
-    db  1,0,$ff
+    db  1,0,TableEnd
     
 waveseq_ForestArp:
     db  0,0,0,0,0,0,0,0
@@ -329,15 +329,15 @@ waveseq_ForestArp:
 ; Must be terminated with a loop command!
 ; =================================================================
 
-vib_Dummy:          db  $ff,0,$80,1
-vib_BeachLead:      db  8,1,1,2,2,1,1,0,0,-1,-1,-2,-2,-1,-1,0,0,$80,1
-vib_PWMLead:        db  24,2,3,3,2,0,0,-2,-3,-3,-2,0,0,$80,1
+vib_Dummy:          db  $ff,0,TableLoopVib,1
+vib_BeachLead:      db  8,1,1,2,2,1,1,0,0,-1,-1,-2,-2,-1,-1,0,0,TableLoopVib,1
+vib_PWMLead:        db  24,2,3,3,2,0,0,-2,-3,-3,-2,0,0,TableLoopVib,1
 
-vib_PlainsLead:     db  18,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
-vib_PlainsEcho:     db  0,-2,$80,1
-vib_PlainsHarmonyR: db  0,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,$80,1
-vib_CityLead:       db  9,1,2,2,1,0,-1,-2,-2,-1,0,$80,1
-vib_ForestPluck:    db  6,3,7,10,7,3,0,-3,-7,-10,-7,-3,0,$80,1
+vib_PlainsLead:     db  18,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,TableLoopVib,1
+vib_PlainsEcho:     db  0,-2,TableLoopVib,1
+vib_PlainsHarmonyR: db  0,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,TableLoopVib,1
+vib_CityLead:       db  9,1,2,2,1,0,-1,-2,-2,-1,0,TableLoopVib,1
+vib_ForestPluck:    db  6,3,7,10,7,3,0,-3,-7,-10,-7,-3,0,TableLoopVib,1
 
 ; =================================================================
 ; Wave sequences
@@ -371,19 +371,19 @@ wave_BossTom:           db  $ac,$cc,$cc,$cc,$cc,$cc,$cc,$ca,$20,$00,$00,$00,$00,
 wave_BossBass:          db  $66,$60,$6c,$cc,$66,$60,$66,$60,$00,$06,$06,$66,$60,$00,$60,$00
 wave_GalleryBass:       db  $00,$11,$23,$45,$66,$78,$89,$aa,$bb,$cc,$cc,$cc,$a9,$89,$bc,$cc
 
-waveseq_Tri:            db  0,$ff
-waveseq_PyramidLead:    db  1,$ff
-waveseq_PyramidSquare:  db  2,$ff
-waveseq_MenuLead:       db  3,4,$ff
-waveseq_MenuTri:        db  5,$ff
-waveseq_PlainsBass:     db  7,$ff
-waveseq_CityLead:       db  8,$ff
-waveseq_ForestBass:     db  6,$ff
-waveseq_WaveBuffer:     db  $fd,$ff
-waveseq_SoftSquare:     db  9,$ff
-waveseq_BossTom:        db  10,$ff
-waveseq_BossBass:       db  11,$ff
-waveseq_GalleryBass:    db  12,$ff
+waveseq_Tri:            db  0,TableEnd
+waveseq_PyramidLead:    db  1,TableEnd
+waveseq_PyramidSquare:  db  2,TableEnd
+waveseq_MenuLead:       db  3,4,TableEnd
+waveseq_MenuTri:        db  5,TableEnd
+waveseq_PlainsBass:     db  7,TableEnd
+waveseq_CityLead:       db  8,TableEnd
+waveseq_ForestBass:     db  6,TableEnd
+waveseq_WaveBuffer:     db  $fd,TableEnd
+waveseq_SoftSquare:     db  9,TableEnd
+waveseq_BossTom:        db  10,TableEnd
+waveseq_BossBass:       db  11,TableEnd
+waveseq_GalleryBass:    db  12,TableEnd
 
 ; =================================================================
 ; Instruments

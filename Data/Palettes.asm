@@ -147,3 +147,6 @@ Pal_Plains:
     RGB  78>>3, 78>>3, 78>>3
     RGB 162>>3,162>>3,162>>3
     RGB 255>>3,255>>3,255>>3
+
+Pal_Forest:
+    incbin  "GFX/Tilesets/Forest.pal"

@@ -32,7 +32,7 @@ LevelPointers:
 ;   addlevel    City6
 ;   addlevel    CityBoss
         
-;   addlevel    Forest1
+    addlevel    Forest1
 ;   addlevel    Forest2
 ;   addlevel    Forest3
 ;   addlevel    Forest4

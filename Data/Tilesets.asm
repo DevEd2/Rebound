@@ -6,7 +6,7 @@
 ; ================================================================
 section "Test tileset - Graphics",romx
 TestMapTiles:
-    incbin  "GFX/TestTiles.2bpp.wle"
+    incbin  "GFX/Tilesets/TestTiles.2bpp.wle"
 
 section "Test tileset - Collision map + metatiles",romx
 ; Valid collision types:
@@ -71,7 +71,7 @@ Tileset_Test:
 
 section "Plains tileset - Graphics",romx
 PlainsTiles:
-    incbin  "GFX/PlainsTiles.2bpp.wle"
+    incbin  "GFX/Tilesets/PlainsTiles.2bpp.wle"
 
 section "Plains tileset - Collision map + metatiles",romx
 ; Valid collision types:
@@ -221,3 +221,33 @@ Tileset_Plains:
     ; middle (rocks 2)
     db  $15,%00000000,$14,%00000000
     db  $15,%00000000,$18,%00000010
+
+; ================================================================
+
+section "Forest tileset - Graphics",romx
+ForestTiles:
+    incbin  "GFX/Tilesets/ForestTiles.2bpp.wle"
+
+section "Forest tileset - Collision map + metatiles",romx
+
+ColMap_Forest:
+	db	0,1,1,1,1,1,0,0,0,4,5,5,6,6,6,6
+	db	3,1,0,1,1,1,0,0,0,4,1,0,6,6,6,6
+	db	3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+Tileset_Forest:
+	dw	ColMap_Forest
+    dbw bank(ForestTiles),ForestTiles

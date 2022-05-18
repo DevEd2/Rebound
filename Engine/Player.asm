@@ -1286,7 +1286,6 @@ Player_AccelerateRight:
     
 DrawPlayer:
     ; load correct frame in player VRAM area
-    ld      b,b
     ld      a,[Player_CurrentFrame]
     add     a
     add     a

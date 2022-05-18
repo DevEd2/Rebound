@@ -1,7 +1,7 @@
 ; ================================================================
 ; DevSound Lite - a Game Boy music system by DevEd
 ;
-; Copyright (c) 2020 DevEd
+; Copyright (c) 2022 DevEd
 ; 
 ; Permission is hereby granted, free of charge, to any person obtaining
 ; a copy of this software and associated documentation files (the
@@ -26,6 +26,9 @@
 ; ================================================================
 ; DevSound defines
 ; ================================================================
+
+if !def(incDSDefines)
+incDSDefines    set 1
 
 ; ================================================================
 
@@ -104,6 +107,7 @@ A_7     equ $45
 A#7     equ $46
 B_7     equ $47
 rest    equ $48
+wait    equ $49
 
 fix     equ C_2
 
@@ -122,12 +126,16 @@ EnablePWM           equ $89
 Arp                 equ $8a
 LoopCount           equ $8b
 Loop                equ $8c
-DummyCommand        equ $8d
+DisablePitchBend    equ $8d
+NoteCut             equ $8e
+Autopan             equ $8f
+DummyCommand        equ $90
 EndChannel          equ $ff
 
 ; Table commands
-TableLoop           equ $80
-TableWait           equ $fe
+TableLoopVib        equ $80
+TableWait           equ $fd
+TableLoop           equ $fe
 TableEnd            equ $ff
 
 ; ================================================================
@@ -201,7 +209,7 @@ DS_CH1Reset::           db
 DS_CH1Vol::             db
 DS_CH1Note::            db
 DS_CH1Transpose::       db
-DS_CH1FreqOffset::      db
+DS_CH1FreqOffset::      dw
 DS_CH1Pan::             db
 DS_CH1Sweep::           db
 DS_CH1NoteCount::       db
@@ -212,6 +220,13 @@ DS_CH1LoopCount::       db
 DS_CH1VolTableTimer::   db
 DS_CH1PulseTableTimer:: db
 DS_CH1ArpTableTimer::   db
+DS_CH1PitchBendFlags::  db
+DS_CH1PitchBendSpeed::  db
+DS_CH1NoteCut::         db
+DS_CH1Autopan::         db
+DS_CH1AutopanSpeed::    db
+DS_CH1AutopanPhase::    db
+DS_CH1AutopanTimer::    db
 
 DS_CH2Ptr::             dw
 DS_CH2VolPtr::          dw
@@ -229,7 +244,7 @@ DS_CH2Reset::           db
 DS_CH2Vol::             db
 DS_CH2Note::            db
 DS_CH2Transpose::       db
-DS_CH2FreqOffset::      db
+DS_CH2FreqOffset::      dw
 DS_CH2Pan::             db
 DS_CH2NoteCount::       db
 DS_CH2InsMode::         db
@@ -239,6 +254,13 @@ DS_CH2LoopCount::       db
 DS_CH2VolTableTimer::   db
 DS_CH2PulseTableTimer:: db
 DS_CH2ArpTableTimer::   db
+DS_CH2PitchBendFlags::  db
+DS_CH2PitchBendSpeed::  db
+DS_CH2NoteCut::         db
+DS_CH2Autopan::         db
+DS_CH2AutopanSpeed::    db
+DS_CH2AutopanPhase::    db
+DS_CH2AutopanTimer::    db
 
 DS_CH3Ptr::             dw
 DS_CH3VolPtr::          dw
@@ -256,7 +278,7 @@ DS_CH3Reset::           db
 DS_CH3Vol::             db
 DS_CH3Note::            db
 DS_CH3Transpose::       db
-DS_CH3FreqOffset::      db
+DS_CH3FreqOffset::      dw
 DS_CH3Wave::            db
 DS_CH3Pan::             db
 DS_CH3NoteCount::       db
@@ -267,6 +289,13 @@ DS_CH3LoopCount::       db
 DS_CH3VolTableTimer::   db
 DS_CH3WaveTableTimer::  db
 DS_CH3ArpTableTimer::   db
+DS_CH3PitchBendFlags::  db
+DS_CH3PitchBendSpeed::  db
+DS_CH3NoteCut::         db
+DS_CH3Autopan::         db
+DS_CH3AutopanSpeed::    db
+DS_CH3AutopanPhase::    db
+DS_CH3AutopanTimer::    db
 
 DS_CH4Ptr::             dw
 DS_CH4VolPtr::          dw
@@ -287,6 +316,11 @@ DS_CH4Ins2::            db
 DS_CH4LoopCount::       db
 DS_CH4VolTableTimer::   db
 DS_CH4ArpTableTimer::   db
+DS_CH4NoteCut::         db
+DS_CH4Autopan::         db
+DS_CH4AutopanSpeed::    db
+DS_CH4AutopanPhase::    db
+DS_CH4AutopanTimer::    db
 
 DS_CH1Retrig::          db
 DS_CH2Retrig::          db
@@ -306,6 +340,8 @@ DSVarsEnd:
 arp_Buffer::            ds  8
 
 DS_RAMEnd:
+
+endc
 
 ; =====================
 
@@ -348,6 +384,11 @@ DevSound_Init:
     ; initialize variables
     ld      a,$77
     ld      [DS_GlobalVolume],a
+    or      %10001000
+    ld      [DS_CH1Autopan],a
+    ld      [DS_CH2Autopan],a
+    ld      [DS_CH3Autopan],a
+    ld      [DS_CH4Autopan],a
     ld      a,1
     ld      [DS_SoundEnabled],a
     ld      [DS_CH1Enabled],a
@@ -398,6 +439,7 @@ DevSound_Init:
     ld      [DS_CH1VibPtr+1],a
     ld      [DS_CH2VibPtr+1],a
     ld      [DS_CH3VibPtr+1],a
+
     
     ld      d,c     ; Transfer song ID
 
@@ -568,25 +610,34 @@ DS_UpdateCH1:
     ld      [DS_CH1Tick],a
     jp      DS_UpdateCH2       ; too far for jr
 .continue
+    xor     a
+    ld      [DS_CH1NoteCut],a
+    
     ld      hl,DS_CH1Ptr       ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    
 DS_CH1_CheckByte:
     ld      a,[hl+]         ; get byte
     cp      $ff             ; if $ff...
-    jr      z,.endChannel
+    jp      z,.endChannel
     cp      $c9             ; if $c9...
     jp      z,.retSection
     bit     7,a             ; if command...
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [DS_CH1Note],a     ; set note
+    ld      b,a
     ld      a,[hl+]
     push    hl
     dec     a
     ld      [DS_CH1Tick],a     ; set tick
+    ld      a,b
+    cp      wait
+    jp      z,DS_CH1_DoneUpdating
+    ld      [DS_CH1Note],a     ; set note
+    
     xor     a
     ld      [DS_CH1VolPos],a
     ld      [DS_CH1ArpPos],a
@@ -685,6 +736,9 @@ DS_CH1_CommandTable:
     dw      .arp
     dw      .setLoopCount
     dw      .loop
+    dw      .disablePitchBend
+    dw      .noteCut
+    dw      .autopan
 
 .setInstrument
     pop     hl
@@ -722,16 +776,31 @@ DS_CH1_CommandTable:
     ld      [DS_CH1Ptr+1],a
     jp      DS_UpdateCH1
 
-.pitchBendUp    ; TODO
+.pitchBendUp
     pop     hl
-    inc     hl
-    jp      DS_CH1_CheckByte   ; too far for jr
+    ld      a,%00000011
+    ld      [DS_CH1PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH1PitchBendSpeed],a
+    jp      DS_CH1_CheckByte
     
-.pitchBendDown  ; TODO
+.pitchBendDown
     pop     hl
-    inc     hl
-    jp      DS_CH1_CheckByte   ; too far for jr
+    ld      a,%00000001
+    ld      [DS_CH1PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH1PitchBendSpeed],a
+    jp      DS_CH1_CheckByte
 
+.disablePitchBend
+    pop     hl
+    xor     a
+    ld      [DS_CH1PitchBendFlags],a
+    ld      [DS_CH1PitchBendSpeed],a
+    ld      [DS_CH1FreqOffset],a
+    ld      [DS_CH1FreqOffset+1],a
+    jp      DS_CH1_CheckByte
+    
 .setSweep       ; TODO
     pop     hl
     inc     hl
@@ -797,6 +866,26 @@ DS_CH1_CommandTable:
     ld      [DS_CH1Ptr+1],a
     jp      DS_UpdateCH1
 
+.noteCut
+    pop     hl
+    ld      a,[hl+]
+    or      %10000000
+    ld      [DS_CH1NoteCut],a
+    jp      DS_CH1_CheckByte
+
+.autopan
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH1Autopan],a
+    ld      a,[hl+]
+    ld      [DS_CH1AutopanSpeed],a
+    ld      [DS_CH1AutopanTimer],a
+    xor     a
+    ld      [DS_CH1AutopanPhase],a
+    or      %00010001
+    ld      [DS_CH1Pan],a
+    jp      DS_CH1_CheckByte
+
 DS_CH1_SetInstrument:
     ld      hl,InstrumentTable
     add     a
@@ -853,25 +942,34 @@ DS_UpdateCH2:
     ld      [DS_CH2Tick],a
     jp      DS_UpdateCH3       ; too far for jr
 .continue
+    xor     a
+    ld      [DS_CH2NoteCut],a
+    
     ld      hl,DS_CH2Ptr       ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    
 DS_CH2_CheckByte:
     ld      a,[hl+]         ; get byte
     cp      $ff             ; if $ff...
-    jr      z,.endChannel
+    jp      z,.endChannel
     cp      $c9             ; if $c9...
     jp      z,.retSection
     bit     7,a             ; if command...
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [DS_CH2Note],a     ; set note
+    ld      b,a
     ld      a,[hl+]
     push    hl
     dec     a
     ld      [DS_CH2Tick],a     ; set tick
+    ld      a,b
+    cp      wait
+    jp      z,DS_CH2_DoneUpdating
+    ld      [DS_CH2Note],a     ; set note
+    
     xor     a
     ld      [DS_CH2VolPos],a
     ld      [DS_CH2ArpPos],a
@@ -970,6 +1068,9 @@ DS_CH2_CommandTable:
     dw      .arp
     dw      .setLoopCount
     dw      .loop
+    dw      .disablePitchBend
+    dw      .noteCut
+    dw      .autopan
 
 .setInstrument
     pop     hl
@@ -1007,15 +1108,30 @@ DS_CH2_CommandTable:
     ld      [DS_CH2Ptr+1],a
     jp      DS_UpdateCH2
 
-.pitchBendUp    ; TODO
+.pitchBendUp
     pop     hl
-    inc     hl
-    jp      DS_CH2_CheckByte   ; too far for jr
+    ld      a,%00000011
+    ld      [DS_CH2PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH2PitchBendSpeed],a
+    jp      DS_CH2_CheckByte
     
-.pitchBendDown  ; TODO
+.pitchBendDown
     pop     hl
-    inc     hl
-    jp      DS_CH2_CheckByte   ; too far for jr
+    ld      a,%00000001
+    ld      [DS_CH2PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH2PitchBendSpeed],a
+    jp      DS_CH2_CheckByte
+
+.disablePitchBend
+    pop     hl
+    xor     a
+    ld      [DS_CH2PitchBendFlags],a
+    ld      [DS_CH2PitchBendSpeed],a
+    ld      [DS_CH2FreqOffset],a
+    ld      [DS_CH2FreqOffset+1],a
+    jp      DS_CH2_CheckByte
 
 .setSweep       ; TODO
     pop     hl
@@ -1082,6 +1198,26 @@ DS_CH2_CommandTable:
     ld      [DS_CH2Ptr+1],a
     jp      DS_UpdateCH2
     
+.noteCut
+    pop     hl
+    ld      a,[hl+]
+    or      %10000000
+    ld      [DS_CH2NoteCut],a
+    jp      DS_CH2_CheckByte
+
+.autopan
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH2Autopan],a
+    ld      a,[hl+]
+    ld      [DS_CH2AutopanSpeed],a
+    ld      [DS_CH2AutopanTimer],a
+    xor     a
+    ld      [DS_CH2AutopanPhase],a
+    or      %00010001
+    ld      [DS_CH2Pan],a
+    jp      DS_CH2_CheckByte
+
 DS_CH2_SetInstrument:
     ld      hl,InstrumentTable
     add     a
@@ -1138,10 +1274,14 @@ DS_UpdateCH3:
     ld      [DS_CH3Tick],a
     jp      DS_UpdateCH4   ; too far for jr
 .continue
+    xor     a
+    ld      [DS_CH3NoteCut],a
+    
     ld      hl,DS_CH3Ptr   ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    
 DS_CH3_CheckByte:
     ld      a,[hl+]     ; get byte
     cp      $ff
@@ -1152,11 +1292,16 @@ DS_CH3_CheckByte:
     jr      nz,.getCommand
     ; if we have a note...
 .getNote
-    ld      [DS_CH3Note],a
+    ld      b,a
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [DS_CH3Tick],a
+    ld      [DS_CH3Tick],a     ; set tick
+    ld      a,b
+    cp      wait
+    jp      z,DS_CH3_DoneUpdating
+    ld      [DS_CH3Note],a     ; set note
+    
     xor     a
     ld      [DS_CH3VolPos],a
     ld      [DS_CH3ArpPos],a
@@ -1258,6 +1403,9 @@ DS_CH3_CommandTable:
     dw      .arp
     dw      .setLoopCount
     dw      .loop
+    dw      .disablePitchBend
+    dw      .noteCut
+    dw      .autopan
 
 .setInstrument
     pop     hl
@@ -1295,15 +1443,30 @@ DS_CH3_CommandTable:
     ld      [DS_CH3Ptr+1],a
     jp      DS_UpdateCH3
 
-.pitchBendUp    ; TODO
+.pitchBendUp
     pop     hl
-    inc     hl
-    jp      DS_CH3_CheckByte   ; too far for jr
+    ld      a,%00000011
+    ld      [DS_CH3PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH3PitchBendSpeed],a
+    jp      DS_CH3_CheckByte
     
-.pitchBendDown  ; TODO
+.pitchBendDown
     pop     hl
-    inc     hl
-    jp      DS_CH3_CheckByte   ; too far for jr
+    ld      a,%00000001
+    ld      [DS_CH3PitchBendFlags],a
+    ld      a,[hl+]
+    ld      [DS_CH3PitchBendSpeed],a
+    jp      DS_CH3_CheckByte
+
+.disablePitchBend
+    pop     hl
+    xor     a
+    ld      [DS_CH3PitchBendFlags],a
+    ld      [DS_CH3PitchBendSpeed],a
+    ld      [DS_CH3FreqOffset],a
+    ld      [DS_CH3FreqOffset+1],a
+    jp      DS_CH3_CheckByte
 
 .setSweep
     pop     hl
@@ -1381,7 +1544,27 @@ DS_CH3_CommandTable:
     ld      a,[hl]
     ld      [DS_CH3Ptr+1],a
     jp      DS_UpdateCH3
-    
+
+.noteCut
+    pop     hl
+    ld      a,[hl+]
+    or      %10000000
+    ld      [DS_CH3NoteCut],a
+    jp      DS_CH3_CheckByte
+
+.autopan
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH3Autopan],a
+    ld      a,[hl+]
+    ld      [DS_CH3AutopanSpeed],a
+    ld      [DS_CH3AutopanTimer],a
+    xor     a
+    ld      [DS_CH3AutopanPhase],a
+    or      %00010001
+    ld      [DS_CH3Pan],a
+    jp      DS_CH3_CheckByte
+
 DS_CH3_SetInstrument:
     ld      hl,InstrumentTable
     add     a
@@ -1438,13 +1621,16 @@ DS_UpdateCH4:
     ld      [DS_CH4Tick],a
     jp      DoneUpdating    ; too far for jr
 .continue
+    xor     a
+    ld      [DS_CH4NoteCut],a
+    
     ld      hl,DS_CH4Ptr   ; get pointer
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    
 DS_CH4_CheckByte:
     ld      a,[hl+]     ; get byte
-    inc     c           ; add 1 to offset
     cp      $ff
     jr      z,.endChannel
     cp      $c9
@@ -1453,11 +1639,16 @@ DS_CH4_CheckByte:
     jr      nz,.getCommand  
     ; if we have a note...
 .getNote
-    ld      [DS_CH4Mode],a
+    ld      b,a
     ld      a,[hl+]
     push    hl
     dec     a
-    ld      [DS_CH4Tick],a
+    ld      [DS_CH4Tick],a     ; set tick
+    ld      a,b
+    cp      wait
+    jp      z,DS_CH4_DoneUpdating
+    ld      [DS_CH4Mode],a     ; set note
+
     ld      a,[DS_CH4Reset]
     jp      z,DS_CH4_DoneUpdating
     xor     a
@@ -1543,6 +1734,9 @@ DS_CH4_CommandTable:
     dw      .arp
     dw      .setLoopCount
     dw      .loop
+    dw      .disablePitchBend
+    dw      .noteCut
+    dw      .autopan
 
 .setInstrument
     pop     hl
@@ -1589,6 +1783,11 @@ DS_CH4_CommandTable:
     pop     hl
     inc     hl
     jp      DS_CH4_CheckByte   ; too far for jr
+
+.disablePitchBend ; unused for CH4
+    pop     hl
+    inc     hl
+    jp      DS_CH4_CheckByte
 
 .setSweep       ; unused for ch4
     pop     hl
@@ -1656,6 +1855,26 @@ DS_CH4_CommandTable:
     ld      [DS_CH4Ptr+1],a
     jp      DS_UpdateCH4
 
+.noteCut
+    pop     hl
+    ld      a,[hl+]
+    or      %10000000
+    ld      [DS_CH4NoteCut],a
+    jp      DS_CH4_CheckByte
+
+.autopan
+    pop     hl
+    ld      a,[hl+]
+    ld      [DS_CH4Autopan],a
+    ld      a,[hl+]
+    ld      [DS_CH4AutopanSpeed],a
+    ld      [DS_CH4AutopanTimer],a
+    xor     a
+    ld      [DS_CH4AutopanPhase],a
+    or      %00010001
+    ld      [DS_CH4Pan],a
+    jp      DS_CH4_CheckByte
+    
 DS_CH4_SetInstrument:
     ld      hl,InstrumentTable
     add     a
@@ -1688,6 +1907,117 @@ DS_CH4_SetInstrument:
 DoneUpdating:
 
 UpdateRegisters:
+    ; run autopan
+.ch1autopan
+    ld      a,[DS_CH1AutopanSpeed]
+    and     a
+    jr      z,.ch2autopan
+    ld      hl,DS_CH1AutopanTimer
+    dec     [hl]
+    jr      nz,.ch2autopan
+    ld      a,[DS_CH1AutopanSpeed]
+    ld      [hl],a
+    ld      a,[DS_CH1AutopanPhase]
+    inc     a
+    and     3
+    ld      [DS_CH1AutopanPhase],a
+    ld      b,a
+    and     a
+    ld      a,[DS_CH1Autopan]
+    jr      z,:++
+:   rra
+    rra
+    dec     b
+    jr      nz,:-
+:   and     %00000011
+    bit     1,a
+    jr      z,:+
+    xor     %00010010
+:   ld      [DS_CH1Pan],a
+
+.ch2autopan
+    ld      a,[DS_CH2AutopanSpeed]
+    and     a
+    jr      z,.ch3autopan
+    ld      hl,DS_CH2AutopanTimer
+    dec     [hl]
+    jr      nz,.ch3autopan
+    ld      a,[DS_CH2AutopanSpeed]
+    ld      [hl],a
+    ld      a,[DS_CH2AutopanPhase]
+    inc     a
+    and     3
+    ld      [DS_CH2AutopanPhase],a
+    ld      b,a
+    and     a
+    ld      a,[DS_CH2Autopan]
+    jr      z,:++
+:   rra
+    rra
+    dec     b
+    jr      nz,:-
+:   and     %00000011
+    bit     1,a
+    jr      z,:+
+    xor     %00010010
+:   ld      [DS_CH2Pan],a
+
+.ch3autopan
+    ld      a,[DS_CH3AutopanSpeed]
+    and     a
+    jr      z,.ch4autopan
+    ld      hl,DS_CH3AutopanTimer
+    dec     [hl]
+    jr      nz,.ch4autopan
+    ld      a,[DS_CH3AutopanSpeed]
+    ld      [hl],a
+    ld      a,[DS_CH3AutopanPhase]
+    inc     a
+    and     3
+    ld      [DS_CH3AutopanPhase],a
+    ld      b,a
+    and     a
+    ld      a,[DS_CH3Autopan]
+    jr      z,:++
+:   rra
+    rra
+    dec     b
+    jr      nz,:-
+:   and     %00000011
+    bit     1,a
+    jr      z,:+
+    xor     %00010010
+:   ld      [DS_CH3Pan],a
+
+.ch4autopan
+    ld      a,[DS_CH4AutopanSpeed]
+    and     a
+    jr      z,.doneautopan
+    ld      hl,DS_CH4AutopanTimer
+    dec     [hl]
+    jr      nz,.doneautopan
+    ld      a,[DS_CH4AutopanSpeed]
+    ld      [hl],a
+    ld      a,[DS_CH4AutopanPhase]
+    inc     a
+    and     3
+    ld      [DS_CH4AutopanPhase],a
+    ld      b,a
+    and     a
+    ld      a,[DS_CH4Autopan]
+    jr      z,:++
+:   rra
+    rra
+    dec     b
+    jr      nz,:-
+:   and     %00000011
+    bit     1,a
+    jr      z,:+
+    xor     %00010010
+:   ld      [DS_CH4Pan],a
+
+.doneautopan
+
     ; update panning
     ld      a,[DS_CH1Pan]
     ld      b,a
@@ -1927,9 +2257,12 @@ DS_CH1_UpdateRegisters:
 
 ; get note frequency
     ld      a,[hl+]
+    ld      e,[hl]
     ld      d,a
-    ld      a,[hl]
-    ld      e,a
+    
+    ld      a,[DS_CH1PitchBendFlags]
+    bit     0,a
+    jr      nz,.updatePitchBend
 .updateVibTable
     ld      a,[DS_CH1VibDelay]
     and     a
@@ -1949,32 +2282,69 @@ DS_CH1_UpdateRegisters:
     inc     h
 .nocarry4
     ld      a,[hl+]
-    cp      TableLoop
+    cp      TableLoopVib
     jr      nz,.noloop3
     ld      a,[hl+]
     ld      [DS_CH1VibPos],a
     jr      .doVib
 .noloop3
     ld      [DS_CH1FreqOffset],a
+    bit     7,a
+    ld      a,0
+    jr      z,:+
+    ld      a,$ff
+:   ld      [DS_CH1FreqOffset+1],a
     ld      a,[DS_CH1VibPos]
     inc     a
     ld      [DS_CH1VibPos],a
-    
+    jr      .getPitchOffset
+
+.updatePitchBend
+    push    de
+    ld      e,a
+    ld      hl,DS_CH1FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    bit     1,e
+    jr      z,.down
+.up
+    ld      a,[DS_CH1PitchBendSpeed]
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   jr      .setPitchBendOffset
+.down
+    ld      a,[DS_CH1PitchBendSpeed]
+    cpl
+    inc     a
+    ld      e,a
+    ld      d,$FF
+    add     hl,de
+.setPitchBendOffset
+    ld      a,l
+    ld      [DS_CH1FreqOffset],a
+    ld      a,h
+    ld      [DS_CH1FreqOffset+1],a
+    pop     de
+    jr      .getPitchOffset2
 .getPitchOffset
-    ld      a,[DS_CH1FreqOffset]
-    bit     7,a
-    jr      nz,.sub
-    add     d
-    ld      d,a
-    jr      nc,.setFreq
-    inc     e
-    jr      .setFreq
-.sub
-    ld      c,a
-    ld      a,d
-    add     c
-    ld      d,a
-.setFreq   
+    ld      hl,DS_CH1FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+.getPitchOffset2
+    ld      c,e
+    ld      e,d
+    ld      d,c
+    add     hl,de
+
+    ld      a,h
+    and     $7
+    ld      e,a
+    ld      d,l
+.setFreq  
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH1,a
     jr      nz,.updateVolume
@@ -1985,6 +2355,17 @@ DS_CH1_UpdateRegisters:
     
     ; update volume
 .updateVolume
+    ld      a,[DS_CH1NoteCut]
+    bit     7,a
+    jr      z,.doVolTable
+    and     $7f
+    jp      z,.done
+    dec     a
+    jr      z,.noteCut
+    or      %10000000
+    ld      [DS_CH1NoteCut],a
+    ; fall through
+.doVolTable
     ld      hl,DS_CH1VolPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -2044,6 +2425,16 @@ DS_CH1_UpdateRegisters:
     jr      nz,.done
     ld      a,[hl]
     ld      [DS_CH1VolPos],a
+    jr      .done
+.noteCut
+    or      %10000000
+    ld      [DS_CH1NoteCut],a
+    xor     a
+    ldh     [rNR12],a
+    ld      [DS_CH1Vol],a
+    or      %10000000
+    ldh     [rNR14],a
+    ld      [DS_CH1Retrig],a
 .done
 
 ; ================================================================
@@ -2198,9 +2589,12 @@ DS_CH2_UpdateRegisters:
 
 ; get note frequency
     ld      a,[hl+]
+    ld      e,[hl]
     ld      d,a
-    ld      a,[hl]
-    ld      e,a
+    
+    ld      a,[DS_CH2PitchBendFlags]
+    bit     0,a
+    jr      nz,.updatePitchBend
 .updateVibTable
     ld      a,[DS_CH2VibDelay]
     and     a
@@ -2220,32 +2614,69 @@ DS_CH2_UpdateRegisters:
     inc     h
 .nocarry4
     ld      a,[hl+]
-    cp      TableLoop
+    cp      TableLoopVib
     jr      nz,.noloop3
     ld      a,[hl+]
     ld      [DS_CH2VibPos],a
     jr      .doVib
 .noloop3
     ld      [DS_CH2FreqOffset],a
+    bit     7,a
+    ld      a,0
+    jr      z,:+
+    ld      a,$ff
+:   ld      [DS_CH2FreqOffset+1],a
     ld      a,[DS_CH2VibPos]
     inc     a
     ld      [DS_CH2VibPos],a
-    
+    jr      .getPitchOffset
+
+.updatePitchBend
+    push    de
+    ld      e,a
+    ld      hl,DS_CH2FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    bit     1,e
+    jr      z,.down
+.up
+    ld      a,[DS_CH2PitchBendSpeed]
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   jr      .setPitchBendOffset
+.down
+    ld      a,[DS_CH2PitchBendSpeed]
+    cpl
+    inc     a
+    ld      e,a
+    ld      d,$FF
+    add     hl,de
+.setPitchBendOffset
+    ld      a,l
+    ld      [DS_CH2FreqOffset],a
+    ld      a,h
+    ld      [DS_CH2FreqOffset+1],a
+    pop     de
+    jr      .getPitchOffset2
 .getPitchOffset
-    ld      a,[DS_CH2FreqOffset]
-    bit     7,a
-    jr      nz,.sub
-    add     d
-    ld      d,a
-    jr      nc,.setFreq
-    inc     e
-    jr      .setFreq
-.sub
-    ld      c,a
-    ld      a,d
-    add     c
-    ld      d,a
-.setFreq   
+    ld      hl,DS_CH2FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+.getPitchOffset2
+    ld      c,e
+    ld      e,d
+    ld      d,c
+    add     hl,de
+
+    ld      a,h
+    and     $7
+    ld      e,a
+    ld      d,l
+.setFreq  
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH2,a
     jr      nz,.updateVolume
@@ -2256,6 +2687,18 @@ DS_CH2_UpdateRegisters:
     
     ; update volume
 .updateVolume
+    ld      a,[DS_CH2NoteCut]
+    bit     7,a
+    jr      z,.doVolTable
+    and     $7f
+    and     a
+    jp      z,.done
+    dec     a
+    jr      z,.noteCut
+    or      %10000000
+    ld      [DS_CH2NoteCut],a
+    ; fall through
+.doVolTable
     ld      hl,DS_CH2VolPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -2315,6 +2758,16 @@ DS_CH2_UpdateRegisters:
     jr      nz,.done
     ld      a,[hl]
     ld      [DS_CH2VolPos],a
+    jr      .done
+.noteCut
+    or      %10000000
+    ld      [DS_CH2NoteCut],a
+    xor     a
+    ldh     [rNR22],a
+    ld      [DS_CH2Vol],a
+    or      %10000000
+    ldh     [rNR24],a
+    ld      [DS_CH2Retrig],a
 .done
 
 
@@ -2412,11 +2865,14 @@ DS_CH3_UpdateRegisters:
     add     hl,bc
     add     hl,bc
     
-    ; get note frequency
+; get note frequency
     ld      a,[hl+]
+    ld      e,[hl]
     ld      d,a
-    ld      a,[hl]
-    ld      e,a
+    
+    ld      a,[DS_CH3PitchBendFlags]
+    bit     0,a
+    jr      nz,.updatePitchBend
 .updateVibTable
     ld      a,[DS_CH3VibDelay]
     and     a
@@ -2436,40 +2892,78 @@ DS_CH3_UpdateRegisters:
     inc     h
 .nocarry4
     ld      a,[hl+]
-    cp      TableLoop
-    jr      nz,.noloop2
+    cp      TableLoopVib
+    jr      nz,.noloop3
     ld      a,[hl+]
     ld      [DS_CH3VibPos],a
     jr      .doVib
-.noloop2
+.noloop3
     ld      [DS_CH3FreqOffset],a
+    bit     7,a
+    ld      a,0
+    jr      z,:+
+    ld      a,$ff
+:   ld      [DS_CH3FreqOffset+1],a
     ld      a,[DS_CH3VibPos]
     inc     a
     ld      [DS_CH3VibPos],a
-    
+    jr      .getPitchOffset
+
+.updatePitchBend
+    push    de
+    ld      e,a
+    ld      hl,DS_CH3FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    bit     1,e
+    jr      z,.down
+.up
+    ld      a,[DS_CH3PitchBendSpeed]
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   jr      .setPitchBendOffset
+.down
+    ld      a,[DS_CH3PitchBendSpeed]
+    cpl
+    inc     a
+    ld      e,a
+    ld      d,$FF
+    add     hl,de
+.setPitchBendOffset
+    ld      a,l
+    ld      [DS_CH3FreqOffset],a
+    ld      a,h
+    ld      [DS_CH3FreqOffset+1],a
+    pop     de
+    jr      .getPitchOffset2
+
 .getPitchOffset
-    ld      a,[DS_CH3FreqOffset]
-    bit     7,a
-    jr      nz,.sub
-    add     d
-    ld      d,a
-    jr      nc,.setFreq
-    inc     e
-    jr      .setFreq
-.sub
-    ld      c,a
-    ld      a,d
-    add     c
-    ld      d,a
+    ld      hl,DS_CH3FreqOffset
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+.getPitchOffset2
+    ld      c,e
+    ld      e,d
+    ld      d,c
+    add     hl,de
+
+    ld      a,h
+    and     $7
+    ld      e,a
+    ld      d,l
 .setFreq  
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
-    jr      nz,.updateWave
+    jp      nz,.updateVolume
     ld      a,d
     ldh     [rNR33],a
     ld      a,e
     ldh     [rNR34],a
-
+    
 .updateWave
     ld      hl,DS_CH3WavePtr
     ld      a,[hl+]
@@ -2533,7 +3027,7 @@ DS_CH3_UpdateRegisters:
     dec     a
     ld      [DS_CH3WaveTableTimer],a
     cp      $80
-    jr      nz,.done
+    jp      nz,.done
     xor     a
     ld      [DS_CH3WaveTableTimer],a
     ld      a,l
@@ -2549,6 +3043,19 @@ DS_CH3_UpdateRegisters:
     
     ; update volume
 .updateVolume
+    ld      a,[DS_CH3NoteCut]
+    bit     7,a
+    jr      z,.doVolTable
+    and     $7f
+    and     a
+    jr      z,.done
+    dec     a
+    set     7,a
+    jr      z,.noteCut
+    or      %10000000
+    ld      [DS_CH3NoteCut],a
+    ; fall through
+.doVolTable
     ld      hl,DS_CH3VolPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -2604,6 +3111,13 @@ DS_CH3_UpdateRegisters:
     jr      nz,.done
     ld      a,[hl]
     ld      [DS_CH3VolPos],a
+    jr      .done
+.noteCut
+    or      %10000000
+    ld      [DS_CH3NoteCut],a
+    xor     a
+    ldh     [rNR32],a
+    ld      [DS_CH3Vol],a
 .done
 
     call    DoPWM
@@ -2718,9 +3232,19 @@ DS_CH4_UpdateRegisters:
     ld      a,[hl+]
     ldh     [rNR43],a   
 
-    ; update volume
-    ; update volume
 .updateVolume
+    ld      a,[DS_CH4NoteCut]
+    bit     7,a
+    jr      z,.doVolTable
+    and     $7f
+    and     a
+    jp      z,.done
+    dec     a
+    jr      z,.noteCut
+    or      %10000000
+    ld      [DS_CH4NoteCut],a
+    ; fall through
+.doVolTable
     ld      hl,DS_CH4VolPtr
     ld      a,[hl+]
     ld      h,[hl]
@@ -2780,6 +3304,16 @@ DS_CH4_UpdateRegisters:
     jr      nz,.done
     ld      a,[hl]
     ld      [DS_CH4VolPos],a
+    jr      .done
+.noteCut
+    or      %10000000
+    ld      [DS_CH4NoteCut],a
+    xor     a
+    ldh     [rNR42],a
+    ld      [DS_CH4Vol],a
+    or      %10000000
+    ldh     [rNR44],a
+    ld      [DS_CH4Retrig],a
 .done
     
 DoneUpdatingRegisters:
@@ -3007,22 +3541,6 @@ NoiseTable: ; taken from deflemask
 ; ================================================================
 ; misc stuff
 ; ================================================================
-    
-DefaultRegTable:
-    ; global flags
-    db  $77,0,0,0,0,1,1,1,1,1
-    ; ch1
-    dw  DummyTable,DummyTable,DummyTable,DummyTable,DummyTable
-    db  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    ; ch2
-    dw  DummyTable,DummyTable,DummyTable,DummyTable,DummyTable
-    db  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    ; ch3
-    dw  DummyTable,DummyTable,DummyTable,DummyTable,DummyTable
-    db  0,0,0,0,0, 0,0, 0,0,0,0,0,0,0, $ff, 0,0,0,0,0
-    ; ch4
-    dw  DummyTable,DummyTable,DummyTable
-    db  0,0, 0,0, 0,0,0,0,0,0,0,0,0
     
 DefaultWave:    db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$fe,$dc,$ba,$98,$76,$54,$32,$10
     
