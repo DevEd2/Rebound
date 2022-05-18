@@ -88,9 +88,19 @@ ROMTitle:       dbp "REBOUND",15,0              ; ROM title (15 bytes)
 GBCSupport:     db  $C0                         ; GBC support (0 = DMG only, $80 = DMG/GBC, $C0 = GBC only)
 NewLicenseCode: db  "56"                        ; new license code (2 bytes)
 SGBSupport:     db  0                           ; SGB support
-CartType:       db  $19                         ; Cart type, see hardware.inc for a list of values
+CartType:                                       ; Cart type, see hardware.inc for a list of values
+    if DebugMode
+        db  $1b
+    else
+        db  $19                                 
+    endc
 ROMSize:        db  0                           ; ROM size (handled by post-linking tool)
-RAMSize:        db  0                           ; RAM size
+RAMSize:                                        ; RAM size
+    if DebugMode
+        db  2   ; 8k sram for tilemap editor
+    else
+        db  0
+    endc
 DestCode:       db  1                           ; Destination code (0 = Japan, 1 = All others)
 OldLicenseCode: db  $33                         ; Old license code (if $33, check new license code)
 ROMVersion:     db  0                           ; ROM version
