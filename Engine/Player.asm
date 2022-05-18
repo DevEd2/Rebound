@@ -17,7 +17,10 @@ Player_YVelocityS::         db  ; current Y fractional velocity
 Player_LastBounceY::        db  ; last bounce Y position (absolute)
 Player_AnimPointer::        dw  ; pointer to current animation sequence
 Player_AnimTimer::          db  ; time until next animation frame is displayed (if -1, frame will be displayed indefinitely)
+Player_AnimLock::           db  ; if 1, current animation cannot be interrupted
 Player_CurrentFrame::       db  ; current animation frame being displayed
+Player_SpeedMax::               ; bit 7 of next byte
+Player_BlinkTimer::         db  ; timer for blink animation
 
 StageClear_Offset1::        db
 StageClear_Offset2::        db
@@ -60,10 +63,10 @@ Player_HitboxSize           equ 6
 bPlayerIsMoving             = 0
 bPlayerIsUnderwater         = 1
 bPlayerIsDead               = 2
-bPlayerVictory              = 3
+bPlayerMaxSpeed             = 3
 bPlayerHitEnemy             = 4
 bPlayerBounceCancel         = 5
-bPlayerUnused6              = 6
+bPlayerStageEnd             = 6
 bPlayerDirection            = 7
 
 ; ========================
@@ -121,11 +124,6 @@ InitPlayer:
     ld      b,PlayerRAM_End-PlayerRAM
     xor     a
     call    _FillRAMSmall
-    ; initialize animation pointer
-    ld      a,low(Anim_Player_Idle)
-    ld      [Player_AnimPointer],a
-    ld      a,high(Anim_Player_Idle)
-    ld      [Player_AnimPointer+1],a
     ; initialize animation timer
     ld      a,-1
     ld      [Player_AnimTimer],a
@@ -141,6 +139,17 @@ InitPlayer:
 ; ========
 
 ProcessPlayer:
+    ; blink test (REMOVE ME)
+    ld      a,[sys_btnPress]
+    bit     btnSelect,a
+    jr      z,:+
+    ld      b,b
+    ld      hl,Anim_Player_IdleBlink
+    call    Player_SetAnimation
+    ld      a,1
+    ld      [Player_AnimLock],a
+:
+
     ld      hl,Player_MovementFlags
     res     bPlayerHitEnemy,[hl]
     
@@ -290,7 +299,7 @@ ProcessPlayer:
 ;   ld      a,1
 ;   ld      [Engine_LockCamera],a
 ;   ld      a,[Player_MovementFlags]
-;   set     bPlayerVictory,a
+;   set     bPlayerStageEnd,a
 ;   ld      [Player_MovementFlags],a
 ;   jp      .moveair
     
@@ -310,6 +319,8 @@ ProcessPlayer:
     bit     7,a
     jr      z,.decelRight
 .decelLeft
+    ld      hl,Anim_Player_Left1
+    call    Player_SetAnimation
     ld      hl,Player_XVelocity
     ld      a,[hl+]
     ld      l,[hl]
@@ -318,6 +329,8 @@ ProcessPlayer:
     add     hl,bc
     bit     7,h
     jr      nz,:+    ; reset X speed to zero on overflow
+    ld      hl,Anim_Player_Idle
+    call    Player_SetAnimation
     ld      hl,0
 :   ld      a,h
     ld      [Player_XVelocity],a
@@ -325,6 +338,8 @@ ProcessPlayer:
     ld      [Player_XVelocityS],a
     jr      .nodecel
 .decelRight
+    ld      hl,Anim_Player_Right1
+    call    Player_SetAnimation
     ld      hl,Player_XVelocity
     ld      a,[hl+]
     ld      l,[hl]
@@ -334,6 +349,8 @@ ProcessPlayer:
     add     hl,bc
     bit     7,h
     jr      z,:+    ; reset X speed to zero on overflow
+    ld      hl,Anim_Player_Idle
+    call    Player_SetAnimation
     ld      hl,0
 :   ld      a,h
     ld      [Player_XVelocity],a
@@ -396,7 +413,7 @@ ProcessPlayer:
     ld      a,e   
     jp      nz,.notvictory
     ld      hl,Player_MovementFlags
-    set     bPlayerVictory,[hl]
+    set     bPlayerStageEnd,[hl]
     ld      a,1
     ld      [Engine_LockCamera],a
     ld      a,MUS_STAGE_CLEAR
@@ -1178,7 +1195,11 @@ Player_WallBounce:
 ; ========
 
 Player_AccelerateLeft:
+    ld      hl,Anim_Player_Left1
+    call    Player_SetAnimation
     ld      a,[Player_MovementFlags]
+    res     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
     bit     bPlayerIsUnderwater,a
     jr      nz,.accelLeftWater
     push    bc
@@ -1196,6 +1217,11 @@ Player_AccelerateLeft:
     ld      de,$8000
     call    Compare16
     jr      c,:+
+    ld      a,[Player_MovementFlags]
+    set     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
+    ld      hl,Anim_Player_Left2
+    call    Player_SetAnimation
     ld      hl,-Player_MaxSpeed
 :   ld      a,h
     ld      [Player_XVelocity],a
@@ -1220,7 +1246,13 @@ Player_AccelerateLeft:
     ld      de,$8000
     call    Compare16
     jr      c,:+
+    ld      a,[Player_MovementFlags]
+    set     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
+    ld      hl,Anim_Player_Left2
+    call    Player_SetAnimation
     ld      hl,-Player_MaxSpeedWater
+    pop     hl
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
@@ -1230,7 +1262,11 @@ Player_AccelerateLeft:
     ret
 
 Player_AccelerateRight:
+    ld      hl,Anim_Player_Right1
+    call    Player_SetAnimation
     ld      a,[Player_MovementFlags]
+    res     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
     bit     bPlayerIsUnderwater,a
     jr      nz,.accelRightWater
     push    bc
@@ -1248,6 +1284,11 @@ Player_AccelerateRight:
     ld      bc,$8000
     call    Compare16
     jr      c,:+
+    ld      a,[Player_MovementFlags]
+    set     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
+    ld      hl,Anim_Player_Right2
+    call    Player_SetAnimation
     ld      hl,Player_MaxSpeed
 :   ld      a,h
     ld      [Player_XVelocity],a
@@ -1272,6 +1313,11 @@ Player_AccelerateRight:
     ld      bc,$8000
     call    Compare16
     jr      c,:+
+    ld      a,[Player_MovementFlags]
+    set     bPlayerMaxSpeed,a
+    ld      [Player_MovementFlags],a
+    ld      hl,Anim_Player_Right2
+    call    Player_SetAnimation
     ld      hl,Player_MaxSpeedWater
 :   ld      a,h
     ld      [Player_XVelocity],a
@@ -1362,6 +1408,7 @@ KillPlayer:
     ld      hl,Anim_Player_Hurt
     call    Player_SetAnimation
     PlaySFX death
+    call    Player_SeeingStars
     pop     bc
     ret
     
@@ -1393,7 +1440,7 @@ Player_Respawn:
     pop     hl
     ld      a,[Engine_LevelID]
     jp      GM_Level
-    
+   
 Player_Splash:
     ; left splash particle
     call    GetParticleSlot
@@ -1484,11 +1531,188 @@ Player_Splash:
 
     ret
 
+Player_SeeingStars:
+    ; bottom left star particle
+    call    GetParticleSlot
+    ld      [hl],6
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,[Player_XPos]
+    sub     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      a,[Player_YPos]
+    ld      [hl],a
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high(-$0020)
+    
+    ld      a,low(-$0020)
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],a
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$0480)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$0480)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    
+    ; bottom right star particle
+    call    GetParticleSlot
+    ld      [hl],6
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,[Player_XPos]
+    add     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      a,[Player_YPos]
+    ld      [hl],a
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high($0020)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low($0020)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$0480)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$0480)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1 | OAMF_XFLIP
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+
+    ; top left star particle
+    call    GetParticleSlot
+    ld      [hl],8
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,[Player_XPos]
+    sub     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      a,[Player_YPos]
+    ld      [hl],a
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high(-$0038)
+    
+    ld      a,low(-$0038)
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],a
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$0500)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$0500)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    
+    ; top right star particle
+    call    GetParticleSlot
+    ld      [hl],8
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,[Player_XPos]
+    add     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      a,[Player_YPos]
+    ld      [hl],a
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high($0038)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low($0038)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$0500)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$0500)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1 | OAMF_XFLIP
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    ret
+
+
 ; INPUT: a = current Y position
 ;        b = previous Y position
 Player_CheckSubscreenBoundary:
     ld      hl,Player_MovementFlags
-    bit     bPlayerVictory,[hl]
+    bit     bPlayerStageEnd,[hl]
     ret     nz
     ld      e,a
     ld      a,[Player_YVelocity]
@@ -1509,7 +1733,8 @@ Player_CheckSubscreenBoundary:
 ; Animation constants
 ; ===================
 
-C_SetAnim   equ $80
+C_SetAnim       equ $80
+C_ToggleLock    equ $81
 
 ; ================
 ; Animation macros
@@ -1528,6 +1753,9 @@ Anim_\1:
 ; ==================
 
 Player_SetAnimation:
+    ld      a,[Player_AnimLock]
+    and     a
+    ret     nz
     ld      a,l
     ld      [Player_AnimPointer],a
     ld      a,h
@@ -1581,12 +1809,20 @@ AnimatePlayer:
     
 .cmdProcTable:
     dw      .setAnim
+    dw      .toggleLock
     
 .setAnim
     pop     hl
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
+    jr      .getEntry
+
+.toggleLock
+    pop     hl
+    ld      a,[Player_AnimLock]
+    xor     1
+    ld      [Player_AnimLock],a
     jr      .getEntry
 
 ; ==============
@@ -1598,87 +1834,75 @@ AnimatePlayer:
 ; XX = Frame ID / command (if bit 7 set)
 ; YY = Wait time (one byte) / command parameter (can be more than one byte)
 
-;   defanim Player_Left2
-;   db      F_Player_Left2,-1
+   defanim Player_Left2
+   db      F_Player_Left2,-1
     
-;   defanim Player_Left1
-;   db      F_Player_Left1,-1
+   defanim Player_Left1
+   db      F_Player_Left1,-1
 
     defanim Player_Idle
-    db      F_Player_Idle,254
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink4,4
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle,192
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink4,4
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle,56
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink4,4
-    db      F_Player_Idle_Blink3,1
-    db      F_Player_Idle_Blink2,1
-    db      F_Player_Idle_Blink1,1
-    db      F_Player_Idle,254
-    db      F_Player_Idle,254
-    dbw     C_SetAnim,Anim_Player_Idle
+    db      F_Player_Idle,-1
     
-
-;   defanim Player_Right1
-;   db      F_Player_Right1,-1
+   defanim Player_Right1
+   db      F_Player_Right1,-1
     
-;   defanim Player_Right2
-;   db      F_Player_Right2,-1
+   defanim Player_Right2
+   db      F_Player_Right2,-1
     
-;   defanim Player_Left2Blink
-;   db      F_Player_Left2_Blink1,1
-;   db      F_Player_Left2_Blink2,1
-;   db      F_Player_Left2_Blink3,1
-;   db      F_Player_Left2_Blink4,4
-;   db      F_Player_Left2_Blink3,1
-;   db      F_Player_Left2_Blink2,1
-;   db      F_Player_Left2_Blink1,1
-;   dbw     C_SetAnim,Anim_Player_Left2
+   defanim Player_Left2Blink
+   db      F_Player_Left2_Blink1,1
+   db      F_Player_Left2_Blink2,1
+   db      F_Player_Left2_Blink3,1
+   db      F_Player_Left2_Blink4,4
+   db      F_Player_Left2_Blink3,1
+   db      F_Player_Left2_Blink2,1
+   db      F_Player_Left2_Blink1,1
+   db      C_ToggleLock
+   dbw     C_SetAnim,Anim_Player_Left2
     
-;   defanim Player_Left1Blink
-;   db      F_Player_Left1_Blink1,1
-;   db      F_Player_Left1_Blink2,1
-;   db      F_Player_Left1_Blink3,1
-;   db      F_Player_Left1_Blink4,4
-;   db      F_Player_Left1_Blink3,1
-;   db      F_Player_Left1_Blink2,1
-;   db      F_Player_Left1_Blink1,1
-;   dbw     C_SetAnim,Anim_Player_Left1
+   defanim Player_Left1Blink
+   db      F_Player_Left1_Blink1,1
+   db      F_Player_Left1_Blink2,1
+   db      F_Player_Left1_Blink3,1
+   db      F_Player_Left1_Blink4,4
+   db      F_Player_Left1_Blink3,1
+   db      F_Player_Left1_Blink2,1
+   db      F_Player_Left1_Blink1,1
+   db      C_ToggleLock
+   dbw     C_SetAnim,Anim_Player_Left1   
+   
+   defanim Player_IdleBlink
+   db      F_Player_Idle_Blink1,1
+   db      F_Player_Idle_Blink2,1
+   db      F_Player_Idle_Blink3,1
+   db      F_Player_Idle_Blink4,4
+   db      F_Player_Idle_Blink3,1
+   db      F_Player_Idle_Blink2,1
+   db      F_Player_Idle_Blink1,1
+   db      C_ToggleLock
+   dbw     C_SetAnim,Anim_Player_Idle
     
-;   defanim Player_Right1Blink
-;   db      F_Player_Right1_Blink1,1
-;   db      F_Player_Right1_Blink2,1
-;   db      F_Player_Right1_Blink3,1
-;   db      F_Player_Right1_Blink4,4
-;   db      F_Player_Right1_Blink3,1
-;   db      F_Player_Right1_Blink2,1
-;   db      F_Player_Right1_Blink1,1
-;   dbw     C_SetAnim,Anim_Player_Right1
+   defanim Player_Right1Blink
+   db      F_Player_Right1_Blink1,1
+   db      F_Player_Right1_Blink2,1
+   db      F_Player_Right1_Blink3,1
+   db      F_Player_Right1_Blink4,4
+   db      F_Player_Right1_Blink3,1
+   db      F_Player_Right1_Blink2,1
+   db      F_Player_Right1_Blink1,1
+   db      C_ToggleLock
+   dbw     C_SetAnim,Anim_Player_Right1
     
-;   defanim Player_Right2Blink
-;   db      F_Player_Right2_Blink1,1
-;   db      F_Player_Right2_Blink2,1
-;   db      F_Player_Right2_Blink3,1
-;   db      F_Player_Right2_Blink4,4
-;   db      F_Player_Right2_Blink3,1
-;   db      F_Player_Right2_Blink2,1
-;   db      F_Player_Right2_Blink1,1
-;   dbw     C_SetAnim,Anim_Player_Right2
+   defanim Player_Right2Blink
+   db      F_Player_Right2_Blink1,1
+   db      F_Player_Right2_Blink2,1
+   db      F_Player_Right2_Blink3,1
+   db      F_Player_Right2_Blink4,4
+   db      F_Player_Right2_Blink3,1
+   db      F_Player_Right2_Blink2,1
+   db      F_Player_Right2_Blink1,1
+   db      C_ToggleLock
+   dbw     C_SetAnim,Anim_Player_Right2
     
     defanim Player_Hurt
     db      F_Player_Hurt1,6

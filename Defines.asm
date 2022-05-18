@@ -107,7 +107,7 @@ endm
 ; Trashes B.
 ldfar:                  macro
     ld      b,bank(\2)
-    call    _Bankswitch
+    rst     Bankswitch
     ld      \1,\2
 endm
     
@@ -115,7 +115,7 @@ endm
 ; Trashes B.
 farcall:                macro
     ld      b,bank(\1)
-    call    _Bankswitch
+    rst     Bankswitch
     call    \1
 endm
     

@@ -12,7 +12,7 @@ include "Defines.asm"
 ; Reset vectors
 ; =============
 section "Reset $00",rom0[$00]
-Trap00::        jr  @
+Bankswitch::    jp  _Bankswitch
     
 section "Reset $08",rom0[$08]
 FillRAM::       jp  _FillRAM
@@ -320,7 +320,11 @@ include "Engine/GameModes/GameOverScreen.asm"
 
 ; ================================
 
-; include "Engine/GameModes/Gallery.asm"
+include "Engine/GameModes/Gallery.asm"
+
+; ================================
+
+include "Engine/GameModes/TilesetEditor.asm"
 
 ; ================================
 

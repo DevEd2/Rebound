@@ -42,6 +42,9 @@ GM_Gallery:
     call    ConvertPals
     call    PalFadeInWhite
     call	UpdatePalettes
+    
+    ld      a,MUS_GALLERY
+    farcall DevSound_Init
 
 	ld		a,LCDCF_ON | LCDCF_BG8000 | LCDCF_BGON
 	ldh		[rLCDC],a
@@ -62,7 +65,7 @@ GM_Gallery:
     jr      nz,:-
 	xor		a
 	ldh		[rLCDC],a
-    jp      GM_TitleAndMenus
+    jp      GM_DebugMenu
 
 ; ================
 

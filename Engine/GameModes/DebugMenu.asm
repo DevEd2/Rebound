@@ -21,7 +21,7 @@ GM_DebugMenu:
     ldfar   hl,Debug_MainMenuText
     call    LoadTilemapText
 
-    ld      a,3
+    ld      a,5
     ld      [Debug_MenuMax],a
     xor     a
     ld      [Debug_MenuPos],a
@@ -92,6 +92,8 @@ DebugLoop:
     dw      Debug_ExitToLevelSelect
     dw      Debug_ExitToSoundTest
     dw      Debug_ExitToSFXTest
+    dw      Debug_ExitToTileEditor
+    dw      Debug_ExitToGallery
 
 .drawcursor
     call    Debug_DrawCursor
@@ -129,11 +131,9 @@ Debug_ExitToGame:
     jp      GM_SplashScreens
     
 Debug_ExitToLevelSelect:
-    ; TODO: Actual level select menu
     halt
     xor     a
     ldh     [rLCDC],a
-    
     jp      GM_LevelSelect
     
 Debug_ExitToSoundTest:
@@ -145,6 +145,18 @@ Debug_ExitToSFXTest:
     xor     a
     ldh     [rLCDC],a
     jp      GM_SFXTest
+    
+Debug_ExitToTileEditor:
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_TileEdit
+
+Debug_ExitToGallery:
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_Gallery
 
 Debug_InvalidMenu:
     PlaySFX menudeny
@@ -160,8 +172,8 @@ Debug_MainMenuText:
     db  "   LEVEL SELECT     "
     db  "   SOUND TEST       "
     db  "   SFX TEST         "
-    db  "                    "
-    db  "                    "
+    db  "   TILESET EDITOR   "
+    db  "   GALLERY          "
     db  "                    "
     db  "                    "
     db  "                    "

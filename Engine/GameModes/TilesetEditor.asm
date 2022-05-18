@@ -1,0 +1,413 @@
+section "Tileset editor RAM",wram0
+
+section "Tileset editor routines",rom0
+
+GM_TileEdit:
+
+TileEdit_MainMenu:
+;    call    ClearScreen
+
+;    ldfar   hl,Pal_DebugScreen
+;    xor     a
+;    call    LoadPal
+;    ld      a,8
+;    ld      hl,Pal_DebugScreen
+;    call    LoadPal
+;    call    CopyPalettes
+
+;    ldfar   hl,Font
+;    ld      de,$8000
+;    call    DecodeWLE
+
+    ld      a,3
+    ld      [Debug_MenuMax],a
+    xor     a
+    ld      [Debug_MenuPos],a
+    ld      [sys_PauseGame],a
+
+    ld      a,$18
+    ld      [Debug_MenuOffset],a
+
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJON | LCDCF_BGON
+    ldh     [rLCDC],a
+    ld      a,IEF_VBLANK
+    ldh     [rIE],a
+    ei
+    
+    call    TileEdit_DrawMainMenu
+
+TileEdit_MainMenuLoop:
+    ld      a,[sys_btnPress]
+    bit     btnUp,a
+    jr      z,.checkdown
+    PlaySFX menucursor
+    ld      hl,Debug_MenuPos
+    dec     [hl]
+    ld      a,[hl]
+    cp      $ff
+    jr      nz,:+
+    ld      a,[Debug_MenuMax]
+    ld      [hl],a
+:   call    TileEdit_DrawMainMenu
+    jp      .drawcursor
+    
+.checkdown
+    bit     btnDown,a
+    jr      z,.checkLeft
+    PlaySFX menucursor
+    ld      hl,Debug_MenuPos
+    inc     [hl]
+    ld      b,[hl]
+    ld      a,[Debug_MenuMax]
+    inc     a
+    cp      b
+    jr      nz,:+
+    xor     a
+    ld      [hl],a
+:   call    TileEdit_DrawMainMenu
+    jp      .drawcursor
+
+.checkLeft
+    bit     btnLeft,a
+    jr      z,.checkRight
+    PlaySFX menucursor
+    ld      a,[Debug_MenuPos]
+    sub     16
+    jr      nc,:+
+    xor     a
+:   ld      [Debug_MenuPos],a
+    call    TileEdit_DrawMainMenu
+    jr      .drawcursor
+
+.checkRight
+    bit     btnRight,a
+    jr      z,.checkB
+    PlaySFX menucursor
+    ld      a,[Debug_MenuPos]
+    add     16
+    cp      3
+    jr      c,:+
+    ld      a,3
+:   ld      [Debug_MenuPos],a
+    call    TileEdit_DrawMainMenu
+    jr      .drawcursor
+
+.checkB
+    bit     btnB,a
+    jr      z,.checkA
+    PlaySFX menuback
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_DebugMenu
+    
+.checkA
+    bit     btnA,a
+    jr      z,.drawcursor
+    
+    PlaySFX menuselect
+    ld      hl,.gotolist
+    ld      a,[Debug_MenuPos]
+    ld      b,a
+    ld      a,[Debug_MenuMax]
+    cp      b
+    jr      c,.going_nowhere
+    ld      e,b
+    ld      d,0
+    add     hl,de
+    add     hl,de
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    jp      hl
+    
+.gotolist
+    dw      .goto_gfxmenu
+    dw      .goto_loadfromsram
+    dw      .goto_loadfromrom
+    dw      .goto_debugmenu
+.goto_gfxmenu:
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      TileEdit_GFXMenu
+.goto_debugmenu
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      GM_DebugMenu
+.goto_loadfromsram
+    ; TODO
+.goto_loadfromrom
+    ; TODO
+.going_nowhere
+    PlaySFX menudeny
+
+.drawcursor
+    call    Debug_DrawCursor
+    halt
+    jp      TileEdit_MainMenuLoop
+
+TileEdit_DrawMainMenu:
+    ld      hl,$9800
+    ld      bc,$400
+:   WaitForVRAM
+    xor     a
+    ld      [hl+],a
+    dec     bc
+    ld      a,b
+    or      c
+    jr      nz,:-
+
+    ld      b,bank(TileEdit_MainMenuText)
+    rst     Bankswitch
+    ld      a,[Debug_MenuPos]
+    and     $f0 
+    ld      b,16
+    ld      de,$9822
+:   push    af
+    ld      hl,TileEdit_MainMenuText
+    add     a
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    push    de
+    call    PrintString
+    pop     de
+    ld      a,e
+    add     32
+    ld      e,a
+    jr      nc,:+
+    inc     d
+:   pop     af
+    inc     a
+    cp      4
+    ret     z
+    dec     b
+    jr      nz,:---
+    ret
+
+; ================================================================    
+
+TileEdit_GFXMenu:
+    ld      a,7
+    ld      [Debug_MenuMax],a
+    xor     a
+    ld      [Debug_MenuPos],a
+    ld      [sys_PauseGame],a
+
+    ld      a,$18
+    ld      [Debug_MenuOffset],a
+
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJON | LCDCF_BGON
+    ldh     [rLCDC],a
+    ld      a,IEF_VBLANK
+    ldh     [rIE],a
+    ei
+    
+    call    TileEdit_DrawGFXMenu
+
+TileEdit_GFXMenuLoop:
+    ld      a,[sys_btnPress]
+    bit     btnUp,a
+    jr      z,.checkdown
+    PlaySFX menucursor
+    ld      hl,Debug_MenuPos
+    dec     [hl]
+    ld      a,[hl]
+    cp      $ff
+    jr      nz,:+
+    ld      a,[Debug_MenuMax]
+    ld      [hl],a
+:   call    TileEdit_DrawGFXMenu
+    jp      .drawcursor
+    
+.checkdown
+    bit     btnDown,a
+    jr      z,.checkLeft
+    PlaySFX menucursor
+    ld      hl,Debug_MenuPos
+    inc     [hl]
+    ld      b,[hl]
+    ld      a,[Debug_MenuMax]
+    inc     a
+    cp      b
+    jr      nz,:+
+    xor     a
+    ld      [hl],a
+:   call    TileEdit_DrawGFXMenu
+    jp      .drawcursor
+
+.checkLeft
+    bit     btnLeft,a
+    jr      z,.checkRight
+    PlaySFX menucursor
+    ld      a,[Debug_MenuPos]
+    sub     16
+    jr      nc,:+
+    xor     a
+:   ld      [Debug_MenuPos],a
+    call    TileEdit_DrawGFXMenu
+    jr      .drawcursor
+
+.checkRight
+    bit     btnRight,a
+    jr      z,.checkB
+    PlaySFX menucursor
+    ld      a,[Debug_MenuPos]
+    add     16
+    cp      7
+    jr      c,:+
+    ld      a,7
+:   ld      [Debug_MenuPos],a
+    call    TileEdit_DrawGFXMenu
+    jr      .drawcursor
+
+.checkB
+    bit     btnB,a
+    jr      z,.checkA
+    PlaySFX menuback
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      TileEdit_MainMenu
+
+.checkA
+    bit     btnA,a
+    jr      z,.drawcursor
+    PlaySFX menuselect
+    ld      a,[Debug_MenuPos]
+    ld      b,a
+    ld      a,[Debug_MenuMax]
+    cp      b
+    jr      nz,:+
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      TileEdit_MainMenu
+:
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    ld      a,1
+    ldh     [rVBK],a
+    
+    ld      hl,TileEdit_GFXPointers
+    ld      a,[Debug_MenuPos]
+    ld      e,a
+    ld      d,0
+    add     hl,de
+    add     hl,de
+    add     hl,de
+    ld      a,[hl+]
+    ld      b,a
+    call    _Bankswitch
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    ld      de,$8000
+    call    DecodeWLE
+    
+    xor     a
+    ldh     [rVBK],a
+    
+    jp      TileEdit_MainMenu
+
+.drawcursor
+    call    Debug_DrawCursor
+    halt
+    jp      TileEdit_GFXMenuLoop
+
+TileEdit_DrawGFXMenu:
+    ld      hl,$9800
+    ld      bc,$400
+:   WaitForVRAM
+    xor     a
+    ld      [hl+],a
+    dec     bc
+    ld      a,b
+    or      c
+    jr      nz,:-
+
+    ld      b,bank(TileEdit_GFXMenuText)
+    call    _Bankswitch
+    ld      a,[Debug_MenuPos]
+    and     $f0 
+    ld      b,16
+    ld      de,$9822
+:   push    af
+    ld      hl,TileEdit_GFXMenuText
+    add     a
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+    push    de
+    call    PrintString
+    pop     de
+    ld      a,e
+    add     32
+    ld      e,a
+    jr      nc,:+
+    inc     d
+:   pop     af
+    inc     a
+    cp      8
+    ret     z
+    dec     b
+    jr      nz,:---
+    ret
+
+; ================================================================
+
+TileEdit_GFXPointers:
+    dbw     bank(TestMapTiles),TestMapTiles
+    dbw     bank(PlainsTiles),PlainsTiles
+    dbw     bank(ForestTiles),ForestTiles
+    dbw     bank(TestMapTiles),TestMapTiles
+    dbw     bank(TestMapTiles),TestMapTiles
+    dbw     bank(TestMapTiles),TestMapTiles
+    dbw     bank(TestMapTiles),TestMapTiles
+
+; ================================================================
+
+section "Tile editor - Main menu text",romx
+TileEdit_MainMenuText:
+    dw  .loadgfx
+    dw  .loadfromsram
+    dw  .loadfromrom
+    dw  .exit
+
+.loadgfx        db  "LOAD GRAPHICS SET",0
+.loadfromsram   db  "LOAD FROM SRAM",0
+.loadfromrom    db  "LOAD FROM ROM",0
+.exit           db  "EXIT",0
+
+; ================================================================
+
+section "Tile editor - Graphics set selector text",romx
+TileEdit_GFXMenuText:
+    dw  .testmap
+    dw  .plains
+    dw  .forest
+    dw  .city
+    dw  .pyramid
+    dw  .cave
+    dw  .temple
+    dw  .cancel
+
+.testmap        db  "TEST MAP",0
+.plains         db  "PLAINS",0
+.forest         db  "FOREST",0
+.city           db  "CITY (NYI)",0
+.pyramid        db  "PYRAMID (NYI)",0
+.cave           db  "CAVE (NYI)",0
+.temple         db  "TEMPLE (NYI)",0
+.cancel         db  "CANCEL",0
