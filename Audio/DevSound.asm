@@ -3507,7 +3507,7 @@ DoArp:
     inc     de
     ld      [de],a
     inc     de
-    ld      a,$80
+    ld      a,TableLoop
     ld      [de],a
     inc     de
     xor     a
