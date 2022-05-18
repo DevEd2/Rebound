@@ -623,6 +623,8 @@ include "Engine/PerFade.asm"    ; Palette routines
 ; TRASHES: a, bc, hl
 ; RESTRICTIONS: Requires the LCD to be disabled, otherwise screen will not be properly cleared.
 ClearScreen:
+    xor     a
+    ldh     [rHDMA5],a  ; cancel pending HDMA transfers (do this before actually clearing VRAM)
     ; clear VRAM bank 0
     xor     a
     ldh     [rVBK],a
@@ -660,7 +662,49 @@ ClearScreen:
     ld      [Engine_CameraX],a
     ld      [Engine_CameraY],a
     ld      [sys_EnableHDMA],a
-    ldh     [rHDMA5],a  ; cancel pending HDMA transfers
+    ret
+
+; Same as ClearScreen, but preserves loaded graphics.
+ClearScreen2:
+    xor     a
+    ldh     [rHDMA5],a  ; cancel pending HDMA transfers (do this before actually clearing VRAM)
+    ; clear VRAM bank 0
+    xor     a
+    ldh     [rVBK],a
+    ld      hl,_SCRN0        ; clear from start of VRAM...
+    ld      bc,_SRAM-_SCRN0   ; ...to end of VRAM.
+    rst     FillRAM
+    
+    ; clear VRAM bank 1
+    ld      a,1
+    ldh     [rVBK],a
+    ldh     [sys_TempSVBK],a
+    xor     a
+    ld      hl,_SCRN0        ; clear from start of VRAM...
+    ld      bc,_SRAM-_SCRN0   ; ...to end of VRAM.
+    rst     FillRAM
+    xor     a
+    ldh     [rVBK],a
+    
+    ; clear OAM
+    ld      hl,OAMBuffer
+    ld      b,OAMBuffer.end-OAMBuffer
+    xor     a
+    call    _FillRAMSmall
+    
+    ; clear palette buffers
+    xor     a
+    ld      hl,sys_PalTransferBuf
+    ld      bc,sys_PalBuffersEnd-sys_PalTransferBuf
+    rst     FillRAM
+
+    ; reset scrolling
+    xor     a
+    ldh     [rSCX],a
+    ldh     [rSCY],a
+    ld      [Engine_CameraX],a
+    ld      [Engine_CameraY],a
+    ld      [sys_EnableHDMA],a
     ret
 
 ; Loads a 20x18 tilemap to VRAM.

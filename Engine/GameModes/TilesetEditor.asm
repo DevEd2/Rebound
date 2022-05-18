@@ -1,8 +1,13 @@
 section "Tileset editor RAM",wram0
 
+TileEdit_PaletteBank:       db
+TileEdit_PalettePointer:    dw
+
 section "Tileset editor routines",rom0
 
 GM_TileEdit:
+    xor     a
+    ld      [TileEdit_PaletteBank],a
 
 TileEdit_MainMenu:
 ;    call    ClearScreen
@@ -19,7 +24,7 @@ TileEdit_MainMenu:
 ;    ld      de,$8000
 ;    call    DecodeWLE
 
-    ld      a,3
+    ld      a,4
     ld      [Debug_MenuMax],a
     xor     a
     ld      [Debug_MenuPos],a
@@ -77,7 +82,7 @@ TileEdit_MainMenuLoop:
     xor     a
 :   ld      [Debug_MenuPos],a
     call    TileEdit_DrawMainMenu
-    jr      .drawcursor
+    jp      .drawcursor
 
 .checkRight
     bit     btnRight,a
@@ -87,7 +92,7 @@ TileEdit_MainMenuLoop:
     add     16
     cp      3
     jr      c,:+
-    ld      a,3
+    ld      a,[Debug_MenuMax]
 :   ld      [Debug_MenuPos],a
     call    TileEdit_DrawMainMenu
     jr      .drawcursor
@@ -125,6 +130,7 @@ TileEdit_MainMenuLoop:
     dw      .goto_gfxmenu
     dw      .goto_loadfromsram
     dw      .goto_loadfromrom
+    dw      .goto_editor
     dw      .goto_debugmenu
 .goto_gfxmenu:
     halt
@@ -136,6 +142,19 @@ TileEdit_MainMenuLoop:
     xor     a
     ldh     [rLCDC],a
     jp      GM_DebugMenu
+.goto_editor
+    ld      a,[TileEdit_PaletteBank]
+    and     a
+    jr      z,.cant_goto_editor
+    halt
+    xor     a
+    ldh     [rLCDC],a
+    jp      TileEdit_Editor
+.cant_goto_editor
+    ld      hl,str_NoTileset
+    call    TileEdit_PrintString
+    ; fall through to going_nowhere
+
 .goto_loadfromsram
     ; TODO
 .goto_loadfromrom
@@ -151,8 +170,10 @@ TileEdit_MainMenuLoop:
 TileEdit_DrawMainMenu:
     ld      hl,$9800
     ld      bc,$400
-:   WaitForVRAM
-    xor     a
+:   xor     a
+    push    af
+    WaitForVRAM
+    pop     af
     ld      [hl+],a
     dec     bc
     ld      a,b
@@ -185,7 +206,7 @@ TileEdit_DrawMainMenu:
     inc     d
 :   pop     af
     inc     a
-    cp      4
+    cp      5
     ret     z
     dec     b
     jr      nz,:---
@@ -252,7 +273,7 @@ TileEdit_GFXMenuLoop:
     xor     a
 :   ld      [Debug_MenuPos],a
     call    TileEdit_DrawGFXMenu
-    jr      .drawcursor
+    jp      .drawcursor
 
 .checkRight
     bit     btnRight,a
@@ -303,14 +324,27 @@ TileEdit_GFXMenuLoop:
     add     hl,de
     add     hl,de
     add     hl,de
+    add     hl,de
+    add     hl,de
+    add     hl,de
     ld      a,[hl+]
     ld      b,a
     call    _Bankswitch
     ld      a,[hl+]
+    push    hl
     ld      h,[hl]
     ld      l,a
     ld      de,$8000
     call    DecodeWLE
+    pop     hl
+    inc     hl
+    ld      a,[hl+]
+    ld      [TileEdit_PaletteBank],a
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      [TileEdit_PalettePointer],a
+    ld      a,h
+    ld      [TileEdit_PalettePointer+1],a
     
     xor     a
     ldh     [rVBK],a
@@ -325,8 +359,10 @@ TileEdit_GFXMenuLoop:
 TileEdit_DrawGFXMenu:
     ld      hl,$9800
     ld      bc,$400
-:   WaitForVRAM
-    xor     a
+:   xor     a
+    push    af
+    WaitForVRAM
+    pop     af
     ld      [hl+],a
     dec     bc
     ld      a,b
@@ -367,14 +403,75 @@ TileEdit_DrawGFXMenu:
 
 ; ================================================================
 
+TileEdit_Editor:
+    call    ClearScreen2
+    ld      a,[TileEdit_PaletteBank]
+    ld      b,a
+    rst     Bankswitch
+    ld      hl,TileEdit_PalettePointer
+    ld      a,[hl+]
+    ld      h,[hl]
+    ld      l,a
+
+    ld      b,8
+    xor     a
+:   push    af
+    push    bc
+    call    LoadPal
+    pop     bc
+    pop     af
+    inc     a
+    dec     b
+    jr      nz,:-
+    call    ConvertPals
+    call    PalFadeInWhite
+
+    ld      a,LCDCF_ON | LCDCF_BG8000 | LCDCF_OBJON | LCDCF_BGON
+    ldh     [rLCDC],a
+    ld      a,IEF_VBLANK
+    ldh     [rIE],a
+    ei
+    
+TileEdit_EditorLoop:
+    ld      a,[sys_CurrentFrame]
+    
+    ld      bc,$9800
+    call    TileEdit_DrawHex4x8
+
+    halt
+    jr      TileEdit_EditorLoop
+
+; ================================================================
+
+TileEdit_PrintString:
+    ld      b,bank(TileEdit_Strings)
+    rst     Bankswitch
+    ld      de,$9a20
+:   ld      a,[hl+]
+    and     a
+    ret     z
+    sub     " "
+    ld      b,a
+    WaitForVRAM
+    ld      a,b
+    ld      [de],a
+    inc     de
+    jr      :-
+    ret
+
+TileEdit_DrawHex4x8:
+    ret
+
+; ================================================================
+
 TileEdit_GFXPointers:
-    dbw     bank(TestMapTiles),TestMapTiles
-    dbw     bank(PlainsTiles),PlainsTiles
-    dbw     bank(ForestTiles),ForestTiles
-    dbw     bank(TestMapTiles),TestMapTiles
-    dbw     bank(TestMapTiles),TestMapTiles
-    dbw     bank(TestMapTiles),TestMapTiles
-    dbw     bank(TestMapTiles),TestMapTiles
+    dwb2    TestMapTiles,Pal_TestMap
+    dwb2    PlainsTiles,Pal_Plains
+    dwb2    ForestTiles,Pal_Forest
+    dwb2    TestMapTiles,Pal_TestMap
+    dwb2    TestMapTiles,Pal_TestMap
+    dwb2    TestMapTiles,Pal_TestMap
+    dwb2    TestMapTiles,Pal_TestMap
 
 ; ================================================================
 
@@ -383,11 +480,13 @@ TileEdit_MainMenuText:
     dw  .loadgfx
     dw  .loadfromsram
     dw  .loadfromrom
+    dw  .starteditor
     dw  .exit
 
 .loadgfx        db  "LOAD GRAPHICS SET",0
 .loadfromsram   db  "LOAD FROM SRAM",0
 .loadfromrom    db  "LOAD FROM ROM",0
+.starteditor    db  "START EDITOR",0
 .exit           db  "EXIT",0
 
 ; ================================================================
@@ -411,3 +510,24 @@ TileEdit_GFXMenuText:
 .cave           db  "CAVE (NYI)",0
 .temple         db  "TEMPLE (NYI)",0
 .cancel         db  "CANCEL",0
+
+; ================================================================
+
+section "Tile editor - Editor text",romx
+TileEdit_Strings:
+str_TileID:     db  "TILE ID",0
+str_Palette:    db  "PALETTE",0
+str_FlipX:      db  "HORIZ. FLIP",0
+str_FlipY:      db  "VERT. FLIP",0
+str_Priority:   db  "PRIORITY",0
+str_Saved:      db  "TILESET SAVED",0
+str_Loaded:     db  "TILESET LOADED",0
+str_SaveError:  db  "COULD NOT SAVE!",0
+str_LoadError:  db  "COULD NOT LOAD!",0
+str_NoTileset:  db  "LOAD TILESET FIRST!",0
+
+; ================================================================
+
+section "Tile editor - 4x8 hex font",romx
+
+HexFont4x8:     incbin  "GFX/HexFont4.1bpp"
