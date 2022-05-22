@@ -92,7 +92,7 @@ DebugLoop:
     dw      Debug_ExitToLevelSelect
     dw      Debug_ExitToSoundTest
     dw      Debug_ExitToSFXTest
-    dw      Debug_ExitToTileEditor
+    dw      Debug_ExitToMetatileViewer
     dw      Debug_ExitToGallery
 
 .drawcursor
@@ -146,11 +146,11 @@ Debug_ExitToSFXTest:
     ldh     [rLCDC],a
     jp      GM_SFXTest
     
-Debug_ExitToTileEditor:
+Debug_ExitToMetatileViewer:
     halt
     xor     a
     ldh     [rLCDC],a
-    jp      GM_TileEdit
+    jp      GM_MetatileViewer
 
 Debug_ExitToGallery:
     halt
@@ -172,7 +172,7 @@ Debug_MainMenuText:
     db  "   LEVEL SELECT     "
     db  "   SOUND TEST       "
     db  "   SFX TEST         "
-    db  "   TILESET EDITOR   "
+    db  "   METATILE VIEWER  "
     db  "   GALLERY          "
     db  "                    "
     db  "                    "

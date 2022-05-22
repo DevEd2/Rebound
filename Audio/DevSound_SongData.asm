@@ -9,8 +9,8 @@
 
     const   MUS_MENU
     const   MUS_PLAINS
-    const   MUS_CITY
     const   MUS_FOREST
+    const   MUS_CITY
     const   MUS_PYRAMID
     const   MUS_CAVE
     const   MUS_TEMPLE
@@ -30,8 +30,8 @@ NUM_SONGS   equ const_value
 SongSpeedTable:
     db  3,4 ; menu
     db  6,6 ; plains
-    db  3,3 ; city
     db  8,8 ; forest
+    db  3,3 ; city
     db  5,4 ; pyramid
     db  3,3 ; cave
     db  3,3 ; temple
@@ -45,8 +45,8 @@ SongSpeedTable:
 SongPointerTable:
     dw  PT_Menu
     dw  PT_Plains
-    dw  PT_City
     dw  PT_Forest
+    dw  PT_City
     dw  PT_Pyramid
     dw  PT_Cave
     dw  PT_Temple

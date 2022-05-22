@@ -614,8 +614,8 @@ SoundTest_SongNames:
 ;        -##################-------------
     db  "     Main Theme                 "
     db  " Humble  Beginnings             "
-    db  "   Rock the Block               "
     db  "   Mystic  Medley               "
+    db  "   Rock the Block               "
     db  "    Pyramid Jams                "
     db  "   Cave Cacophony               "
     db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune

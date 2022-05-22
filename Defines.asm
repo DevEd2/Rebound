@@ -160,6 +160,15 @@ dwb2:                  macro
     dw      \2
 endm
 
+dwb3:                  macro
+    db      bank(\1)
+    dw      \1
+    db      bank(\2)
+    dw      \2
+    db      bank(\3)
+    dw      \3
+endm
+
 if DebugMode
 debugmsg:               macro
     ld      d,d

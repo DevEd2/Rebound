@@ -12,13 +12,13 @@ GM_TileEdit:
 TileEdit_MainMenu:
 ;    call    ClearScreen
 
-;    ldfar   hl,Pal_DebugScreen
-;    xor     a
-;    call    LoadPal
-;    ld      a,8
-;    ld      hl,Pal_DebugScreen
-;    call    LoadPal
-;    call    CopyPalettes
+    ldfar   hl,Pal_DebugScreen
+    xor     a
+    call    LoadPal
+    ld      a,8
+    ld      hl,Pal_DebugScreen
+    call    LoadPal
+    call    CopyPalettes
 
 ;    ldfar   hl,Font
 ;    ld      de,$8000
@@ -128,8 +128,8 @@ TileEdit_MainMenuLoop:
     
 .gotolist
     dw      .goto_gfxmenu
-    dw      .goto_loadfromsram
-    dw      .goto_loadfromrom
+    dw      .goto_load
+    dw      .goto_save
     dw      .goto_editor
     dw      .goto_debugmenu
 .goto_gfxmenu:
@@ -155,9 +155,9 @@ TileEdit_MainMenuLoop:
     call    TileEdit_PrintString
     ; fall through to going_nowhere
 
-.goto_loadfromsram
+.goto_load
     ; TODO
-.goto_loadfromrom
+.goto_save
     ; TODO
 .going_nowhere
     PlaySFX menudeny
@@ -434,11 +434,23 @@ TileEdit_Editor:
     
 TileEdit_EditorLoop:
     ld      a,[sys_CurrentFrame]
-    
-    ld      bc,$9800
+    ld      b,$40
     call    TileEdit_DrawHex4x8
-
+    WaitForVRAM
+    ld      a,$40
+    ld      [_SCRN0],a
+    
+    
+    ld      a,[sys_btnPress]
+    bit     btnB,a
+    jr      z,:+
     halt
+    xor     a
+    ldh     [rLCDC],a
+    call    ClearScreen2
+    jp      TileEdit_MainMenu
+
+:   halt
     jr      TileEdit_EditorLoop
 
 ; ================================================================
@@ -459,7 +471,91 @@ TileEdit_PrintString:
     jr      :-
     ret
 
+; A = number to draw
+; B = tile ID
+
 TileEdit_DrawHex4x8:
+
+    push    bc
+    ld      b,bank(HexFont4x8)
+    rst     Bankswitch 
+    pop     bc
+    
+    push    af
+    push    bc
+    and     $f0
+    swap    a
+    ld      l,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    ld      de,HexFont4x8
+    add     hl,de
+    ld      d,h
+    ld      e,l
+    
+    ; get tile address
+    pop     af  ; A = old B (destroys flags but they aren't needed)
+    ld      c,a
+    and     $f0
+    swap    a
+    or      $80
+    ld      h,a
+    ld      a,c
+    and     $f
+    swap    a
+    ld      l,a
+    push    hl
+    
+    ld      b,8
+:   ld      a,[de]
+    ld      c,a
+    WaitForVRAM
+    ld      [hl],c
+    inc     l
+    WaitForVRAM
+    ld      [hl],c
+    inc     l
+    inc     de
+    dec     b
+    jr      nz,:-
+    
+    pop     hl
+    pop     af
+    
+    push    hl
+    and     $0f
+    ld      l,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    ld      de,HexFont4x8
+    add     hl,de
+    ld      d,h
+    ld      e,l
+    pop     hl
+
+    ld      b,8
+:   ld      a,[de]
+    swap    a
+    push    af
+    WaitForVRAM
+    pop     af
+    or      [hl]
+    ld      [hl+],a
+    ld      a,[de]
+    swap    a
+    push    af
+    WaitForVRAM
+    pop     af
+    or      [hl]
+    ld      [hl+],a
+    inc     de
+    dec     b
+    jr      nz,:-
+ 
     ret
 
 ; ================================================================
@@ -478,14 +574,14 @@ TileEdit_GFXPointers:
 section "Tile editor - Main menu text",romx
 TileEdit_MainMenuText:
     dw  .loadgfx
-    dw  .loadfromsram
-    dw  .loadfromrom
+    dw  .loadtileset
+    dw  .save
     dw  .starteditor
     dw  .exit
 
 .loadgfx        db  "LOAD GRAPHICS SET",0
-.loadfromsram   db  "LOAD FROM SRAM",0
-.loadfromrom    db  "LOAD FROM ROM",0
+.loadtileset    db  "LOAD TILESET",0
+.save           db  "SAVE TILESET",0
 .starteditor    db  "START EDITOR",0
 .exit           db  "EXIT",0
 

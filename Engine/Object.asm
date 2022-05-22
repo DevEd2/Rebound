@@ -65,9 +65,9 @@ RESPAWN_LIST_SIZE           equ 16
 Respawn_Index:              ds  RESPAWN_LIST_SIZE ; -1 = Empty
 Respawn_Next:               db
 
-PARTICLE_COUNT              equ 6 ; maximum number of particle slots
+PARTICLE_COUNT              equ 6  ; maximum number of particle slots
 
-PARTICLE_FLICKERTIME        equ 30 ; particles will flicker when their lifetime is smaller than this
+PARTICLE_FLICKERTIME        equ 16 ; particles will flicker when their lifetime is smaller than this
 
 PARTICLE_FLAG_DSOLID        equ 0 ; Destroyed when colliding with a solid tile
 PARTICLE_FLAG_DWATER        equ 1 ; Destroyed when colliding with water

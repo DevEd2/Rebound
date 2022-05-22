@@ -1252,7 +1252,6 @@ Player_AccelerateLeft:
     ld      hl,Anim_Player_Left2
     call    Player_SetAnimation
     ld      hl,-Player_MaxSpeedWater
-    pop     hl
 :   ld      a,h
     ld      [Player_XVelocity],a
     ld      a,l
@@ -1706,7 +1705,6 @@ Player_SeeingStars:
     add     hl,bc
     ld      [hl],1<<PARTICLE_FLAG_GRAVITY
     ret
-
 
 ; INPUT: a = current Y position
 ;        b = previous Y position

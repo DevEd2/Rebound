@@ -334,7 +334,7 @@ include "Engine/GameModes/Gallery.asm"
 
 ; ================================
 
-include "Engine/GameModes/TilesetEditor.asm"
+include "Engine/GameModes/MetatileViewer.asm"
 
 ; ================================
 

@@ -173,54 +173,14 @@ LevelLoop::
     ld      a,[Engine_CameraTargetX]
     ld      [Engine_CameraX],a
 
-    ; Vertical camera following logic:
-    ; Whenever the player bounces on a floor higher than their last bounce, the camera
-    ; moves to follow the player vertically. This helps to reduce motion sickness on big
-    ; screens (i.e. Game Boy Player, emulators)
-
-    ; if player is falling and Y position > Y position at last bounce, camera Y follows player directly
-    ld      a,[Player_LastBounceY]
-    ld      b,a
-;   ld      a,[Player_YVelocity]
-;   add     2
-;   add     b                       ; add Y velocity + 1 to prevent camera following on bounce at same height
-;   ld      b,a
-    ld      a,[Player_YPos]
-    cp      b
-    jr      c,.checkhigher
     ld      a,[Engine_CameraTargetY]
-    ld      [Engine_CameraY],a
-    jr      .doparallax
-.checkhigher
-    ; if player bounces on higher surface than previous surface, then move camera vertically to follow player    
-    ld      a,[Player_LastBounceY]
-    ld      b,a
-    ld      a,[Player_YPos]
-    cp      b
-    jr      nc,.doparallax
-    ld      a,[Engine_CameraIsTracking]
-    and     a
-    jr      z,.doparallax           ; if camera isn't tracking the player, skip
-
-    ld      a,[Engine_CameraY]
-    sub     2
-    jr      nc,.noreset             ; reset camera if overflow occurs
-    xor     a
-    ld      [Engine_CameraY],a
-    ld      [Engine_CameraIsTracking],a
-    jr      .doparallax
-.noreset
-    ld      [Engine_CameraY],a
-    ld      b,a
-    ld      a,[Engine_BounceCamTarget]
-    cp      b                       ; is camera Y < target camera Y?
-    jr      c,.doparallax           ; if not, skip
-
     ld      [Engine_CameraY],a
     xor     a
     ld      [Engine_CameraIsTracking],a
     
 .doparallax
+
+
     and     a   ; clear carry
     push    de
     ld      a,[Engine_CameraX]

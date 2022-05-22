@@ -231,9 +231,9 @@ ForestTiles:
 section "Forest tileset - Collision map + metatiles",romx
 
 ColMap_Forest:
-	db	0,1,1,1,1,1,0,0,0,4,5,5,6,6,6,6
-	db	3,1,0,1,1,1,0,0,0,4,1,0,6,6,6,6
-	db	3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	db	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -251,3 +251,4 @@ ColMap_Forest:
 Tileset_Forest:
 	dw	ColMap_Forest
     dbw bank(ForestTiles),ForestTiles
+    incbin  "GFX/Tilesets/Forest.blk"

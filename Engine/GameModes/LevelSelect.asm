@@ -1,6 +1,6 @@
 section "Level select RAM",wram0
 
-NUM_LEVEL_SELECT_ENTRIES = 8
+NUM_LEVEL_SELECT_ENTRIES = 7
 
 section "Level select routines",rom0
 GM_LevelSelect:
@@ -162,7 +162,7 @@ LevelSelect_DrawNames:
 section "Level names",romx
 LevelSelect_LevelNames:
     dw       .0
-    dw       .1, .2, .3, .4, .5, .6, .7
+    dw       .1, .2, .3, .4, .5, .6;, .7
 ;    dw       .8, .9,.10,.11,.12,.13,.14
 ;    dw      .15,.16,.17,.18,.19,.20,.21
 ;    dw      .22,.23,.24,.25,.26,.27,.28
@@ -177,19 +177,19 @@ LevelSelect_LevelNames:
 .5  db          "PLAIN PLAINS 5",0
 .6  db          "PLAIN PLAINS 6",0
 ;.7  db          "BOSS 1",0
-;.8  db          "CENTRAL CITY 1",0
-;.9 db           "CENTRAL CITY 2",0
-;.10 db          "CENTRAL CITY 3",0
-;.11 db          "CENTRAL CITY 4",0
-;.12 db          "CENTRAL CITY 5",0
-;.13 db          "CENTRAL CITY 6",0
+;.8  db          "FORLORN FOREST 1",0
+;.9  db          "FORLORN FOREST 2",0
+;.10 db          "FORLORN FOREST 3",0
+;.11 db          "FORLORN FOREST 4",0
+;.12 db          "FORLORN FOREST 5",0
+;.13 db          "FORLORN FOREST 6",0
 ;.14 db          "BOSS 2",0
-.7 db          "FORLORN FOREST 1",0
-;.16 db          "FORLORN FOREST 2",0
-;.17 db          "FORLORN FOREST 3",0
-;.18 db          "FORLORN FOREST 4",0
-;.19 db          "FORLORN FOREST 5",0
-;.20 db          "FORLORN FOREST 6",0
+;.15  db          "CENTRAL CITY 1",0
+;.16 db           "CENTRAL CITY 2",0
+;.17 db          "CENTRAL CITY 3",0
+;.18 db          "CENTRAL CITY 4",0
+;.19 db          "CENTRAL CITY 5",0
+;.20 db          "CENTRAL CITY 6",0
 ;.21 db          "BOSS 3",0
 ;.22 db          "PYRAMID POWER 1",0
 ;.23 db          "PYRAMID POWER 2",0
