@@ -514,9 +514,14 @@ Level_TransitionUp:
     ret
     
 Level_TransitionDown:
+    ld      b,b
     ld      a,[Engine_CurrentSubarea]
-    cp      $30
-    jp      nc,KillPlayer
+    and     $30
+    ld      b,a
+    ld      a,[Engine_NumSubareas]
+    swap    a
+    cp      b
+    jp      z,KillPlayer
     ld      a,[Player_MovementFlags]
     bit     2,a
     ret     nz
