@@ -1,6 +1,6 @@
 section "Level select RAM",wram0
 
-NUM_LEVEL_SELECT_ENTRIES = 7
+NUM_LEVEL_SELECT_ENTRIES = 9
 
 section "Level select routines",rom0
 GM_LevelSelect:
@@ -162,8 +162,8 @@ LevelSelect_DrawNames:
 section "Level names",romx
 LevelSelect_LevelNames:
     dw       .0
-    dw       .1, .2, .3, .4, .5, .6;, .7
-;    dw       .8, .9,.10,.11,.12,.13,.14
+    dw       .1, .2, .3, .4, .5, .6,; .7
+    dw       .8, .9,;.10,.11,.12,.13,.14
 ;    dw      .15,.16,.17,.18,.19,.20,.21
 ;    dw      .22,.23,.24,.25,.26,.27,.28
 ;    dw      .29,.30,.31,.32,.33,.34,.35
@@ -177,8 +177,8 @@ LevelSelect_LevelNames:
 .5  db          "PLAIN PLAINS 5",0
 .6  db          "PLAIN PLAINS 6",0
 ;.7  db          "BOSS 1",0
-;.8  db          "FORLORN FOREST 1",0
-;.9  db          "FORLORN FOREST 2",0
+.8  db          "FORLORN FOREST 1",0
+.9  db          "FORLORN FOREST 2",0
 ;.10 db          "FORLORN FOREST 3",0
 ;.11 db          "FORLORN FOREST 4",0
 ;.12 db          "FORLORN FOREST 5",0

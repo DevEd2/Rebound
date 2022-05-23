@@ -13,6 +13,62 @@ MapID_\1 = NUM_LEVELS
 NUM_LEVELS = NUM_LEVELS + 1
 endm
 
+LevelParallaxFlags:
+    ; test map
+    db          1
+    ; plains
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+;    db          0
+    ; forest
+    db          0
+    db          0
+    db          0
+    db          0
+    db          0
+    db          0
+    db          0
+
+    ; city
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          0
+
+    ; pyramid
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          0
+
+    ; cave
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          0
+
+    ; temple
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          1
+    db          0
+
 LevelPointers:
     addlevel    TestMap
     
@@ -24,8 +80,8 @@ LevelPointers:
     addlevel    Plains6
 ;   addlevel    PlainsBoss
         
-;   addlevel    Forest1
-;   addlevel    Forest2
+    addlevel    Forest1
+    addlevel    Forest2
 ;   addlevel    Forest3
 ;   addlevel    Forest4
 ;	addlevel	Forest5

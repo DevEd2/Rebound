@@ -31,6 +31,16 @@ section "Level routines",rom0
 
 ; INPUT: A = Map ID
 GM_Level:
+    push    af
+    ld      hl,LevelParallaxFlags
+    add     l
+    ld      l,a
+    jr      nc,:+
+    inc     h
+:   ld      a,[hl]
+    ld      [sys_EnableParallax],a
+    pop     af
+
     call    GetLevel
     push    hl
     ; initialize variables
@@ -179,7 +189,9 @@ LevelLoop::
     ld      [Engine_CameraIsTracking],a
     
 .doparallax
-
+    ld      a,[sys_EnableParallax]
+    and     a
+    jp      z,.noparallax
 
     and     a   ; clear carry
     push    de
@@ -214,6 +226,7 @@ LevelLoop::
     farcall Parallax_ShiftVertical
 .skipY
 
+.noparallax
 .nocamera
     
     call    SpawnMonsters

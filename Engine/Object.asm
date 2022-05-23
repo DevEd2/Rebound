@@ -36,6 +36,9 @@ COLLECTABLE_1UP             equ 3
 MONSTER_FISH_LR             equ 4
 MONSTER_FISH_UD             equ 5
 MONSTER_FISH_CIRC           equ 6
+MONSTER_LOG                 equ 7
+MONSTER_LOG_BOUNCING        equ 8
+MONSTER_LOG_SPAWNER         equ 9
 
 Monster_ID:                 ds  MONSTER_COUNT
 Monster_WRAMPointer:        ds  MONSTER_COUNT
@@ -133,6 +136,10 @@ ObjectInit:
     minit   -$000, $080,1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,1 ; MONSTER_FISH_UD
     minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER, BANK(Anim_Fish_Swim),Anim_Fish_Swim,1 ; MONSTER_FISH_CIRC
     
+    minit   -$080, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG
+    minit   -$080, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG_BOUNCING
+    minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG_SPAWNER
+    
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
 section "Object Tile Pointers",romx
@@ -143,6 +150,10 @@ ObjectGraphics:
     mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_LR
     mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_UD
     mgraphic    bank(FishTiles),FishTiles           ; MONSTER_FISH_CIRC
+    
+    mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG
+    mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_BOUNCING
+    mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_SPAWNER
     
 ; Object animations
 section "Object Animation Data",romx
@@ -181,12 +192,16 @@ Anim_Fish_Swim:
 section "Object Behvaiors",romx
 BehaviorTable:
     dw      Monster_NoBehavior      ; MONSTER_NULL
-    dw      Monster_MoveLeftRight   ; MONSTER_TEST
-    dw      Monster_MoveLeftRight   ; MONSTER_TEST2
+    dw      Monster_Goony           ; MONSTER_TEST
+    dw      Monster_Goony           ; MONSTER_TEST2
     dw      Collectable_ExtraLife   ; COLLECTABLE_1UP
     dw      Monster_Fish_LR         ; MONSTER_FISH_LR
     dw      Monster_Fish_UD         ; MONSTER_FISH_UD
     dw      Monster_Fish_Circ       ; MONSTER_FISH_CIRC
+    
+    dw      Monster_MoveLeftRight   ; MONSTER_LOG
+    dw      Monster_BounceLeftRight ; MONSTER_LOG_BOUNCING
+    dw      Monster_NoBehavior      ; MONSTER_LOG_SPAWNER (TODO)
 
 BehaviorDispatch:
     bit     7,h
@@ -224,7 +239,7 @@ Monster_TestBehavior:
 :
     ret
   
-Monster_MoveLeftRight:
+Monster_Goony:
     ld      hl,Monster_Collision
     add     hl,bc
     ld      a,[hl]
@@ -277,6 +292,119 @@ Monster_MoveLeftRight:
     ld      a,[hl]
     xor     1<<MONSTER_FLAG_FLIPH
     ld      [hl],a
+    ret
+
+Monster_MoveLeftRight:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    add     1
+    push    af
+    ld      [hl],a
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    pop     af
+    ld      a,[hl]
+    cpl
+    adc     0
+    ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+:
+    ld      a,e
+    and     MONSTER_COLLISION_VERT
+    jr      z,:+
+    xor     a
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      [hl],a
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],a
+:
+    bit     MONSTER_COLLISION_PLAYER,e
+    ld      de,0
+;    ld      de,Anim_GoonyKill
+    jp      nz,Monster_CheckKill
+    ; death animation flipping
+;    ld      hl,Monster_Flags
+;    add     hl,bc
+;    bit     MONSTER_FLAG_REMOVE_Y,[hl]
+;    ret     z
+;    ld      a,[sys_CurrentFrame]
+;    and     $7
+;    and     a
+;    ret     nz
+;    ld      a,[hl]
+;    xor     1<<MONSTER_FLAG_FLIPH
+;    ld      [hl],a
+    ret
+
+Monster_BounceLeftRight:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    ld      a,[hl]
+    ld      e,a
+    and     MONSTER_COLLISION_HORIZ
+    jr      z,:+
+    ld      hl,Monster_XVelocityS
+    add     hl,bc
+    ld      a,[hl]
+    cpl
+    add     1
+    push    af
+    ld      [hl],a
+    ld      hl,Monster_XVelocity
+    add     hl,bc
+    pop     af
+    ld      a,[hl]
+    cpl
+    adc     0
+    ld      [hl],a
+    ld      hl,Monster_Flags
+    add     hl,bc
+    ld      a,[hl]
+    xor     1<<MONSTER_FLAG_FLIPH
+    ld      [hl],a
+:
+    ld      a,e
+    and     MONSTER_COLLISION_VERT
+    jr      z,:+
+    ld      hl,Monster_YVelocity
+    add     hl,bc
+    ld      a,high(-$0400)
+    ld      [hl],a
+    xor     a
+    ld      hl,Monster_YVelocityS
+    add     hl,bc
+    ld      [hl],a
+:
+    bit     MONSTER_COLLISION_PLAYER,e
+    ld      de,0
+;    ld      de,Anim_GoonyKill
+    jp      nz,Monster_CheckKill
+    ; death animation flipping
+;    ld      hl,Monster_Flags
+;    add     hl,bc
+;    bit     MONSTER_FLAG_REMOVE_Y,[hl]
+;    ret     z
+;    ld      a,[sys_CurrentFrame]
+;    and     $7
+;    and     a
+;    ret     nz
+;    ld      a,[hl]
+;    xor     1<<MONSTER_FLAG_FLIPH
+;    ld      [hl],a
     ret
     
 Monster_Fish_LR:
@@ -512,6 +640,9 @@ Monster_CheckKill:
     add     hl,bc
     ld      [hl],low(-$300)
     ; set animation
+    ld      a,e
+    or      d
+    jr      z,:+    ; skip if anim pointer = 0
     ld      hl,Monster_AnimPtrHi
     add     hl,bc
     ld      [hl],d
@@ -521,7 +652,7 @@ Monster_CheckKill:
     ld      hl,Monster_AnimTimer
     add     hl,bc
     ld      [hl],1
-    ; make player bounce
+:   ; make player bounce
     ld      a,[sys_btnHold]
     bit     btnA,a
     jr      nz,.highbounce
