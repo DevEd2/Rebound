@@ -514,7 +514,6 @@ Level_TransitionUp:
     ret
     
 Level_TransitionDown:
-    ld      b,b
     ld      a,[Engine_CurrentSubarea]
     and     $30
     ld      b,a

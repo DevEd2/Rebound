@@ -105,7 +105,7 @@ MetatileViewer_GFXMenuLoop:
     halt
     xor     a
     ldh     [rLCDC],a
-    jp      MetatileViewer_GFXMenu
+    jp      GM_DebugMenu
 
 .checkA
     bit     btnA,a
@@ -119,7 +119,7 @@ MetatileViewer_GFXMenuLoop:
     halt
     xor     a
     ldh     [rLCDC],a
-    jp      MetatileViewer_GFXMenu
+    jp      GM_DebugMenu
 :
     halt
     xor     a
