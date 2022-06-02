@@ -2019,23 +2019,51 @@ UpdateRegisters:
 .doneautopan
 
     ; update panning
+    ld      b,b
+    xor     a
+    ld      b,a
+    ld      hl,VGMSFX_Flags
+    bit     bSFX_CH1,[hl]
+    jr      nz,:+
     ld      a,[DS_CH1Pan]
     ld      b,a
+    jr      :++
+:   ld      a,%00010001
+    or      b
+    ld      b,a
+:   bit     bSFX_CH2,[hl]
+    jr      nz,:+
     ld      a,[DS_CH2Pan]
     rla
-    add     b
+    or      b
     ld      b,a
+    jr      :++
+:   ld      a,%00100010
+    or      b
+    ld      b,a
+:   bit     bSFX_CH3,[hl]
+    jr      nz,:+
     ld      a,[DS_CH3Pan]
     rla 
     rla
-    add     b
+    or      b
     ld      b,a
+    jr      :++
+:   ld      a,%01000100
+    or      b
+    ld      b,a
+:   bit     bSFX_CH4,[hl]
+    jr      nz,:+
     ld      a,[DS_CH4Pan]
     rla
     rla
     rla
-    add     b
-    ldh     [rNR51],a
+    or      b
+    jr      :++
+:   ld      a,%10001000
+    or      b
+    ld      b,a
+:   ldh     [rNR51],a
 
     ; update global volume + fade system
     ld      a,[DS_FadeType]
