@@ -2019,7 +2019,6 @@ UpdateRegisters:
 .doneautopan
 
     ; update panning
-    ld      b,b
     xor     a
     ld      b,a
     ld      hl,VGMSFX_Flags

@@ -471,8 +471,11 @@ Level_TransitionUp:
     and     $3f
     ld      [Engine_CurrentSubarea],a
 
+    ld      a,[VGMSFX_Flags]
+    bit     7,a
+    jr      nz,:+
     PlaySFX transitionup
-    
+:    
     ld      b,16
 .loop
     push    bc
@@ -529,8 +532,12 @@ Level_TransitionDown:
     add     $10
     and     $3f
     ld      [Engine_CurrentSubarea],a
+ 
+    ld      a,[VGMSFX_Flags]
+    bit     7,a
+    jr      nz,:+
     PlaySFX transitiondown
-    
+:    
     ld      b,16
 .loop
     push    bc
