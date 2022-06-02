@@ -58,6 +58,8 @@ Player_LowWallBounceHeight  equ -$100
 Player_TerminalVelocity     equ $600
 Player_HitboxSize           equ 6
 
+Player_SpringStrength       equ -$750
+
 ; Player_MovementFlags defines
 
 bPlayerIsMoving             = 0
@@ -305,9 +307,18 @@ ProcessPlayer:
     
 .checkkill
     cp      COLLISION_KILL
-    jr      nz,.donecollide
+    jr      nz,.checkspring
     call    KillPlayer
     jp      .moveair
+
+.checkspring
+    cp      COLLISION_SPRING
+    jr      nz,.donecollide
+    PlaySFX spring
+    ld      a,high(Player_SpringStrength)
+    ld      [Player_YVelocity],a
+    ld      a,low(Player_SpringStrength)
+    ld      [Player_YVelocityS],a
     
     
 .donecollide

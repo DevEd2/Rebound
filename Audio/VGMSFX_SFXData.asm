@@ -48,4 +48,6 @@ endm
 	defsfx	enemykill,SFX_CH1
     defsfx  transitionup,SFX_CH1
     defsfx  transitiondown,SFX_CH1
+    defsfx  ready,SFX_CH3
+    defsfx  go,SFX_CH3
     endsfx
