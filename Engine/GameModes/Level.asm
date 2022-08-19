@@ -604,6 +604,25 @@ include "Data/LevelPointers.asm"
 
 ; Input:    HL = Pointer to map header
 LoadMap:
+	; clear map memory space
+	ld		b,b
+	push	hl
+	ld		e,7
+.clearloop
+	ld		a,e
+	ldh		[rSVBK],a
+	ld		hl,Engine_LevelData
+	ld		bc,$1000
+:	xor		a
+	ld		[hl+],a
+	dec		bc
+	ld		a,b
+	or		c
+	jr		nz,:-
+	dec		e
+	jr		nz,.clearloop
+	pop		hl
+
     ld      a,[sys_CurrentBank]
     ld      [Engine_MapBank],a
     ld      a,[hl+] ; get screen count

@@ -8,7 +8,7 @@ BuildError () {
 }
 
 echo Assembling...
-rgbasm -o $PROJECTNAME.obj -p 255 Main.asm
+rgbasm -o $PROJECTNAME.obj -p 255 Main.asm -Wno-numeric-string -Wno-obsolete
 if test $? -eq 1; then
     BuildError
 fi
