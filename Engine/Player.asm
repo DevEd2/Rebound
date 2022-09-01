@@ -241,7 +241,7 @@ ProcessPlayer:
     
 .checkcoin
     cp      COLLISION_COIN  ; are we touching a coin?
-    jr      nz,.checkgoal
+    jr      nz,.checkkill
     ; replace coin tile with "blank" tile
     ; TODO: Get tile from background
     push    de
@@ -293,17 +293,6 @@ ProcessPlayer:
     ld      [Player_CoinCount],a
     ld      [Player_CoinCount+1],a
     jr      .decel
-    
-.checkgoal
-;   cp      COLLISION_GOAL
-;   jr      nz,.checkkill
-;.dogoal
-;   ld      a,1
-;   ld      [Engine_LockCamera],a
-;   ld      a,[Player_MovementFlags]
-;   set     bPlayerStageEnd,a
-;   ld      [Player_MovementFlags],a
-;   jp      .moveair
     
 .checkkill
     cp      COLLISION_KILL

@@ -605,7 +605,6 @@ include "Data/LevelPointers.asm"
 ; Input:    HL = Pointer to map header
 LoadMap:
 	; clear map memory space
-	ld		b,b
 	push	hl
 	ld		e,7
 .clearloop
