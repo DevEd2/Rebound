@@ -598,6 +598,9 @@ Collectable_ExtraLife:
 
 ; INPUT: de = animation pointer for death animation
 Monster_CheckKill:
+	ld		a,[Player_MovementFlags]
+	bit		bPlayerIsDead,a
+	ret		nz	; don't run if player is dead
     ld      a,[Player_YVelocity]
     bit     7,a ; is player falling?
     jp      nz,KillPlayer
