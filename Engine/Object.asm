@@ -589,11 +589,20 @@ Collectable_ExtraLife:
     jr      z,:+
     inc     a
     ld      [Player_LifeCount],a
-:   ld      hl,Monster_ID
+	
+:	ld      hl,Monster_ID
     add     hl,bc
     ld      [hl],MONSTER_NULL
-    ; prevent monster from respawning
-    jp      PermaKillMonster
+	; prevent 1up from respawning
+	call	PermaKillMonster
+	; create particle effect
+	ld		hl,Monster_XPosition
+	add		hl,bc
+	ld		d,[hl]
+	ld		hl,Monster_YPosition
+	add		hl,bc
+	ld		e,[hl]
+	jp		ParticleFX_SeeingStars
     
 
 ; INPUT: de = animation pointer for death animation
@@ -2213,3 +2222,177 @@ RenderParticles:
   bit 7,c
   jr  z,.renderLoop
   ret
+  
+; ================
+
+; INPUT: de = [x,y]
+ParticleFX_SeeingStars:
+	
+    ; bottom left star particle
+    call    GetParticleSlot
+    ld      [hl],6
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,d
+    sub     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      [hl],e
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high(-$020)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low(-$020)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$240)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$240)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    
+    ; bottom right star particle
+    call    GetParticleSlot
+    ld      [hl],6
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,d
+    add     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      [hl],e
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high($020)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low($020)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$240)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$240)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1 | OAMF_XFLIP
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+
+    ; top left star particle
+    call    GetParticleSlot
+    ld      [hl],8
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,d
+    sub     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      [hl],e
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high(-$038)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low(-$038)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$300)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$300)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+    
+    ; top right star particle
+    call    GetParticleSlot
+    ld      [hl],8
+    
+    ld      hl,Particle_XPosition
+    add     hl,bc
+    ld      a,d
+    add     4
+    ld      [hl],a
+    
+    ld      hl,Particle_YPosition
+    add     hl,bc
+    ld      [hl],e
+    
+    ld      hl,Particle_Lifetime
+    add     hl,bc
+    ld      [hl],64
+    
+    ld      hl,Particle_XVelocity
+    add     hl,bc
+    ld      [hl],high($038)
+    
+    ld      hl,Particle_XVelocityS
+    add     hl,bc
+    ld      [hl],low($038)
+    
+    ld      hl,Particle_YVelocity
+    add     hl,bc
+    ld      [hl],high(-$300)
+    
+    ld      hl,Particle_YVelocityS
+    add     hl,bc
+    ld      [hl],low(-$300)
+    
+    ld      hl,Particle_Attribute
+    add     hl,bc
+    ld      [hl],OAMF_BANK1 | OAMF_XFLIP
+    
+    ld      hl,Particle_Flags
+    add     hl,bc
+    ld      [hl],1<<PARTICLE_FLAG_GRAVITY
+	ret

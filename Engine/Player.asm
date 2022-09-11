@@ -1712,6 +1712,8 @@ Player_CheckSubscreenBoundary:
     ld      hl,Player_MovementFlags
     bit     bPlayerStageEnd,[hl]
     ret     nz
+	bit		bPlayerIsDead,[hl]
+	ret		nz
     ld      e,a
     ld      a,[Player_YVelocity]
     bit     7,a
