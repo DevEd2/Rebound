@@ -39,6 +39,7 @@ MONSTER_FISH_CIRC           equ 6
 MONSTER_LOG                 equ 7
 MONSTER_LOG_BOUNCING        equ 8
 MONSTER_LOG_SPAWNER         equ 9
+COLLECTABLE_MONEYBAG		equ	10
 
 Monster_ID:                 ds  MONSTER_COUNT
 Monster_WRAMPointer:        ds  MONSTER_COUNT
@@ -139,6 +140,8 @@ ObjectInit:
     minit   -$080, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG
     minit   -$080, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG_BOUNCING
     minit   -$000, $000,1<<MONSTER_FLAG_CPLAYER | 1<<MONSTER_FLAG_CWORLD | 1<<MONSTER_FLAG_GRAVITY,BANK(Anim_Default),Anim_Default,3 ; MONSTER_LOG_SPAWNER
+	
+    minit    $000, $000,1<<MONSTER_FLAG_CPLAYER,BANK(Anim_Default),Anim_Default,1 ; COLLECTABLE_MONEYBAG
     
 ; Monster graphics pointer table
 ; Format: Bank, Pointer
@@ -154,6 +157,8 @@ ObjectGraphics:
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_BOUNCING
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_SPAWNER
+	
+    mgraphic    bank(PlayerTiles),PlayerTiles       ; COLLECTABLE_MONEYBAG
     
 ; Object animations
 section "Object Animation Data",romx
@@ -202,6 +207,8 @@ BehaviorTable:
     dw      Monster_MoveLeftRight   ; MONSTER_LOG
     dw      Monster_BounceLeftRight ; MONSTER_LOG_BOUNCING
     dw      Monster_NoBehavior      ; MONSTER_LOG_SPAWNER (TODO)
+	
+	dw		Collectable_Moneybag
 
 BehaviorDispatch:
     bit     7,h
@@ -575,7 +582,6 @@ Monster_Fish_Circ:
     ret
     
 Collectable_ExtraLife:
-    ; TODO: More eye candy
     ld      hl,Monster_Collision
     add     hl,bc
     bit     MONSTER_COLLISION_PLAYER,[hl]
@@ -604,6 +610,46 @@ Collectable_ExtraLife:
 	ld		e,[hl]
 	jp		ParticleFX_SeeingStars
     
+Collectable_Moneybag:
+    ld      hl,Monster_Collision
+    add     hl,bc
+    bit     MONSTER_COLLISION_PLAYER,[hl]
+    ret     z
+    ; play 1up sound
+    push    bc
+    PlaySFX moneybag
+    pop     bc
+	
+	ld		b,b
+	ld		hl,Player_CoinCount
+	ld		a,[hl+]
+	ld		h,[hl]
+	ld		l,a
+	inc		hl
+	ld		a,h
+	or		l
+	jr		z,:+
+	dec		hl
+	ld		de,100
+	add		hl,de
+	ld		a,h
+	ld		[Player_CoinCount+1],a
+	ld		a,l
+	ld		[Player_CoinCount],a
+	
+:	ld      hl,Monster_ID
+    add     hl,bc
+    ld      [hl],MONSTER_NULL
+	; prevent 1up from respawning
+	call	PermaKillMonster
+	; create particle effect
+	ld		hl,Monster_XPosition
+	add		hl,bc
+	ld		d,[hl]
+	ld		hl,Monster_YPosition
+	add		hl,bc
+	ld		e,[hl]
+	jp		ParticleFX_SeeingStars
 
 ; INPUT: de = animation pointer for death animation
 Monster_CheckKill:

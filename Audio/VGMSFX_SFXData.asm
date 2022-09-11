@@ -50,4 +50,5 @@ endm
     defsfx  transitiondown,SFX_CH1
     defsfx  ready,SFX_CH3
     defsfx  go,SFX_CH3
+	defsfx	moneybag,SFX_CH1|SFX_CH2|SFX_CH3
     endsfx

@@ -23,6 +23,8 @@
 ; SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ; ================================================================
 
+; FIXME: waveform is discarded when a sound effect plays on CH3
+
 ; ================================================================
 
 ; Note values
