@@ -615,7 +615,7 @@ Collectable_Moneybag:
     add     hl,bc
     bit     MONSTER_COLLISION_PLAYER,[hl]
     ret     z
-    ; play 1up sound
+    ; play moneybag sound
     push    bc
     PlaySFX moneybag
     pop     bc
@@ -640,8 +640,6 @@ Collectable_Moneybag:
 :	ld      hl,Monster_ID
     add     hl,bc
     ld      [hl],MONSTER_NULL
-	; prevent 1up from respawning
-	call	PermaKillMonster
 	; create particle effect
 	ld		hl,Monster_XPosition
 	add		hl,bc
