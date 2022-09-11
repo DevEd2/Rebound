@@ -280,6 +280,8 @@ SkipGBCScreen:
     ld      [sys_EnableHDMA],a
     ld      [Player_CoinCount],a
     ld      [Player_CoinCount+1],a
+    ld      [Player_CoinCountHUD],a
+    ld      [Player_CoinCountHUD+1],a
     
     call    DoubleSpeed
     if      !DebugMode

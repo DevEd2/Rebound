@@ -100,6 +100,8 @@ LevelSelectLoop:
     xor     a
     ld      [Player_CoinCount],a
     ld      [Player_CoinCount+1],a
+    ld      [Player_CoinCountHUD],a
+    ld      [Player_CoinCountHUD+1],a
     ld      a,[Debug_MenuPos]
     jp      GM_Level
 

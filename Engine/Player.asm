@@ -34,7 +34,8 @@ StageClear_Delay5::         db
 
 PlayerRAM_End:
 ; the following are part of the player RAM but are not to be cleared after each level
-Player_CoinCount::          dw
+Player_CoinCount::          dw	; actual coin count
+Player_CoinCountHUD::		dw	; visible coin count
 Player_LifeCount::          db
 
 ; initial player life count
@@ -1439,6 +1440,32 @@ Player_Respawn:
     pop     hl
     ld      a,[Engine_LevelID]
     jp      GM_Level
+
+Player_RollCoinCounter:
+	ld		hl,Player_CoinCount
+	ld		a,[hl+]
+	ld		b,[hl]
+	ld		c,a
+	ld		hl,Player_CoinCountHUD
+	ld		a,[hl+]
+	ld		h,[hl]
+	ld		l,a
+	ld		d,h
+	ld		e,l
+	call	Compare16
+	ret		z
+	
+	jr		c,.rolldown
+.rollup
+	inc		hl
+	jr		:+
+.rolldown
+	dec		hl
+:	ld		a,l
+	ld		[Player_CoinCountHUD],a
+	ld		a,h
+	ld		[Player_CoinCountHUD+1],a
+	ret
    
 Player_Splash:
     ; left splash particle

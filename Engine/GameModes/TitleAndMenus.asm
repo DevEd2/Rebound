@@ -112,6 +112,8 @@ TitleLoop:
     xor     a
     ld      [Player_CoinCount],a
     ld      [Player_CoinCount+1],a
+    ld      [Player_CoinCountHUD],a
+    ld      [Player_CoinCountHUD+1],a
     
     ld      a,MapID_Plains1
     jp      GM_Level

@@ -392,7 +392,8 @@ Level_InitHUD:
     ret
     
 Level_UpdateHUD:
-    xor     a
+	call	Player_RollCoinCounter
+	xor     a
     ldh     [rVBK],a
     ld      a,[Player_LifeCount]
     call    Hex2Dec8
@@ -425,7 +426,7 @@ Level_UpdateHUD:
     add     $13
     ld      [de],a
     
-    ld      hl,Player_CoinCount
+    ld      hl,Player_CoinCountHUD
     ld      a,[hl+]
     ld      h,[hl]
     ld      l,a
