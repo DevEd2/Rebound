@@ -75,8 +75,8 @@ VGMSFX_ClearCH2:
     ldh     [rNR24],a   ; reset volume envelope
     ret
 VGMSFX_ClearCH3:
-    xor     a
-    ldh     [rNR30],a   ; disable wave channel
+	xor		a
+	ldh		[rNR32],a	; volume
     ret
 VGMSFX_ClearCH4:
     xor     a

@@ -620,7 +620,6 @@ Collectable_Moneybag:
     PlaySFX moneybag
     pop     bc
 	
-	ld		b,b
 	ld		hl,Player_CoinCount
 	ld		a,[hl+]
 	ld		h,[hl]
