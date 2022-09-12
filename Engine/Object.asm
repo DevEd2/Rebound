@@ -639,6 +639,7 @@ Collectable_Moneybag:
 :	ld      hl,Monster_ID
     add     hl,bc
     ld      [hl],MONSTER_NULL
+	call	KillMonster
 	; create particle effect
 	ld		hl,Monster_XPosition
 	add		hl,bc
