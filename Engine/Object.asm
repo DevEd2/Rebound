@@ -158,7 +158,7 @@ ObjectGraphics:
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_BOUNCING
     mgraphic    bank(PlayerTiles),PlayerTiles       ; MONSTER_LOG_SPAWNER
 	
-    mgraphic    bank(PlayerTiles),PlayerTiles       ; COLLECTABLE_MONEYBAG
+    mgraphic    bank(MoneybagTiles),MoneybagTiles       ; COLLECTABLE_MONEYBAG
     
 ; Object animations
 section "Object Animation Data",romx

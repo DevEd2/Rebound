@@ -1041,6 +1041,7 @@ include	"GFX/Sprites/Goony/Goony.inc"
 include "GFX/Sprites/Fish.inc"
 include "GFX/Sprites/1up.inc"
 include "GFX/Sprites/StageClear.inc"
+include "GFX/Sprites/Moneybag.inc"
 
 section "Particle tiles",romx
 ParticleTiles:  incbin  "GFX/Particles.2bpp.wle"
