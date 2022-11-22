@@ -885,6 +885,7 @@ Level_LoadMapRow:
 ;        d = column to load
 ;        e = screen to load from
 Level_LoadMapColumn:
+
     push    de
     ld      a,[Engine_CurrentScreen]
     and     $f
@@ -909,6 +910,15 @@ Level_LoadMapColumn:
     ldh     [rSVBK],a
     
     ld      b,16
+    ld      a,[Engine_CurrentSubarea]
+    and     $f
+    and     a
+    jr      z,.loop
+    ld      a,c
+    cp      $b0
+    jr      nc,.loop
+    inc     h
+ 
 .loop
     push    bc
     ld      a,[hl]
@@ -923,7 +933,7 @@ Level_LoadMapColumn:
     add     16
     ld      l,a
     jr      nc,:+
-	inc		h
+    inc     h
 :
     pop     bc
     dec     b

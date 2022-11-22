@@ -83,7 +83,7 @@ LevelPointers:
     addlevel    Forest1
     addlevel    Forest2
     addlevel    Forest3
-;   addlevel    Forest4
+    addlevel    Forest4
 ;	addlevel	Forest5
 ;   addlevel    Forest6
 ;   addlevel    ForestBoss

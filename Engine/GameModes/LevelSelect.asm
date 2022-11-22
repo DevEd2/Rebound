@@ -1,6 +1,6 @@
 section "Level select RAM",wram0
 
-NUM_LEVEL_SELECT_ENTRIES = 10
+NUM_LEVEL_SELECT_ENTRIES = 11
 
 section "Level select routines",rom0
 GM_LevelSelect:
