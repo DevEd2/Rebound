@@ -613,7 +613,7 @@ section "Sound test - Song names",romx
 SoundTest_SongNames:
 ;        -##################-------------
     db  "     Main Theme                 "
-    db  " Humble  Beginnings             "
+    db  "    Plain Plains                "
     db  "   Mystic  Medley               "
     db  "   Rock the Block               "
     db  "    Pyramid Jams                "
@@ -621,7 +621,9 @@ SoundTest_SongNames:
     db  "    Temple Tunes                " ; TODO: Come up with better name for the temple tune
     db  "    Stage Clear!                "
     db  "   Down 'n  Dirty               "
+    db  " The Final Showdown             "
     db  "     Game  Over                 "
+    db  "  Spend Some Coins              "
     db  "    Bonus  Time!                "
     db  "       Museum                   "
     db  "     Staff Roll                 "
