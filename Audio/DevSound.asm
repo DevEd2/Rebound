@@ -113,18 +113,16 @@ CallSection         equ $81
 Goto                equ $82
 PitchBendUp         equ $83
 PitchBendDown       equ $84
-SetSweep            equ $85
-SetPan              equ $86
-SetSpeed            equ $87
-SetInsAlternate     equ $88
-EnablePWM           equ $89
-Arp                 equ $8a
-LoopCount           equ $8b
-Loop                equ $8c
-DisablePitchBend    equ $8d
-NoteCut             equ $8e
-Autopan             equ $8f
-DummyCommand        equ $90
+SetPan              equ $85
+SetSpeed            equ $86
+SetInsAlternate     equ $87
+Arp                 equ $88
+LoopCount           equ $89
+Loop                equ $8a
+DisablePitchBend    equ $8b
+NoteCut             equ $8c
+Autopan             equ $8d
+DummyCommand        equ $8e
 EndChannel          equ $ff
 
 ; Table commands
@@ -205,7 +203,6 @@ DS_CH1Note::            db
 DS_CH1Transpose::       db
 DS_CH1FreqOffset::      dw
 DS_CH1Pan::             db
-DS_CH1Sweep::           db
 DS_CH1NoteCount::       db
 DS_CH1InsMode::         db
 DS_CH1Ins1::            db
@@ -320,14 +317,6 @@ DS_CH1Retrig::          db
 DS_CH2Retrig::          db
 DS_CH4Retrig::          db
 
-DS_WaveBuffer::         ds  16
-DS_WavePos::            db
-DS_WaveUpdateFlag::     db
-DS_PWMEnabled::         db
-DS_PWMVol::             db
-DS_PWMSpeed::           db
-DS_PWMTimer::           db
-DS_PWMDir::             db
 
 DSVarsEnd:
 
@@ -361,8 +350,6 @@ DevSound_Init:
     
     xor     a
     ldh     [rNR52],a   ; disable sound
-    ld      [DS_PWMEnabled],a
-    ld      [DS_WaveUpdateFlag],a
 
     ; init sound RAM area
     ld      hl,DS_RAMStart
@@ -438,7 +425,6 @@ DevSound_Init:
     ; load default waveform
     ld      hl,DefaultWave
     call    LoadWave
-    call    ClearWaveBuffer
     call    ClearArpBuffer
     
     ; set up song pointers
@@ -720,11 +706,9 @@ DS_CH1_CommandTable:
     dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
-    dw      .setSweep
     dw      .setPan
     dw      .setSpeed
     dw      .setInsAlternate
-    dw      .enablePWM
     dw      .arp
     dw      .setLoopCount
     dw      .loop
@@ -792,11 +776,6 @@ DS_CH1_CommandTable:
     ld      [DS_CH1FreqOffset],a
     ld      [DS_CH1FreqOffset+1],a
     jp      DS_CH1_CheckByte
-    
-.setSweep       ; TODO
-    pop     hl
-    inc     hl
-    jp      DS_CH1_CheckByte   ; too far for jr
 
 .setPan
     pop     hl
@@ -822,12 +801,6 @@ DS_CH1_CommandTable:
     ld      [DS_CH1Ins2],a
     ld      a,1
     ld      [DS_CH1InsMode],a
-    jp      DS_CH1_CheckByte
-
-.enablePWM
-    pop     hl
-    inc     hl
-    inc     hl
     jp      DS_CH1_CheckByte
     
 .arp
@@ -1050,11 +1023,9 @@ DS_CH2_CommandTable:
     dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
-    dw      .setSweep
     dw      .setPan
     dw      .setSpeed
     dw      .setInsAlternate
-    dw      .enablePWM
     dw      .arp
     dw      .setLoopCount
     dw      .loop
@@ -1123,11 +1094,6 @@ DS_CH2_CommandTable:
     ld      [DS_CH2FreqOffset+1],a
     jp      DS_CH2_CheckByte
 
-.setSweep       ; TODO
-    pop     hl
-    inc     hl
-    jp      DS_CH2_CheckByte   ; too far for jr
-
 .setPan
     pop     hl
     ld      a,[hl+]
@@ -1152,12 +1118,6 @@ DS_CH2_CommandTable:
     ld      [DS_CH2Ins2],a
     ld      a,1
     ld      [DS_CH2InsMode],a
-    jp      DS_CH2_CheckByte
-
-.enablePWM
-    pop     hl
-    inc     hl
-    inc     hl
     jp      DS_CH2_CheckByte
     
 .arp
@@ -1382,11 +1342,9 @@ DS_CH3_CommandTable:
     dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
-    dw      .setSweep
     dw      .setPan
     dw      .setSpeed
     dw      .setInsAlternate
-    dw      .enablePWM
     dw      .arp
     dw      .setLoopCount
     dw      .loop
@@ -1455,11 +1413,6 @@ DS_CH3_CommandTable:
     ld      [DS_CH3FreqOffset+1],a
     jp      DS_CH3_CheckByte
 
-.setSweep
-    pop     hl
-    inc     hl
-    jp      DS_CH3_CheckByte   ; too far for jr
-
 .setPan
     pop     hl
     ld      a,[hl+]
@@ -1484,21 +1437,6 @@ DS_CH3_CommandTable:
     ld      [DS_CH3Ins2],a
     ld      a,1
     ld      [DS_CH3InsMode],a
-    jp      DS_CH3_CheckByte
-.enablePWM
-    call    ClearWaveBuffer
-    pop     hl
-    ld      a,[hl+]
-    ld      [DS_PWMVol],a
-    ld      a,[hl+]
-    ld      [DS_PWMSpeed],a
-    ld      a,$ff
-    ld      [DS_WavePos],a
-    xor     a
-    ld      [DS_PWMDir],a
-    inc     a
-    ld      [DS_PWMEnabled],a
-    ld      [DS_PWMTimer],a
     jp      DS_CH3_CheckByte
     
 .arp
@@ -1710,11 +1648,9 @@ DS_CH4_CommandTable:
     dw      .goto
     dw      .pitchBendUp
     dw      .pitchBendDown
-    dw      .setSweep
     dw      .setPan
     dw      .setSpeed
     dw      .setInsAlternate
-    dw      .enablePWM
     dw      .arp
     dw      .setLoopCount
     dw      .loop
@@ -1773,11 +1709,6 @@ DS_CH4_CommandTable:
     inc     hl
     jp      DS_CH4_CheckByte
 
-.setSweep       ; unused for ch4
-    pop     hl
-    inc     hl
-    jp      DS_CH4_CheckByte   ; too far for jr
-
 .setPan
     pop     hl
     ld      a,[hl+]
@@ -1802,12 +1733,6 @@ DS_CH4_CommandTable:
     ld      [DS_CH4Ins2],a
     ld      a,1
     ld      [DS_CH4InsMode],a
-    jp      DS_CH4_CheckByte
-
-.enablePWM
-    pop     hl
-    inc     hl
-    inc     hl
     jp      DS_CH4_CheckByte
     
 .arp
@@ -2992,11 +2917,6 @@ DS_CH3_UpdateRegisters:
     jr      z,.noreset2
     ld      a,b
     ld      [DS_CH3Wave],a
-    cp      $fd                 ; if value = $fd, use wave buffer
-    jr      nz,.notwavebuf
-    ld      hl,DS_WaveBuffer
-    jr      .loadwave
-.notwavebuf
     push    de
     ld      l,a
     ld      h,0
@@ -3131,23 +3051,6 @@ DS_CH3_UpdateRegisters:
     ld      [DS_CH3Vol],a
 .done
 
-    call    DoPWM
-    ld      a,[DS_CH3Wave]
-    cp      $fd
-    jr      nz,.noupdate
-    ld      a,[DS_WaveUpdateFlag]
-    and     a
-    jr      z,.noupdate
-    ld      hl,DS_WaveBuffer
-    call    LoadWave
-    xor     a
-    ld      [DS_WaveUpdateFlag],a
-    ld      a,[VGMSFX_Flags]
-    bit     bSFX_CH3,a
-    jr      nz,.noupdate
-    ld      a,e
-    or      $80
-    ldh     [rNR34],a
 .noupdate
 
 ; ================================================================
@@ -3350,106 +3253,6 @@ LoadWave:
     jr      nz,.loop    ; loop until done
     ld      a,%10000000
     ldh     [rNR30],a   ; enable DS_CH3
-    ret
-    
-ClearWaveBuffer:
-    ld      a,$10
-    ld      b,a
-    xor     a
-    ld      hl,DS_WaveBuffer
-.loop
-    ld      [hl+],a     ; copy to wave ram
-    dec     b
-    jr      nz,.loop    ; loop until done
-    ret
-
-; Do PWM
-; TODO: Optimize
-DoPWM:
-    ld      a,[DS_PWMEnabled]
-    and     a
-    ret     z   ; if PWM is not enabled, return
-    ld      a,[DS_PWMTimer]
-    dec     a
-    ld      [DS_PWMTimer],a
-    and     a
-    ret     nz
-    ld      a,[DS_PWMSpeed]
-    ld      [DS_PWMTimer],a
-    ld      a,[DS_PWMDir]
-    and     a
-    jr      nz,.decPos
-.incPos 
-    ld      a,[DS_WavePos]
-    inc     a
-    ld      [DS_WavePos],a
-    cp      $1e
-    jr      nz,.continue
-    ld      a,[DS_PWMDir]
-    xor     1
-    ld      [DS_PWMDir],a
-    jr      .continue
-.decPos
-    ld      a,[DS_WavePos]
-    dec     a
-    ld      [DS_WavePos],a
-    and     a
-    jr      nz,.continue2
-    ld      a,[DS_PWMDir]
-    xor     1
-    ld      [DS_PWMDir],a
-    jr      .continue2
-.continue
-    ld      hl,DS_WaveBuffer
-    ld      a,[DS_WavePos]
-    rra
-    push    af
-    and     $f
-    add     l
-    ld      l,a
-    jr      nc,.nocarry
-    inc     h
-.nocarry
-    pop     af
-    jr      c,.odd
-.even
-    ld      a,[DS_PWMVol]
-    swap    a
-    ld      [hl],a
-    jr      .done
-.odd
-    ld      a,[hl]
-    ld      b,a
-    ld      a,[DS_PWMVol]
-    or      b
-    ld      [hl],a
-    jr      .done
-    
-.continue2
-    ld      hl,DS_WaveBuffer
-    ld      a,[DS_WavePos]
-    inc     a
-    rra
-    push    af
-    and     $f
-    add     l
-    ld      l,a
-    jr      nc,.nocarry2
-    inc     h
-.nocarry2
-    pop     af
-    jr      nc,.odd2
-.even2
-    ld      a,[DS_PWMVol]
-    swap    a
-    ld      [hl],a
-    jr      .done
-.odd2
-    xor     a
-    ld      [hl],a
-.done
-    ld      a,1
-    ld      [DS_WaveUpdateFlag],a
     ret
 
 ; ================================================================
