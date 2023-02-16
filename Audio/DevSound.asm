@@ -136,26 +136,25 @@ TableEnd            equ $ff
 ; ================================================================
 
 Instrument:     macro
-    db      \1
+if "\1" == "_"
+    dw      DummyTable
+else
+    dw      vol_\1
+endc
 if "\2" == "_"
     dw      DummyTable
 else
-    dw      vol_\2
+    dw      arp_\2
 endc
 if "\3" == "_"
     dw      DummyTable
 else
-    dw      arp_\3
+    dw      waveseq_\3
 endc
 if "\4" == "_"
-    dw      DummyTable
-else
-    dw      waveseq_\4
-endc
-if "\5" == "_"
     dw      vib_Dummy
 else
-    dw      vib_\5
+    dw      vib_\4
 endc
     endm
 
@@ -165,7 +164,7 @@ Drum:           macro
 
 dins:           macro
     const   _\1
-    dw  ins_\1
+;    dw  ins_\1
 endm
 
 ; ================================================================
@@ -880,20 +879,18 @@ DS_CH1_CommandTable:
     jp      DS_CH1_CheckByte
 
 DS_CH1_SetInstrument:
-    ld      hl,InstrumentTable
-    add     a
-    add     l
     ld      l,a
-    jr      nc,.nocarry
-    inc     h
-.nocarry
-    ld      a,[hl+]
-    ld      h,[hl]
-    ld      l,a
-    ; no reset flag
-    ld      a,[hl+]
-    ld      [DS_CH1Reset],a
-    ld      b,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    push    de
+    ld      d,h
+    ld      e,l
+    ld      hl,DS_Instruments
+    add     hl,de
+    pop     de
+
     ; vol table
     ld      a,[hl+]
     ld      [DS_CH1VolPtr],a
@@ -1212,20 +1209,17 @@ DS_CH2_CommandTable:
     jp      DS_CH2_CheckByte
 
 DS_CH2_SetInstrument:
-    ld      hl,InstrumentTable
-    add     a
-    add     l
     ld      l,a
-    jr      nc,.nocarry
-    inc     h
-.nocarry
-    ld      a,[hl+]
-    ld      h,[hl]
-    ld      l,a
-    ; no reset flag
-    ld      a,[hl+]
-    ld      [DS_CH2Reset],a
-    ld      b,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    push    de
+    ld      d,h
+    ld      e,l
+    ld      hl,DS_Instruments
+    add     hl,de
+    pop     de
     ; vol table
     ld      a,[hl+]
     ld      [DS_CH2VolPtr],a
@@ -1559,20 +1553,17 @@ DS_CH3_CommandTable:
     jp      DS_CH3_CheckByte
 
 DS_CH3_SetInstrument:
-    ld      hl,InstrumentTable
-    add     a
-    add     l
     ld      l,a
-    jr      nc,.nocarry
-    inc     h
-.nocarry
-    ld      a,[hl+]
-    ld      h,[hl]
-    ld      l,a
-    ; no reset flag
-    ld      a,[hl+]
-    ld      [DS_CH3Reset],a
-    ld      b,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    push    de
+    ld      d,h
+    ld      e,l
+    ld      hl,DS_Instruments
+    add     hl,de
+    pop     de
     ; vol table
     ld      a,[hl+]
     ld      [DS_CH3VolPtr],a
@@ -1869,20 +1860,17 @@ DS_CH4_CommandTable:
     jp      DS_CH4_CheckByte
     
 DS_CH4_SetInstrument:
-    ld      hl,InstrumentTable
-    add     a
-    add     l
     ld      l,a
-    jr      nc,.nocarry
-    inc     h
-.nocarry
-    ld      a,[hl+]
-    ld      h,[hl]
-    ld      l,a
-    ; no reset flag
-    ld      a,[hl+]
-    ld      [DS_CH4Reset],a
-    ld      b,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    push    de
+    ld      d,h
+    ld      e,l
+    ld      hl,DS_Instruments
+    add     hl,de
+    pop     de
     ; vol table
     ld      a,[hl+]
     ld      [DS_CH4VolPtr],a
@@ -3009,16 +2997,19 @@ DS_CH3_UpdateRegisters:
     ld      hl,DS_WaveBuffer
     jr      .loadwave
 .notwavebuf
-    add     a
-    ld      hl,WaveTable
-    add     l
+    push    de
     ld      l,a
-    jr      nc,.nocarry3
-    inc     h   
-.nocarry3
-    ld      a,[hl+]
-    ld      h,[hl]
-    ld      l,a
+    ld      h,0
+    add     hl,hl   ; x2
+    add     hl,hl   ; x4
+    add     hl,hl   ; x8
+    add     hl,hl   ; x16
+    ld      d,h
+    ld      e,l
+    ld      hl,DS_Waves
+    add     hl,de
+    pop     de
+    
 .loadwave
     ld      a,[VGMSFX_Flags]
     bit     bSFX_CH3,a
@@ -3348,9 +3339,6 @@ DoneUpdatingRegisters:
 ; ================================================================
 
 LoadWave:
-    ld      a,[VGMSFX_Flags]
-    bit     bSFX_CH3,a
-    ret     nz
     xor     a
     ldh     [rNR30],a   ; disable DS_CH3
     ld      bc,$1030    ; b = counter, c = HRAM address

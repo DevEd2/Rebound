@@ -231,6 +231,12 @@ vol_GalleryEchoA:       db  $3a,TableEnd
 
 vol_GalleryLead:        db  $3a,TableWait,17,$74,TableEnd
 
+; ========
+
+vol_BonusBass:          db  w3,TableWait,6,w2,TableWait,8,w1,TableEnd
+vol_BonusLead:          db  $c7,TableEnd
+vol_BonusWhistle:       db  10,TableWait,5,1,TableWait,5,10,TableWait,17,1,TableEnd
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
@@ -260,9 +266,11 @@ arp_BassOctave:         db  12,0,TableWait,9,12,TableEnd
 
 arp_BossTomKick:        db  24,21,18,15,12,09,06,03,00,TableEnd
 arp_BossTomSnare:       db  36,34,32,30,28,26,24,22,20,TableLoop,0
+arp_BonusWhistle:       db  1 ; fall through
 arp_BossBass:           db  0,TableLoop,0
 
 arp_ForestPluck:        db  1,0,TableEnd
+
 
 ; =================================================================
 ; Noise sequences
@@ -330,34 +338,20 @@ waveseq_ForestArp:
 ; =================================================================
 
 vib_Dummy:          db  $ff,0,TableLoopVib,1
-vib_BeachLead:      db  8,1,1,2,2,1,1,0,0,-1,-1,-2,-2,-1,-1,0,0,TableLoopVib,1
-vib_PWMLead:        db  24,2,3,3,2,0,0,-2,-3,-3,-2,0,0,TableLoopVib,1
+vib_PyramidLead:      db  8,1,1,2,2,1,1,0,0,-1,-1,-2,-2,-1,-1,0,0,TableLoopVib,1
 
 vib_PlainsLead:     db  18,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,TableLoopVib,1
 vib_PlainsEcho:     db  0,-2,TableLoopVib,1
 vib_PlainsHarmonyR: db  0,2,4,6,4,2,0,-2,-4,-6,-4,-2,0,TableLoopVib,1
 vib_CityLead:       db  9,1,2,2,1,0,-1,-2,-2,-1,0,TableLoopVib,1
 vib_ForestPluck:    db  6,3,7,10,7,3,0,-3,-7,-10,-7,-3,0,TableLoopVib,1
+vib_BonusLead:      db  9,2,4,2,0,-2,-4,-2,0,TableLoopVib,1
 
 ; =================================================================
 ; Wave sequences
 ; =================================================================
 
-WaveTable:
-    dw      DefaultWave
-    dw      wave_PyramidLead
-    dw      wave_PyramidSquare
-    dw      wave_MenuLead1
-    dw      wave_MenuLead2
-    dw      wave_MenuTri
-    dw      wave_ForestBass
-    dw      wave_PlainsBass
-    dw      wave_CityLead
-    dw      wave_SoftSquare
-    dw      wave_BossTom
-    dw      wave_BossBass
-    dw      wave_GalleryBass
-
+DS_Waves:
 wave_PyramidLead:       db  $01,$23,$45,$67,$89,$ab,$cd,$ef,$ed,$b9,$75,$31,$02,$46,$8a,$ce
 wave_PyramidSquare:     db  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$00,$00,$00,$44,$44,$00,$00,$00
 wave_MenuLead1:         db  $cb,$ab,$11,$22,$22,$22,$22,$22,$22,$23,$33,$45,$44,$44,$32,$56
@@ -370,20 +364,23 @@ wave_SoftSquare:        db  $ab,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$00,$00,$00,$00,$00,
 wave_BossTom:           db  $ac,$cc,$cc,$cc,$cc,$cc,$cc,$ca,$20,$00,$00,$00,$00,$00,$00,$02
 wave_BossBass:          db  $66,$60,$6c,$cc,$66,$60,$66,$60,$00,$06,$06,$66,$60,$00,$60,$00
 wave_GalleryBass:       db  $00,$11,$23,$45,$66,$78,$89,$aa,$bb,$cc,$cc,$cc,$a9,$89,$bc,$cc
+wave_BonusBass:         db  $22,$66,$bb,$dd,$ee,$ff,$88,$33,$48,$ac,$ed,$cb,$97,$53,$20,$00
+wave_BonusArps:         db  $06,$75,$8a,$ce,$ae,$fc,$95,$00,$00,$47,$ad,$a5,$20,$00,$11,$10
 
-waveseq_Tri:            db  0,TableEnd
-waveseq_PyramidLead:    db  1,TableEnd
-waveseq_PyramidSquare:  db  2,TableEnd
-waveseq_MenuLead:       db  3,4,TableEnd
-waveseq_MenuTri:        db  5,TableEnd
-waveseq_PlainsBass:     db  7,TableEnd
-waveseq_CityLead:       db  8,TableEnd
-waveseq_ForestBass:     db  6,TableEnd
+waveseq_PyramidLead:    db  0,TableEnd
+waveseq_PyramidSquare:  db  1,TableEnd
+waveseq_MenuLead:       db  2,3,TableEnd
+waveseq_MenuTri:        db  4,TableEnd
+waveseq_PlainsBass:     db  6,TableEnd
+waveseq_CityLead:       db  7,TableEnd
+waveseq_ForestBass:     db  5,TableEnd
 waveseq_WaveBuffer:     db  $fd,TableEnd
-waveseq_SoftSquare:     db  9,TableEnd
-waveseq_BossTom:        db  10,TableEnd
-waveseq_BossBass:       db  11,TableEnd
-waveseq_GalleryBass:    db  12,TableEnd
+waveseq_SoftSquare:     db  8,TableEnd
+waveseq_BossTom:        db  9,TableEnd
+waveseq_BossBass:       db  10,TableEnd
+waveseq_GalleryBass:    db  11,TableEnd
+waveseq_BonusBass:      db  12,TableEnd
+waveseq_BonusArps:      db  13,TableEnd
 
 ; =================================================================
 ; Instruments
@@ -491,106 +488,117 @@ InstrumentTable:
     dins    GalleryLead
     dins    GalleryBass
 
-; Instrument format: [no reset flag],[wave mode (ch3 only)],[voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
-; !!! REMEMBER TO ADD INSTRUMENTS TO THE INSTRUMENT POINTER TABLE !!!
-ins_Kick:               Instrument  0,Kick,Kick,_,_ ; pulse/waveseq and vibrato unused by noise instruments
-ins_Snare:              Instrument  0,Snare,Snare,_,_
-ins_CHH:                Instrument  0,CHH,Hat,_,_
-ins_OHH:                Instrument  0,OHH,Hat,_,_
-ins_Cymbal:             Instrument  0,Cymbal,Cymbal,_,_
+    dins    BonusBass
+    dins    BonusArps
+    dins    BonusLead
+    dins    BonusWhistle
 
-ins_Echo1:              Instrument  0,Echo1,_,_,_
-ins_Echo2:              Instrument  0,Echo2,_,_,_
-ins_TomEcho:            Instrument  0,TomEcho,TomEcho,Square,_
-ins_PyramidBass:        Instrument  0,PulseBass,Pluck,PyramidBass,_
-ins_PyramidLead:        Instrument  0,Bass1,Pluck,PyramidLead,BeachLead
-ins_PyramidLeadF:       Instrument  0,PyramidLeadF,_,PyramidLead,_
-ins_PyramidLeadS:       Instrument  0,PyramidLeadS,Pluck,PyramidLead,_
-ins_PyramidLeadL:       Instrument  0,PyramidLeadL,Pluck,PyramidLead,BeachLead
-ins_PyramidOctArp:      Instrument  0,PyramidArp,Oct2,Square,BeachLead
-ins_PyramidArp720:      Instrument  0,PyramidArp,720,PyramidSquare,_
-ins_PyramidArp940:      Instrument  0,PyramidArp,940,PyramidSquare,_
-ins_PyramidArp520:      Instrument  0,PyramidArp,520,PyramidSquare,_
+; Instrument format: [voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
+DS_Instruments:
 
-ins_MenuLead:           Instrument  0,MenuLead,Pluck,MenuLead,BeachLead
-ins_MenuOctave:         Instrument  0,MenuOctave,Oct2,MenuTri,_
-ins_MenuOctaveEcho:     Instrument  0,MenuOctaveEcho,Oct2,MenuTri,_
-ins_MenuBass:           Instrument  0,MenuBass,Pluck,Pulse25,_
-ins_MenuArp027:         Instrument  0,MenuArp,MenuArp027,CityArp,_
-ins_MenuArp037:         Instrument  0,MenuArp,MenuArp037,CityArp,_
-ins_MenuArp047:         Instrument  0,MenuArp,MenuArp047,CityArp,_
-ins_MenuArp057:         Instrument  0,MenuArp,MenuArp057,CityArp,_
-ins_MenuArp038:         Instrument  0,MenuArp,MenuArp038,CityArp,_
-ins_MenuArp059:         Instrument  0,MenuArp,MenuArp059,CityArp,_
-ins_MenuArp05A:         Instrument  0,MenuArp,MenuArp05A,CityArp,_
-ins_MenuTom:            Instrument  0,MenuArp,MenuTom,Pulse50,_
+ins_Kick:               Instrument  Kick,Kick,_,_ ; pulse/waveseq and vibrato unused by noise instruments
+ins_Snare:              Instrument  Snare,Snare,_,_
+ins_CHH:                Instrument  CHH,Hat,_,_
+ins_OHH:                Instrument  OHH,Hat,_,_
+ins_Cymbal:             Instrument  Cymbal,Cymbal,_,_
 
-ins_PlainsBass:         Instrument  0,PlainsBass,PlainsBass,PlainsBass,_
-ins_PlainsLead:         Instrument  0,PlainsLead,_,PlainsLead,PlainsLead
-ins_PlainsEcho:         Instrument  0,PlainsEcho,_,Pulse25,PlainsEcho
-ins_PlainsHarmony:      Instrument  0,PlainsHarmony,_,PlainsHarmony,PlainsLead
-ins_PlainsHarmonyR:     Instrument  0,PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
+ins_Echo1:              Instrument  Echo1,_,_,_
+ins_Echo2:              Instrument  Echo2,_,_,_
+ins_TomEcho:            Instrument  TomEcho,TomEcho,Square,_
+ins_PyramidBass:        Instrument  PulseBass,Pluck,PyramidBass,_
+ins_PyramidLead:        Instrument  Bass1,Pluck,PyramidLead,PyramidLead
+ins_PyramidLeadF:       Instrument  PyramidLeadF,_,PyramidLead,_
+ins_PyramidLeadS:       Instrument  PyramidLeadS,Pluck,PyramidLead,_
+ins_PyramidLeadL:       Instrument  PyramidLeadL,Pluck,PyramidLead,PyramidLead
+ins_PyramidOctArp:      Instrument  PyramidArp,Oct2,Square,PyramidLead
+ins_PyramidArp720:      Instrument  PyramidArp,720,PyramidSquare,_
+ins_PyramidArp940:      Instrument  PyramidArp,940,PyramidSquare,_
+ins_PyramidArp520:      Instrument  PyramidArp,520,PyramidSquare,_
 
-ins_BassOctave:         Instrument  0,MenuBass,BassOctave,Pulse25,_
-ins_CityArp:            Instrument  0,CityArp,Buffer,CityArp,_
-ins_CityLead:           Instrument  0,CityLead,PluckDelay,CityLead,CityLead
-ins_CityLead2:          Instrument  0,CityLead2,PluckDelay,CityLead,CityLead
-ins_CityLeadL:          Instrument  0,CityLeadL,_,CityLead,CityLead
+ins_MenuLead:           Instrument  MenuLead,Pluck,MenuLead,PyramidLead
+ins_MenuOctave:         Instrument  MenuOctave,Oct2,MenuTri,_
+ins_MenuOctaveEcho:     Instrument  MenuOctaveEcho,Oct2,MenuTri,_
+ins_MenuBass:           Instrument  MenuBass,Pluck,Pulse25,_
+ins_MenuArp027:         Instrument  MenuArp,MenuArp027,CityArp,_
+ins_MenuArp037:         Instrument  MenuArp,MenuArp037,CityArp,_
+ins_MenuArp047:         Instrument  MenuArp,MenuArp047,CityArp,_
+ins_MenuArp057:         Instrument  MenuArp,MenuArp057,CityArp,_
+ins_MenuArp038:         Instrument  MenuArp,MenuArp038,CityArp,_
+ins_MenuArp059:         Instrument  MenuArp,MenuArp059,CityArp,_
+ins_MenuArp05A:         Instrument  MenuArp,MenuArp05A,CityArp,_
+ins_MenuTom:            Instrument  MenuArp,MenuTom,Pulse50,_
 
-ins_GameOverLead:       Instrument  0,GameOverLead,PluckDelay,SoftSquare,CityLead
-ins_GameOverGuitarA:    Instrument  0,GameOverGuitarA,_,GameOverGuitarA,_
-ins_GameOverGuitarB:    Instrument  0,GameOverGuitarB,PluckDelay,Pulse25,_
+ins_PlainsBass:         Instrument  PlainsBass,PlainsBass,PlainsBass,_
+ins_PlainsLead:         Instrument  PlainsLead,_,PlainsLead,PlainsLead
+ins_PlainsEcho:         Instrument  PlainsEcho,_,Pulse25,PlainsEcho
+ins_PlainsHarmony:      Instrument  PlainsHarmony,_,PlainsHarmony,PlainsLead
+ins_PlainsHarmonyR:     Instrument  PlainsHarmonyR,_,Pulse125,PlainsHarmonyR
 
-ins_BossIntro1a:        Instrument  0,BossIntro1a,Pluck,Pulse125,_
-ins_BossIntro1b:        Instrument  0,BossIntro1b,Pluck,Pulse125,_
-ins_BossIntro2a:        Instrument  0,BossIntro2a,Pluck,Pulse25,_
-ins_BossIntro2b:        Instrument  0,BossIntro2b,Pluck,Pulse25,_
-ins_BossIntro3a:        Instrument  0,BossIntro1a,Pluck,Pulse125,PlainsEcho
-ins_BossIntro3b:        Instrument  0,BossIntro1b,Pluck,Pulse125,PlainsEcho
-ins_BossLead:           Instrument  0,BossLead,_,Pulse125,PlainsLead
-ins_BossTomKick:        Instrument  0,BossTomKick,BossTomKick,BossTom,_
-ins_BossTomSnare:       Instrument  0,BossTomSnare,BossTomSnare,BossTom,_
-ins_BossBass:           Instrument  0,Bass1,BossBass,BossBass,_
-ins_BossKick:           Instrument  0,BossKick,BossKick,_,_
-ins_BossCHH:            Instrument  0,BossCHH,BossCHH,_,_
-ins_BossOHH:            Instrument  0,BossOHH,BossOHH,_,_
-ins_BossOHHRoll:        Instrument  0,BossOHHRoll,BossOHH,_,_
+ins_BassOctave:         Instrument  MenuBass,BassOctave,Pulse25,_
+ins_CityArp:            Instrument  CityArp,Buffer,CityArp,_
+ins_CityLead:           Instrument  CityLead,PluckDelay,CityLead,CityLead
+ins_CityLead2:          Instrument  CityLead2,PluckDelay,CityLead,CityLead
+ins_CityLeadL:          Instrument  CityLeadL,_,CityLead,CityLead
 
-ins_ForestPluck0:       Instrument  0,ForestPluck,ForestPluck,Pulse125,ForestPluck
-ins_ForestPluck1:       Instrument  0,ForestPluck,ForestPluck,Pulse25,ForestPluck
-ins_ForestPluck2:       Instrument  0,ForestPluck,ForestPluck,Pulse50,ForestPluck
-ins_ForestPluck3:       Instrument  0,ForestPluck,ForestPluck,Pulse75,ForestPluck
-ins_ForestLead:         Instrument  0,ForestLead,_,Pulse50,CityLead
-ins_ForestArp:          Instrument  0,ForestArp,Buffer,ForestArp,_
-ins_ForestEcho1:        Instrument  0,ForestEcho1,_,Pulse50,_
-ins_ForestEcho2:        Instrument  0,ForestEcho2,_,Pulse50,_
-ins_ForestBass:         Instrument  0,ForestBass,_,ForestBass,_
-ins_ForestBassSustain:  Instrument  0,ForestBassSustain,_,ForestBass,_
-ins_ForestBassDecay:    Instrument  0,ForestBassDecay,_,ForestBass,_
-ins_ForestPercussion1:  Instrument  0,ForestPercussion1,ForestPercussion1,_,_
-ins_ForestPercussion2:  Instrument  0,ForestPercussion2,ForestPercussion2,_,_
-ins_ForestPercussion3:  Instrument  0,ForestPercussion3,ForestPercussion2,_,_
-ins_ForestPercussionV8: Instrument  0,ForestPercussionV8,ForestPercussion1,_,_
-ins_ForestPercussionV9: Instrument  0,ForestPercussionV9,ForestPercussion1,_,_
-ins_ForestPercussionVA: Instrument  0,ForestPercussionVA,ForestPercussion1,_,_
-ins_ForestPercussionVB: Instrument  0,ForestPercussionVB,ForestPercussion1,_,_
-ins_ForestPercussionVC: Instrument  0,ForestPercussionVC,ForestPercussion1,_,_
-ins_ForestPercussionVD: Instrument  0,ForestPercussionVD,ForestPercussion1,_,_
-ins_ForestPercussionVE: Instrument  0,ForestPercussionVE,ForestPercussion1,_,_
+ins_GameOverLead:       Instrument  GameOverLead,PluckDelay,SoftSquare,CityLead
+ins_GameOverGuitarA:    Instrument  GameOverGuitarA,_,GameOverGuitarA,_
+ins_GameOverGuitarB:    Instrument  GameOverGuitarB,PluckDelay,Pulse25,_
 
-ins_GalleryEcho1:       Instrument  0,GalleryEcho1,_,Pulse125,_
-ins_GalleryEcho2:       Instrument  0,GalleryEcho2,_,Pulse125,_
-ins_GalleryEcho3:       Instrument  0,GalleryEcho3,_,Pulse125,_
-ins_GalleryEcho4:       Instrument  0,GalleryEcho4,_,Pulse125,_
-ins_GalleryEcho5:       Instrument  0,GalleryEcho5,_,Pulse125,_
-ins_GalleryEcho6:       Instrument  0,GalleryEcho6,_,Pulse125,_
-ins_GalleryEcho7:       Instrument  0,GalleryEcho7,_,Pulse125,_
-ins_GalleryEcho8:       Instrument  0,GalleryEcho8,_,Pulse125,_
-ins_GalleryEcho9:       Instrument  0,GalleryEcho9,_,Pulse125,_
-ins_GalleryEchoA:       Instrument  0,GalleryEchoA,_,Pulse125,_
-ins_GalleryBack:        Instrument  0,GalleryLead,Pluck,Pulse125,ForestPluck
-ins_GalleryLead:        Instrument  0,GalleryLead,PluckDelay,Pulse50,CityLead
-ins_GalleryBass:        Instrument  0,Bass1,PlainsBass,GalleryBass,ForestPluck
+ins_BossIntro1a:        Instrument  BossIntro1a,Pluck,Pulse125,_
+ins_BossIntro1b:        Instrument  BossIntro1b,Pluck,Pulse125,_
+ins_BossIntro2a:        Instrument  BossIntro2a,Pluck,Pulse25,_
+ins_BossIntro2b:        Instrument  BossIntro2b,Pluck,Pulse25,_
+ins_BossIntro3a:        Instrument  BossIntro1a,Pluck,Pulse125,PlainsEcho
+ins_BossIntro3b:        Instrument  BossIntro1b,Pluck,Pulse125,PlainsEcho
+ins_BossLead:           Instrument  BossLead,_,Pulse125,PlainsLead
+ins_BossTomKick:        Instrument  BossTomKick,BossTomKick,BossTom,_
+ins_BossTomSnare:       Instrument  BossTomSnare,BossTomSnare,BossTom,_
+ins_BossBass:           Instrument  Bass1,BossBass,BossBass,_
+ins_BossKick:           Instrument  BossKick,BossKick,_,_
+ins_BossCHH:            Instrument  BossCHH,BossCHH,_,_
+ins_BossOHH:            Instrument  BossOHH,BossOHH,_,_
+ins_BossOHHRoll:        Instrument  BossOHHRoll,BossOHH,_,_
+
+ins_ForestPluck0:       Instrument  ForestPluck,ForestPluck,Pulse125,ForestPluck
+ins_ForestPluck1:       Instrument  ForestPluck,ForestPluck,Pulse25,ForestPluck
+ins_ForestPluck2:       Instrument  ForestPluck,ForestPluck,Pulse50,ForestPluck
+ins_ForestPluck3:       Instrument  ForestPluck,ForestPluck,Pulse75,ForestPluck
+ins_ForestLead:         Instrument  ForestLead,_,Pulse50,CityLead
+ins_ForestArp:          Instrument  ForestArp,Buffer,ForestArp,_
+ins_ForestEcho1:        Instrument  ForestEcho1,_,Pulse50,_
+ins_ForestEcho2:        Instrument  ForestEcho2,_,Pulse50,_
+ins_ForestBass:         Instrument  ForestBass,_,ForestBass,_
+ins_ForestBassSustain:  Instrument  ForestBassSustain,_,ForestBass,_
+ins_ForestBassDecay:    Instrument  ForestBassDecay,_,ForestBass,_
+ins_ForestPercussion1:  Instrument  ForestPercussion1,ForestPercussion1,_,_
+ins_ForestPercussion2:  Instrument  ForestPercussion2,ForestPercussion2,_,_
+ins_ForestPercussion3:  Instrument  ForestPercussion3,ForestPercussion2,_,_
+ins_ForestPercussionV8: Instrument  ForestPercussionV8,ForestPercussion1,_,_
+ins_ForestPercussionV9: Instrument  ForestPercussionV9,ForestPercussion1,_,_
+ins_ForestPercussionVA: Instrument  ForestPercussionVA,ForestPercussion1,_,_
+ins_ForestPercussionVB: Instrument  ForestPercussionVB,ForestPercussion1,_,_
+ins_ForestPercussionVC: Instrument  ForestPercussionVC,ForestPercussion1,_,_
+ins_ForestPercussionVD: Instrument  ForestPercussionVD,ForestPercussion1,_,_
+ins_ForestPercussionVE: Instrument  ForestPercussionVE,ForestPercussion1,_,_
+
+ins_GalleryEcho1:       Instrument  GalleryEcho1,_,Pulse125,_
+ins_GalleryEcho2:       Instrument  GalleryEcho2,_,Pulse125,_
+ins_GalleryEcho3:       Instrument  GalleryEcho3,_,Pulse125,_
+ins_GalleryEcho4:       Instrument  GalleryEcho4,_,Pulse125,_
+ins_GalleryEcho5:       Instrument  GalleryEcho5,_,Pulse125,_
+ins_GalleryEcho6:       Instrument  GalleryEcho6,_,Pulse125,_
+ins_GalleryEcho7:       Instrument  GalleryEcho7,_,Pulse125,_
+ins_GalleryEcho8:       Instrument  GalleryEcho8,_,Pulse125,_
+ins_GalleryEcho9:       Instrument  GalleryEcho9,_,Pulse125,_
+ins_GalleryEchoA:       Instrument  GalleryEchoA,_,Pulse125,_
+ins_GalleryBack:        Instrument  GalleryLead,Pluck,Pulse125,ForestPluck
+ins_GalleryLead:        Instrument  GalleryLead,PluckDelay,Pulse50,CityLead
+ins_GalleryBass:        Instrument  Bass1,PlainsBass,GalleryBass,ForestPluck
+
+ins_BonusBass:          Instrument  BonusBass,PlainsBass,BonusBass,_
+ins_BonusArps:          Instrument  BonusBass,Buffer,BonusArps,_
+ins_BonusLead:          Instrument  BonusLead,_,Pulse125,BonusLead
+ins_BonusWhistle:       Instrument  BonusWhistle,BonusWhistle,Pulse50,_
 
 ; =================================================================
 
@@ -3080,15 +3088,172 @@ Gallery_CH4:
     
 ; =================================================================
 
+PT_Bonus:   dw  Bonus_CH1,Bonus_CH2,Bonus_CH3,Bonus_CH4
+
+Bonus_CH1:
+    dbw CallSection,.block1
+    db  C_5,3,rest,1
+    db  B_4,3,rest,1
+    db  C_5,3,rest,1
+    db  G_4,3,rest,1
+    db  E_4,3,rest,1
+    db  F_4,3,rest,1
+    db  G_4,8
+    db  SetInstrument,_BonusWhistle
+    db  B_6,12
+    dbw CallSection,.block1
+    db  C_5,3,rest,1
+    db  D_5,3,rest,1
+    db  E_5,3,rest,1
+    db  F_5,3,rest,1
+    db  E_5,7,rest,1
+    db  D_5,8
+    db  SetInstrument,_BonusWhistle
+    db  E_7,12
+    
+    db  EndChannel
+.block1
+    db  SetInstrument,_BonusLead
+    db  C_5,3,rest,1
+    db  B_4,3,rest,1
+    db  C_5,3,rest,1
+    db  E_5,8
+    ret
+
+Bonus_CH2:
+    db  EndChannel
+
+Bonus_CH3:
+    db  LoopCount,2
+:   db  Arp,2,$47
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    db  SetInstrument,_BonusBass,C_3,4
+    dbw CallSection,.block3
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    dbw CallSection,.block2
+    dbw CallSection,.block1
+    db  Arp,2,$37
+    db  SetInstrument,_BonusBass,E_3,4
+    db  SetInstrument,_BonusArps,E_5,4
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,E_5,4
+    db  Arp,2,$47
+    db  SetInstrument,_BonusBass,F_3,4
+    db  SetInstrument,_BonusArps,F_5,4
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,F_5,4
+    db  SetInstrument,_BonusBass,F#3,4
+    db  SetInstrument,_BonusArps,F#5,4
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,F#5,4
+    dbw CallSection,.block2
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,G_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    dbw CallSection,.block1
+    dbw Loop,:-
+    
+    db  LoopCount,4
+:   dbw CallSection,.block4
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block5
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block4
+    dbw Loop,:-
+    dbw CallSection,.block5
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,G_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,C_3,4
+    db                           C_3,4
+    db                           D#3,4
+    db                           C_3,4
+    dbw CallSection,.block6
+    db                           D_3,4
+    db                           F_3,4
+    db                           D_3,4
+    dbw CallSection,.block6
+    dbw CallSection,.block3
+    dbw Goto,Bonus_CH3
+    
+.block1
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,G_2,4
+    db  SetInstrument,_BonusArps,C_5,4
+    ret
+.block2
+    db  SetInstrument,_BonusBass,G_3,4
+    db  SetInstrument,_BonusArps,G_5,4
+    db  SetInstrument,_BonusBass,D_3,4
+    db  SetInstrument,_BonusArps,G_5,4
+    db  SetInstrument,_BonusBass,G_3,4
+.block3
+    db  G_2,4
+    db  A_2,4
+    db  B_2,4
+    ret
+.block4   
+    db  SetInstrument,_BonusBass,F_3,4
+    db  SetInstrument,_BonusArps,F_5,4
+    db  SetInstrument,_BonusBass,C_4,4
+    db  SetInstrument,_BonusArps,F_5,4
+    db  SetInstrument,_BonusBass,F_3,4
+    db                           C_3,4
+    db                           D#3,4
+    db                           C_3,4
+    ret
+.block5
+    db  SetInstrument,_BonusBass,C_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,G_3,4
+    db  SetInstrument,_BonusArps,C_5,4
+    db  SetInstrument,_BonusBass,C_3,4
+    db                           G_2,4
+    db                           A#2,4
+    db                           G_2,4
+    ret
+.block6
+    db  SetInstrument,_BonusBass,G_3,4
+    db  SetInstrument,_BonusArps,G_5,4
+    db  SetInstrument,_BonusBass,D_4,4
+    db  SetInstrument,_BonusArps,G_5,4
+    db  SetInstrument,_BonusBass,G_3,4
+    ret
+
+Bonus_CH4:
+    db      LoopCount,2
+:   Drum    Kick,1
+    db      rest,1
+    Drum    CHH,2
+    Drum    Snare,4
+    dbw     Loop,:-
+    Drum    Kick,1
+    db      rest,1
+    Drum    CHH,2
+    Drum    Snare,2
+    Drum    Kick,1
+    db      rest,1
+    Drum    CHH,2
+    Drum    Kick,1
+    db      rest,1
+    Drum    Snare,4
+    dbw     Goto,Bonus_CH4 
+    
+; =================================================================
+
 PT_Cave:
 
 ; =================================================================
 
 PT_Temple:
-
-; =================================================================
-
-PT_Bonus:
 
 ; =================================================================
 
