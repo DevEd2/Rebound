@@ -36,7 +36,7 @@ SongSpeedTable:
     db  3,3 ; city
     db  5,4 ; pyramid
     db  3,3 ; cave
-    db  3,3 ; temple
+    db  5,4 ; temple
     db  6,6 ; stage clear
     db  4,4 ; boss battle
     db  3,3 ; final boss
@@ -245,6 +245,8 @@ vol_BonusWhistle:       db  10,TableWait,5,1,TableWait,5,10,TableWait,17,1,Table
 vol_BonusLead2:         db  $1c,TableWait,8,$27,TableWait,8,$33,TableEnd
 vol_BonusBanjo:         db  $18,TableEnd
 
+; ========
+
 ; =================================================================
 ; Arpeggio sequences
 ; =================================================================
@@ -376,6 +378,7 @@ wave_BossBass:          db  $66,$60,$6c,$cc,$66,$60,$66,$60,$00,$06,$06,$66,$60,
 wave_GalleryBass:       db  $00,$11,$23,$45,$66,$78,$89,$aa,$bb,$cc,$cc,$cc,$a9,$89,$bc,$cc
 wave_BonusBass:         db  $22,$66,$bb,$dd,$ee,$ff,$88,$33,$48,$ac,$ed,$cb,$97,$53,$20,$00
 wave_BonusArps:         db  $06,$75,$8a,$ce,$ae,$fc,$95,$00,$00,$47,$ad,$a5,$20,$00,$11,$10
+wave_TempleBass:        db  $11,$11,$33,$56,$8a,$bd,$de,$ee,$84,$11,$1d,$db,$aa,$86,$38,$83
 
 waveseq_PyramidLead:    db  0,TableEnd
 waveseq_PyramidSquare:  db  1,TableEnd
@@ -391,6 +394,7 @@ waveseq_BossBass:       db  10,TableEnd
 waveseq_GalleryBass:    db  11,TableEnd
 waveseq_BonusBass:      db  12,TableEnd
 waveseq_BonusArps:      db  13,TableEnd
+waveseq_TempleBass:     db  14,TableEnd
 
 ; =================================================================
 ; Instruments
@@ -504,6 +508,8 @@ InstrumentTable:
     dins    BonusWhistle
     dins    BonusLead2
     dins    BonusBanjo
+    
+    dins    TempleBass
 
 ; Instrument format: [voltable id],[arptable id],[pulsetable/wavetable id],[vibtable id]
 DS_Instruments:
@@ -614,6 +620,8 @@ ins_BonusWhistle:       Instrument  BonusWhistle,BonusWhistle,Pulse50,_
 ins_BonusLead2:         Instrument  BonusLead2,PluckGlass,Pulse50,_
 ins_BonusBanjo:         Instrument  BonusBanjo,_,Pulse125,_
 
+ins_TempleBass:         Instrument  BonusBass,Pluck,TempleBass,_
+
 ; =================================================================
 
 PT_Pyramid: dw  Pyramid_CH1,Pyramid_CH2,Pyramid_CH3,Pyramid_CH4
@@ -655,16 +663,16 @@ Pyramid_CH2:
     db  C_5,1,F_5,1
     db  D#5,1,C_5,1
     db  C_5,1,D#5,1
-    dbw CallSection,.block0
-    dbw CallSection,.block0
-    dbw CallSection,.block0
+    db  LoopCount,3
+:   dbw CallSection,.block0
+    dbw Loop,:-
     db  F#5,1,C_5,1
     db  C#5,1,F#5,1
     db  E_5,1,C#5,1
     db  C#5,1,E_5,1
-    dbw CallSection,.block1
-    dbw CallSection,.block1
-    dbw CallSection,.block1
+    db  LoopCount,3
+:   dbw CallSection,.block1
+    dbw Loop,:-
     dbw Goto,.loop
 .block0
     db  F_5,1,C_5,1
@@ -760,8 +768,36 @@ Pyramid_CH3:
     db  SetInstrument,_PyramidOctArp
     db  CallSection
     dw  .block0
-    db  CallSection
-    dw  .block2
+    db  F_6,2
+    db  D#6,2
+    db  F_6,2
+    db  F#6,2
+    db  F_6,2
+    db  D#6,2
+    db  F_6,2
+    db  C_6,2
+    db  F_6,2
+    db  C_6,2
+    db  F_6,2
+    db  A_6,4
+    db  F_6,2
+    db  D#6,2
+    db  F_6,2
+    db  F#6,2
+    db  C#6,2
+    db  A#6,2
+    db  G#6,2
+    db  F#6,2
+    db  F_6,2
+    db  F#6,2
+    db  C#6,2
+    db  F#6,2
+    db  C#6,2
+    db  F#6,2
+    db  A#6,4
+    db  G#6,2
+    db  F#6,2
+    db  D#6,2
     dbw Goto,Pyramid_CH3
 
 .block0
@@ -801,38 +837,6 @@ Pyramid_CH3:
     db  C_5,14,C_5,2
     db  F_5,6,F_5,2
     db  C_5,6,C_5,2
-    ret
-.block2
-    db  F_6,2
-    db  D#6,2
-    db  F_6,2
-    db  F#6,2
-    db  F_6,2
-    db  D#6,2
-    db  F_6,2
-    db  C_6,2
-    db  F_6,2
-    db  C_6,2
-    db  F_6,2
-    db  A_6,4
-    db  F_6,2
-    db  D#6,2
-    db  F_6,2
-    db  F#6,2
-    db  C#6,2
-    db  A#6,2
-    db  G#6,2
-    db  F#6,2
-    db  F_6,2
-    db  F#6,2
-    db  C#6,2
-    db  F#6,2
-    db  C#6,2
-    db  F#6,2
-    db  A#6,4
-    db  G#6,2
-    db  F#6,2
-    db  D#6,2
     ret
     
 Pyramid_CH4:
@@ -3101,6 +3105,8 @@ Gallery_CH4:
     
 ; =================================================================
 
+    db  "!start!"
+
 PT_Bonus:   dw  Bonus_CH1,Bonus_CH2,Bonus_CH3,Bonus_CH4
 
 Bonus_CH1:
@@ -3136,7 +3142,9 @@ Bonus_CH1:
     db  D_5,7,rest,1
     db  C_5,8
     db  SetInstrument,_BonusLead2
-    
+    db  C_5,4
+    db  D_5,4
+    db  E_5,4
     dbw CallSection,.block6
     db  G_4,4
     db  A#4,4
@@ -3147,6 +3155,9 @@ Bonus_CH1:
     db  A#4,4
     db  D_5,8
     db  C_5,24
+    db  C_5,4
+    db  D#5,4
+    db  E_5,4
     dbw CallSection,.block6
     db  D#5,4
     db  F_5,4
@@ -3208,10 +3219,7 @@ Bonus_CH1:
     db  F_5,3,rest,1
     db  G_5,8
     ret
-.block6    
-    db  C_5,4
-    db  D_5,4
-    db  E_5,4
+.block6
     db  F_5,8
     db  F_5,4
     db  C_5,4
@@ -3439,23 +3447,110 @@ Bonus_CH3:
 
 Bonus_CH4:
     db      LoopCount,2
-:   Drum    Kick,1
-    db      rest,1
+:   Drum    Kick,2
     Drum    CHH,2
     Drum    Snare,4
     dbw     Loop,:-
-    Drum    Kick,1
-    db      rest,1
+    Drum    Kick,2
     Drum    CHH,2
     Drum    Snare,2
-    Drum    Kick,1
-    db      rest,1
+    Drum    Kick,2
     Drum    CHH,2
-    Drum    Kick,1
-    db      rest,1
+    Drum    Kick,2
     Drum    Snare,4
     dbw     Goto,Bonus_CH4
     
+    db      "!end!"
+    
+; =================================================================
+
+PT_Temple:  dw  Temple_CH1,Temple_CH2,Temple_CH3,Temple_CH4
+
+Temple_CH1:
+    db  EndChannel
+
+Temple_CH2:
+    db  EndChannel
+
+Temple_CH3:
+    db  SetInstrument,_TempleBass
+    db  LoopCount,40
+:   dbw CallSection,.block1
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block2
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block3
+    dbw Loop,:-
+    db  LoopCount,8
+:   dbw CallSection,.block1
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block2
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block3
+    dbw Loop,:-
+    db  LoopCount,4
+:   dbw CallSection,.block2
+    dbw CallSection,.block2
+    dbw CallSection,.block2
+    dbw CallSection,.block2
+    dbw CallSection,.block3
+    dbw CallSection,.block3
+    dbw CallSection,.block3
+    dbw CallSection,.block3
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    dbw CallSection,.block1
+    dbw CallSection,.block4
+    db  A_2,2
+    db  A_3,2
+    db  A_4,2
+    db  A#2,2
+    db  A#3,2
+    db  A#4,2
+    dbw CallSection,.block4
+    dbw Loop,:-
+    dbw Goto,Temple_CH3
+.block1
+    db  G_2,2
+    db  G_2,2
+    db  G_3,2
+    ret
+.block2
+    db  D#2,2
+    db  D#2,2
+    db  D#3,2
+    ret
+ .block3
+    db  F_2,2
+    db  F_2,2
+    db  F_3,2
+    ret
+.block4
+    db  G_2,2
+    db  G_3,2
+    db  G_4,2
+    ret
+
+Temple_CH4:
+    Drum    Kick,2
+    Drum    CHH,2
+    db      fix,2
+    Drum    Snare,2
+    Drum    CHH,2
+    db      fix,2
+    Drum    Kick,2
+    Drum    CHH,2
+    Drum    Kick,2
+    Drum    Snare,2
+    Drum    CHH,2
+    db      fix,2
+    dbw     Goto,Temple_CH4
+
 ; =================================================================
 
 PT_Shop:
@@ -3468,9 +3563,6 @@ PT_FinalBoss:
 
 PT_Cave:
 
-; =================================================================
-
-PT_Temple:
 
 ; =================================================================
 
